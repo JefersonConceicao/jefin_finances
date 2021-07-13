@@ -22,6 +22,7 @@
     <link rel="stylesheet" href="{{ asset('css/mazer-theme/pages/email.css') }} ">
     <link rel="stylesheet" href="{{ asset('css/mazer-theme/pages/error.css') }} ">
     <link rel="stylesheet" href="{{ asset('css/mazer-theme/vendors/bootstrap-icons/bootstrap-icons.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/mazer-theme/vendors/fontawesome/all.min.css') }}">
     
     <link rel="stylesheet" href="{{ asset('css/app.css') }} "/>   
 </head>
@@ -32,10 +33,8 @@
         integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" 
         crossorigin="anonymous"
     ></script>
-    <script src=""> </script>
-    <script src=""> </script>
-    <script src=""> </script>
-    <script src=""> </script>
+    <script src="{{ asset('css/mazer-theme/vendors/fontawesome/all.min.js') }}"> </script>
+    <script src="{{ asset('css/mazer-theme/vendors/jquery/jquery.min.js') }}"> </script>
     <script src="{{ asset('js/app.js') }}"> </script>
 </body>
 </html>

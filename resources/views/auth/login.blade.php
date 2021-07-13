@@ -8,13 +8,13 @@
 
                 <form action="index.html">
                     <div class="form-group position-relative has-icon-left mb-4">
-                        <input type="text" class="form-control form-control-xl" placeholder="Username">
+                        <input type="email" class="form-control form-control-xl" placeholder="Preencha seu e-mail">
                         <div class="form-control-icon">
                             <i class="bi bi-person"></i>
                         </div>
                     </div>
                     <div class="form-group position-relative has-icon-left mb-4">
-                        <input type="password" class="form-control form-control-xl" placeholder="Password">
+                        <input type="password" class="form-control form-control-xl" placeholder="Preencha sua senha">
                         <div class="form-control-icon">
                             <i class="bi bi-shield-lock"></i>
                         </div>
@@ -24,7 +24,7 @@
                 <div class="text-center mt-5 text-lg fs-4">
                     <p class="text-gray-600"> 
                         Não tem uma conta? 
-                        <a href="auth-register.html" class="font-bold">Cadastre-se</a>.
+                        <a href="/signup" class="font-bold">Cadastre-se</a>.
                     </p>
                     <p><a class="font-bold" href="/forgotPassword"> Esqueci minha senha</a>.</p>
                 </div>
@@ -34,5 +34,4 @@
             <div id="auth-right"> </div>
         </div>
     </div>
-
 </div>

@@ -1,1 +1,1 @@
-require('bootstrap');
+window.AppAuth = require('./Auth/AppAuth');
