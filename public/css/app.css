@@ -3,3 +3,7 @@
   background-size: cover !important;
 }
 
+.required {
+  color: red;
+}
+

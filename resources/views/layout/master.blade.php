@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title> Jefin Finances </title>
     <link 
@@ -23,7 +24,6 @@
     <link rel="stylesheet" href="{{ asset('css/mazer-theme/pages/error.css') }} ">
     <link rel="stylesheet" href="{{ asset('css/mazer-theme/vendors/bootstrap-icons/bootstrap-icons.css') }}">
     <link rel="stylesheet" href="{{ asset('css/mazer-theme/vendors/fontawesome/all.min.css') }}">
-    
     <link rel="stylesheet" href="{{ asset('css/app.css') }} "/>   
 </head>
 <body style="background-color:#e7e7e7">

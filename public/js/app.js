@@ -93,6 +93,17 @@
 /*! no static exports found */
 /***/ (function(module, exports) {
 
+
+
+/***/ }),
+
+/***/ "./resources/js/Auth/AppRegister.js":
+/*!******************************************!*\
+  !*** ./resources/js/Auth/AppRegister.js ***!
+  \******************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
 $(function () {
   habilitaBotoes();
   habilitaEventos();
@@ -103,13 +114,83 @@ var habilitaBotoes = function habilitaBotoes() {};
 var habilitaEventos = function habilitaEventos() {
   $("#formAuthRegister").on("submit", function (e) {
     e.preventDefault();
-    $(this).find('.btn-primary').prop("disabled", true).html("<div class=\"text-center\"> \n                    <i class=\"fa fa-circle-notch fa-spin\"> </i>\n                </div>\n            ");
+    formAuthRegister();
+  });
+};
+
+var formAuthRegister = function formAuthRegister() {
+  var url = '/requestSignUP';
+  var form = "#formAuthRegister";
+  $.ajax({
+    type: "POST",
+    url: url,
+    data: $(form).serialize(),
+    dataType: "JSON",
+    beforeSend: function beforeSend() {
+      $(form).find('.btn-primary').prop("disabled", true).html("\n                    <i class=\"fas fa-circle-notch\"> </i>\n                ");
+    },
+    success: function success(response) {
+      console.log(response);
+    },
+    error: function error(jqXHR, textStatus, _error) {
+      if (jqXHR.responseJSON.errors) {
+        var errors = jqXHR.responseJSON.errors;
+        AppUsage.showMessagesValidator(form, errors);
+      }
+    },
+    complete: function complete() {
+      $(form).find('.btn-primary').prop("disabled", false).html("\n                   Cadastrar\n                ");
+    }
   });
 };
 
 module.exports = {
   habilitaBotoes: habilitaBotoes,
   habilitaEventos: habilitaEventos
+};
+
+/***/ }),
+
+/***/ "./resources/js/Core/AppUsage.js":
+/*!***************************************!*\
+  !*** ./resources/js/Core/AppUsage.js ***!
+  \***************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+var color = function color() {
+  return {
+    "default": "#25396f"
+  };
+};
+
+var showMessagesValidator = function showMessagesValidator(form, errors) {
+  $(form).find('.is-invalid').removeClass("is-invalid");
+  $(".error_feedback").html("");
+
+  if ($(form).length == 0 || !errors) {
+    return;
+  }
+
+  var nameInputs = Object.keys(errors);
+
+  var _loop = function _loop(i) {
+    var fieldError = $("[name=\"".concat(nameInputs[i], "\"]"));
+    errors[nameInputs[i]].forEach(function (value) {
+      fieldError.addClass('is-invalid');
+      fieldError.parent().find('.error_feedback').html("\n                <p class=\"required\"> ".concat(value, " </p> \n            "));
+    });
+  };
+
+  for (var i = 0; i < nameInputs.length; i++) {
+    _loop(i);
+  }
+};
+
+var optionSwalDelete = {};
+module.exports = {
+  showMessagesValidator: showMessagesValidator,
+  color: color
 };
 
 /***/ }),
@@ -121,7 +202,14 @@ module.exports = {
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
+window.AppRegister = __webpack_require__(/*! ./Auth/AppRegister */ "./resources/js/Auth/AppRegister.js");
 window.AppAuth = __webpack_require__(/*! ./Auth/AppAuth */ "./resources/js/Auth/AppAuth.js");
+window.AppUsage = __webpack_require__(/*! ./Core/AppUsage */ "./resources/js/Core/AppUsage.js");
+$.ajaxSetup({
+  headers: {
+    'X-CSRF-TOKEN': $("meta[name='csrf-token']").attr("content")
+  }
+});
 
 /***/ }),
 
