@@ -22,8 +22,10 @@
     <link rel="stylesheet" href="{{ asset('css/mazer-theme/pages/dripicons.css') }} ">
     <link rel="stylesheet" href="{{ asset('css/mazer-theme/pages/email.css') }} ">
     <link rel="stylesheet" href="{{ asset('css/mazer-theme/pages/error.css') }} ">
+    <link rel="stylesheet" href="{{ asset('css/mazer-theme/vendors/perfect-scrollbar/perfect-scrollbar.css') }}"  />
     <link rel="stylesheet" href="{{ asset('css/mazer-theme/vendors/bootstrap-icons/bootstrap-icons.css') }}">
     <link rel="stylesheet" href="{{ asset('css/mazer-theme/vendors/fontawesome/all.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/mazer-theme/app.css') }} "/> 
     <link rel="stylesheet" href="{{ asset('css/app.css') }} "/>   
 </head>
 <body style="background-color:#e7e7e7">
@@ -35,6 +37,8 @@
     ></script>
     <script src="{{ asset('css/mazer-theme/vendors/fontawesome/all.min.js') }}"> </script>
     <script src="{{ asset('css/mazer-theme/vendors/jquery/jquery.min.js') }}"> </script>
+    <script src="{{ asset('js/mazer-theme/bootstrap.bundle.min.js') }}"> </script>
+    <script src="{{ asset('js/mazer-theme/main.js') }}"> </script>
     <script src="{{ asset('js/app.js') }}"> </script>
 </body>
 </html>

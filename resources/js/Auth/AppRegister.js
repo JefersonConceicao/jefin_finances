@@ -1,3 +1,6 @@
+const { default: Swal } = require("sweetalert2");
+const { color } = require('../Core/AppUsage');
+
 $(function(){
     habilitaBotoes()
     habilitaEventos()
@@ -30,12 +33,22 @@ const formAuthRegister = () => {
                 `)
         },
         success: function (response) {
-            console.log(response);
+            Swal.fire({
+                toast:true,
+                position: 'bottom-left',
+                title: `<h5 style="color:white"> ${response.msg} </h5>`,
+                icon: !response.error ? 'success' : 'error',
+                showConfirmButton: false,
+                timer:3000,
+                background: response.error ? 'red' : color().default,
+                didClose:() => {
+                    window.location.href = '/';  
+                }
+            });            
         },
         error:function(jqXHR, textStatus, error){
             if(jqXHR.responseJSON.errors){
                 const errors = jqXHR.responseJSON.errors;
-
                 AppUsage.showMessagesValidator(form, errors);
             }
         },

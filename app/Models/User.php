@@ -39,9 +39,24 @@ class User extends Authenticatable
             return [
                 'error' => true,
                 'msg' => 'Não foi possível criar a conta, tente novamente',
-                'error_message' => $error->getMessage()
             ];
         }
+    }
+
+    public function getUsers($request = []){
+        $conditions = [];
+
+        if(isset($request['name']) && !empty($request['name'])){
+            $conditions[] = ['name', 'LIKE', "%".$request['name']."%"];
+        }
+
+        if(!isset($request['email']) && !empty($request['email'])){
+            $conditions[] = ['email', 'LIKE', "%".$request['email']."%"];
+        }
+
+        return $this
+            ->where($conditions)
+            ->paginate(7);
     }
 
 }

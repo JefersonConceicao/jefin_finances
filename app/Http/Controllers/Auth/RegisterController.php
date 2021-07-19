@@ -39,6 +39,6 @@ class RegisterController extends Controller
        $user = new User;
        
        $data = $user->signUpUser($request->all());
-       return response()->json($data);
+       return response()->json($data, $data['error'] ? 500 : 200);
     }
 }
