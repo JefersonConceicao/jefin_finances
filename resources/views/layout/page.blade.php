@@ -10,9 +10,7 @@
     aria-hidden="true"
     >
         <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document"> 
-            <div class="modal-content">
-                @include('layout.modal')
-            </div>
+            @include('layout.modal')
         </div>
     </div>
 @section('content')

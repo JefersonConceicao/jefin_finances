@@ -74,7 +74,7 @@
                                         <tr> 
                                             <td> {{ $user->name." ".$user->last_name}} </td>
                                             <td> {{ $user->email }} </td>
-                                            <td> {{ $user->created_at }} </td>
+                                            <td> {{ converteData($user->created_at, 'd/m/Y H:i:s') }} </td>
                                             <td> 
                                                 <span class="badge bg-{{ $user->ativo ? "success" : "danger"}}">
                                                     {{ $user->ativo ? "Sim" : "Não"}}
@@ -83,14 +83,14 @@
                                             <td> 
                                                 <div class="text-center" style="display:flex;">
                                                     <button 
-                                                        class="btn btn-secondary rounded-pill"
+                                                        class="btnEditUser btn btn-secondary rounded-pill"
                                                         id="{{ $user->id }}"    
                                                     >
                                                         <i class="fa fa-edit"> </i>
                                                     </button>
                                                     &nbsp;
                                                     <button 
-                                                        class="btn btn-danger rounded-pill"
+                                                        class="btnDeleteUser btn btn-danger rounded-pill"
                                                         id="{{ $user->id }}"
                                                     >
                                                         <i class="fa fa-trash"> </i>

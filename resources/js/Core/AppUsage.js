@@ -23,8 +23,8 @@ const showMessagesValidator = (form, errors) => {
 
     const nameInputs = Object.keys(errors);
     for (let i = 0; i < nameInputs.length; i++) {
-        const fieldError = $(`[name="${nameInputs[i]}"]`);
-
+        const fieldError = $(form +` [name="${nameInputs[i]}"]`);
+ 
         errors[nameInputs[i]].forEach(value => {
             fieldError.addClass('is-invalid');
             fieldError.parent().find('.error_feedback').html(`
@@ -65,11 +65,11 @@ const loadModal = (url, callback = null) => {
     const modalElement = $("#nivel1");
 
     modalElement.modal('show')
-    modalElement.find(".modal-content").load(`${url} >`);
-
-    if(!!callback){
-        callback();
-    }
+    modalElement.find(".modal-content").load(`${url} >`, function(){
+        if(!!callback){
+            callback();
+        }
+    });
 }
 
 const loadingContent = element => {

@@ -3,6 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+
+//REQUEST
+use App\Http\Requests\RegisterRequest;
+//MODEL
 use App\Models\User;
 
 class UsersController extends Controller
@@ -29,18 +33,12 @@ class UsersController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(RegisterRequest $request)
     {
-        //
-    }
+        $user = new User;
 
-    /**
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
+        $data = $user->signUpUser($request->all());
+        return response()->json($data);
     }
 
     /**
@@ -49,7 +47,10 @@ class UsersController extends Controller
      */
     public function edit($id)
     {
-        //
+        $user = new User;
+        
+        $data = $user->find($id);
+        return view('users.edit')->with('user', $data);
     }
 
     /**

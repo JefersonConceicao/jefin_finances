@@ -3377,7 +3377,7 @@ var showMessagesValidator = function showMessagesValidator(form, errors) {
   var nameInputs = Object.keys(errors);
 
   var _loop = function _loop(i) {
-    var fieldError = $("[name=\"".concat(nameInputs[i], "\"]"));
+    var fieldError = $(form + " [name=\"".concat(nameInputs[i], "\"]"));
     errors[nameInputs[i]].forEach(function (value) {
       fieldError.addClass('is-invalid');
       fieldError.parent().find('.error_feedback').html("\n                <p class=\"required\"> ".concat(value, " </p> \n            "));
@@ -3419,11 +3419,11 @@ var loadModal = function loadModal(url) {
   var callback = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
   var modalElement = $("#nivel1");
   modalElement.modal('show');
-  modalElement.find(".modal-content").load("".concat(url, " >"));
-
-  if (!!callback) {
-    callback();
-  }
+  modalElement.find(".modal-content").load("".concat(url, " >"), function () {
+    if (!!callback) {
+      callback();
+    }
+  });
 };
 
 var loadingContent = function loadingContent(element) {
@@ -3451,12 +3451,15 @@ module.exports = {
 
 var _require = __webpack_require__(/*! ../Core/AppUsage */ "./resources/js/Core/AppUsage.js"),
     loadModal = _require.loadModal,
-    loadingContent = _require.loadingContent;
+    loadingContent = _require.loadingContent,
+    htmlLoading = _require.htmlLoading,
+    color = _require.color;
 
 $(function () {
   habilitaEventos();
   habilitaBotoes();
 });
+var modalObject = "#nivel1";
 var grid = "#gridUsers";
 
 var habilitaEventos = function habilitaEventos() {
@@ -3469,7 +3472,70 @@ var habilitaEventos = function habilitaEventos() {
 var habilitaBotoes = function habilitaBotoes() {
   $("#addUser").on("click", function () {
     var url = '/users/create';
-    AppUsage.loadModal(url, function () {});
+    AppUsage.loadModal(url, function () {
+      $("#formAddUser").on("submit", function (e) {
+        e.preventDefault();
+        formUser();
+      });
+    });
+  });
+  $(".btnEditUser").on("click", function () {
+    var id = $(this).attr("id");
+    var url = '/users/edit/' + id;
+    AppUsage.loadModal(url, function () {
+      $("#changePassword").on("click", function () {
+        var inputPassword = $(modalObject + ' input[name="password"]');
+        var inputPasswordConf = $(modalObject + ' input[name="password_confirmation"]');
+
+        if (inputPassword.prop("disabled") && inputPasswordConf.prop("disabled")) {
+          inputPassword.prop("disabled", false);
+          inputPasswordConf.prop("disabled", false);
+        } else {
+          inputPassword.prop("disabled", true);
+          inputPasswordConf.prop("disabled", true);
+        }
+      });
+    });
+  });
+};
+
+var formUser = function formUser(id) {
+  var url = typeof id === "undefined" ? '/users/store' : '/users/update/' + id;
+  var form = typeof id === "undefined" ? '#formAddUser' : '#formEditUser';
+  var type = typeof id === "undefined" ? 'POST' : 'PUT';
+  $.ajax({
+    type: type,
+    url: url,
+    data: $(form).serialize(),
+    dataType: "JSON",
+    beforeSend: function beforeSend() {
+      $(form + " .btnSubmit").prop("disabled", true).html(htmlLoading);
+    },
+    success: function success(response) {
+      Swal.fire({
+        toast: true,
+        position: 'bottom-left',
+        title: "<h5 style=\"color:white\"> ".concat(response.msg, " </h5>"),
+        icon: !response.error ? 'success' : 'error',
+        showConfirmButton: false,
+        timer: 3000,
+        background: response.error ? 'red' : color()["default"],
+        didOpen: function didOpen() {
+          $(modalObject).modal('hide');
+        }
+      });
+      getFilterUsers();
+    },
+    error: function error(jqXHR, textStatus, _error) {
+      var errors = jqXHR.responseJSON.errors;
+
+      if (!!errors) {
+        AppUsage.showMessagesValidator(form, errors);
+      }
+    },
+    complete: function complete() {
+      $(form + " .btnSubmit").prop("disabled", false).html("Salvar");
+    }
   });
 };
 
