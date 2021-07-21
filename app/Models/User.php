@@ -22,6 +22,22 @@ class User extends Authenticatable
     ];
   
     protected $hidden = ['password'];
+    
+    public function getUsers($request = []){
+        $conditions = [];
+
+        if(isset($request['name']) && !empty($request['name'])){
+            $conditions[] = ['name', 'LIKE', "%".$request['name']."%"];
+        }
+
+        if(isset($request['email']) && !empty($request['email'])){
+            $conditions[] = ['email', 'LIKE', "%".$request['email']."%"];
+        }
+
+        return $this
+            ->where($conditions)
+            ->paginate(7);
+    }
 
     public function signUpUser($request = []){
         try{
@@ -43,20 +59,34 @@ class User extends Authenticatable
         }
     }
 
-    public function getUsers($request = []){
-        $conditions = [];
+    public function updateUser($id, $request = []){
+        try{
+            $user = $this->find($id);
+            $user->fill($request)->save();
 
-        if(isset($request['name']) && !empty($request['name'])){
-            $conditions[] = ['name', 'LIKE', "%".$request['name']."%"];
+            return [
+                'error' => false,
+                'msg' => 'Registro alterado com sucesso!' 
+            ];
+        }catch(\Exception $error){
+            return [
+                'error' => true,
+                'msg' => 'Não foi possível alterar o registro, tente de novo.' 
+            ];
         }
-
-        if(!isset($request['email']) && !empty($request['email'])){
-            $conditions[] = ['email', 'LIKE', "%".$request['email']."%"];
-        }
-
-        return $this
-            ->where($conditions)
-            ->paginate(7);
     }
 
+    public function deleteUser($id){
+        if($this->find($id)->delete()){
+            return [
+                'error' => false,
+                'msg' => 'Registro excluído com sucesso!'
+            ];
+        }else{
+            return [
+                'error' => true,
+                'msg' => 'Não foi possível excluír o registro, tente de novo'
+            ];
+        }
+    }
 }

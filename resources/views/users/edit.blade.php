@@ -47,36 +47,6 @@
             </div>
         </div>
     </div>
-
-    <p> <a href="#" id="changePassword"> Trocar Senha  </a> </p>
-    <div class="row">
-        <div class="col-md-6">
-            <div class="form-group">
-                <label> Senha </label>
-                <input 
-                    name="password"
-                    type="password"
-                    class="form-control"
-                    disabled
-                />
-
-                <div class="error_feedback"> </div>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="form-group">
-                <label> Confirmação de Senha  </label>
-                <input 
-                    name="password_confirmation"
-                    type="password"
-                    class="form-control"
-                    disabled
-                />
-
-                <div class="error_feedback"> </div>
-            </div>
-        </div>
-    </div>
 @endsection
 
 @section('btn_fechar', 'Fechar')

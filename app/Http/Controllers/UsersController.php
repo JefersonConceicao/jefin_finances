@@ -30,7 +30,7 @@ class UsersController extends Controller
     }
 
     /**
-     * @param  \Illuminate\Http\Request  $request
+     * @param   App\Http\Requests\RegisterRequest;  $request
      * @return \Illuminate\Http\Response
      */
     public function store(RegisterRequest $request)
@@ -54,21 +54,27 @@ class UsersController extends Controller
     }
 
     /**
-     * @param  \Illuminate\Http\Request  $request
+     * @param  App\Http\Requests\RegisterRequest;
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(RegisterRequest $request, $id)
     {
-        //
+        $user = new User;
+
+        $data = $user->updateUser($id, $request->all());
+        return response()->json($data);
     }
 
     /**
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function delete($id)
     {
-        //
+        $user = new User;
+
+        $data = $user->deleteUser($id);
+        return response()->json($data);
     }
 }

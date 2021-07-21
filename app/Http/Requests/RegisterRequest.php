@@ -5,6 +5,8 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Route;
 
+use App\Models\User;
+
 class RegisterRequest extends FormRequest
 {
     /**
@@ -20,13 +22,53 @@ class RegisterRequest extends FormRequest
      */
     public function rules()
     {   
-        return [
-            'name' => 'required',
-            'last_name' => 'required',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|min:8',
-            'password_confirmation' => 'required|min:8|same:password'
-        ];
+        $currentRoute = explode('.', Route::currentRouteName());
+        $validate = [];
+
+        switch(end($currentRoute)){
+            case 'registerUser': 
+                $validate = [
+                    'name' => 'required',
+                    'last_name' => 'required',
+                    'email' => 'required|email|unique:users',
+                    'password' => 'required|min:8',
+                    'password_confirmation' => 'required|min:8|same:password'
+                ];
+            break;
+            case 'store':
+                $validate = [
+                    'name' => 'required',
+                    'last_name' => 'required',
+                    'email' => 'required|email|unique:users',
+                    'password' => 'required|min:8',
+                    'password_confirmation' => 'required|min:8|same:password'
+                ];
+            break;
+            case 'update'   : 
+                $validate = [
+                    'name' => 'required',
+                    'last_name' => 'required',
+                    'email' => [
+                        'required', 
+                        'email',
+                        function($attribute, $value, $fail){
+                            $user = new User;
+                            
+                            $existsMail = $user->where([
+                                ['email', '=', $value],
+                                ['id', '!=', $this->route('id')]
+                            ])->count();
+
+                            if($existsMail > 0){
+                                $fail('Este e-mail já existe em nossa base de dados');
+                            }   
+                        }
+                    ]
+                ];
+            break;
+        }
+
+        return $validate;
     }
 
     public function messages(){

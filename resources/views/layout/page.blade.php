@@ -8,9 +8,12 @@
     aria-modal="true"
     role="dialog"
     aria-hidden="true"
+    data-bs-backdrop="static"
     >
         <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document"> 
-            @include('layout.modal')
+            <div class="modal-content">
+                @include('layout.modal')
+            </div>
         </div>
     </div>
 @section('content')

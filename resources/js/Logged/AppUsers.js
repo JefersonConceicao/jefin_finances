@@ -1,7 +1,10 @@
+const { default: Swal } = require('sweetalert2');
 const { loadModal, 
         loadingContent, 
         htmlLoading,
         color,
+        optionsSwalDelete,
+        deleteRowForGrid
     } = require('../Core/AppUsage');
 
 $(() => {
@@ -23,7 +26,7 @@ const habilitaBotoes = function(){
     $("#addUser").on("click", function(){
         const url = '/users/create';
     
-        AppUsage.loadModal(url, function(){
+        loadModal(url, function(){
             $("#formAddUser").on("submit", function(e){
                 e.preventDefault();
                 formUser();
@@ -35,20 +38,24 @@ const habilitaBotoes = function(){
         const id = $(this).attr("id");
         const url = '/users/edit/' + id;
 
-        AppUsage.loadModal(url, function(){
-            $("#changePassword").on("click", function(){
-                const inputPassword = $(modalObject + ' input[name="password"]');
-                const inputPasswordConf = $(modalObject + ' input[name="password_confirmation"]');
+        loadModal(url, function(){
+            $("#formEditUser").on("submit", function(e){
+                e.preventDefault();
+                formUser(id);
+            })
+        });
+    });
 
-                if(inputPassword.prop("disabled") && inputPasswordConf.prop("disabled")){
-                    inputPassword.prop("disabled", false);
-                    inputPasswordConf.prop("disabled", false);
-                }else{
-                    inputPassword.prop("disabled", true);
-                    inputPasswordConf.prop("disabled", true);
-                }
+    $(".btnDeleteUser").on("click", function(){
+        const id = $(this).attr("id");
+        const url = '/users/delete/' + id;
 
-            });
+        Swal.fire(optionsSwalDelete).then(result => {
+            if(result.isConfirmed){
+                deleteRowForGrid(url, function(){
+                    getFilterUsers();
+                })
+            }
         });
     });
 }
@@ -112,9 +119,7 @@ const getFilterUsers = (urlPaginate) => {
             loadingContent(grid);
         },  
         success: function (response) {
-           $(grid).html($(response).find(grid + " >"));
-
-       
+           $(grid).html($(response).find(grid + " >"));       
         }, 
         complete:function(){
             habilitaBotoes()

@@ -24,6 +24,11 @@ Route::group(['middleware' => 'auth'], function(){
         Route::post('/store', 'UsersController@store')->name('users.store');
         Route::get('/edit/{id}', 'UsersController@edit')->name('users.edit');
         Route::put('/update/{id}', 'UsersController@update')->name('users.update');
+        Route::delete('/delete/{id}', 'UsersController@delete')->name('users.delete');
+    });
+
+    Route::group(['prefix' => 'proventos'], function(){
+        Route::get('/', 'ProventosController@index')->name('proventos.index');
     });
 });
 

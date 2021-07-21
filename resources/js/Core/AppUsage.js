@@ -8,10 +8,23 @@ const initialize = () => {
 const color = () => {
     return {
         default: "#25396f",
+        danger: "#dc3545",
     }
 }
 
 const htmlLoading = `<i style="font-size:20px;" class="fas fa-circle-notch fa-spin">  </i> carregando...`;
+
+const optionsSwalDelete = {
+    icon: 'warning',
+    title: 'Deseja realmente excluír o registro ?',
+    text: 'Esta ação é irreversível!',
+    showConfirmButton: true,
+    showCancelButton: true,
+    confirmButtonText: 'Sim, quero excluir!',
+    cancelButtonText: 'Cancelar',
+    confirmButtonColor: color().danger
+}
+
 
 const showMessagesValidator = (form, errors) => {
     $(form).find('.is-invalid').removeClass("is-invalid");
@@ -64,8 +77,9 @@ const eventsHelper = () => {
 const loadModal = (url, callback = null) => {
     const modalElement = $("#nivel1");
 
-    modalElement.modal('show')
+    modalElement.modal('show');
     modalElement.find(".modal-content").load(`${url} >`, function(){
+
         if(!!callback){
             callback();
         }
@@ -82,10 +96,53 @@ const loadingContent = element => {
     }
 }
 
+const deleteRowForGrid = (url, onSuccess = null, onError = null) => {
+    $.ajax({
+        type: "DELETE",
+        url,
+        dataType: "JSON",
+        success: function (response) {
+            Swal.fire({
+                toast:true,
+                position: 'bottom-left',
+                title: `<h5 style="color:white"> ${response.msg} </h5>`,
+                icon: !response.error ? 'success' : 'error',
+                showConfirmButton: false,
+                timer:3500,
+                background: response.error ? color().danger : color().default,
+            }); 
+
+            if(!!onSuccess){
+                onSuccess();
+            }
+        },
+        error:function(jqXHR, textStatus, error){
+            Swal.fire({
+                toast:true,
+                position: 'bottom-left',
+                title: `<h5 style="color:white"> 
+                            Ocorreu um erro interno, tente de novo ou abra um chamado 
+                        </h5>`,
+                icon: 'error',
+                showConfirmButton: false,
+                timer:3500,
+                background: color().danger,
+            }); 
+
+            if(!!onError){
+                onError();
+            }
+        },
+    });
+}
+
+
 module.exports = {
     htmlLoading,
     loadingContent,
     showMessagesValidator,
     color,
     loadModal,
+    optionsSwalDelete,
+    deleteRowForGrid,
 }

@@ -14,4 +14,27 @@
             <span> Usuários </span>
         </a>
     </li>
+
+    <li class="sidebar-item has-sub">
+        <a href="#" class="sidebar-link">
+            <i class="fas fa-money-bill-wave-alt"></i>
+            <span> Meu dinheiro  </span>
+        </a>
+        <ul class="submenu"> 
+            <li class="submenu-item"> 
+                <a href="/proventos/">
+                    <i class="fas fa-angle-right"></i>
+                    &nbsp;
+                    Proventos 
+                </a>
+            </li>
+            <li class="submenu-item"> 
+                <a href="/proventos/">
+                    <i class="fas fa-angle-right"></i>
+                    &nbsp;
+                    Despesas 
+                </a>
+            </li>
+        </ul>
+    </li>
 </ul>

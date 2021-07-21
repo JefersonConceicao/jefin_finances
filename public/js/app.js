@@ -3360,11 +3360,22 @@ var initialize = function initialize() {
 
 var color = function color() {
   return {
-    "default": "#25396f"
+    "default": "#25396f",
+    danger: "#dc3545"
   };
 };
 
 var htmlLoading = "<i style=\"font-size:20px;\" class=\"fas fa-circle-notch fa-spin\">  </i> carregando...";
+var optionsSwalDelete = {
+  icon: 'warning',
+  title: 'Deseja realmente excluír o registro ?',
+  text: 'Esta ação é irreversível!',
+  showConfirmButton: true,
+  showCancelButton: true,
+  confirmButtonText: 'Sim, quero excluir!',
+  cancelButtonText: 'Cancelar',
+  confirmButtonColor: color().danger
+};
 
 var showMessagesValidator = function showMessagesValidator(form, errors) {
   $(form).find('.is-invalid').removeClass("is-invalid");
@@ -3432,12 +3443,54 @@ var loadingContent = function loadingContent(element) {
   }
 };
 
+var deleteRowForGrid = function deleteRowForGrid(url) {
+  var onSuccess = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+  var onError = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+  $.ajax({
+    type: "DELETE",
+    url: url,
+    dataType: "JSON",
+    success: function success(response) {
+      Swal.fire({
+        toast: true,
+        position: 'bottom-left',
+        title: "<h5 style=\"color:white\"> ".concat(response.msg, " </h5>"),
+        icon: !response.error ? 'success' : 'error',
+        showConfirmButton: false,
+        timer: 3500,
+        background: response.error ? color().danger : color()["default"]
+      });
+
+      if (!!onSuccess) {
+        onSuccess();
+      }
+    },
+    error: function error(jqXHR, textStatus, _error) {
+      Swal.fire({
+        toast: true,
+        position: 'bottom-left',
+        title: "<h5 style=\"color:white\"> \n                            Ocorreu um erro interno, tente de novo ou abra um chamado \n                        </h5>",
+        icon: 'error',
+        showConfirmButton: false,
+        timer: 3500,
+        background: color().danger
+      });
+
+      if (!!onError) {
+        onError();
+      }
+    }
+  });
+};
+
 module.exports = {
   htmlLoading: htmlLoading,
   loadingContent: loadingContent,
   showMessagesValidator: showMessagesValidator,
   color: color,
-  loadModal: loadModal
+  loadModal: loadModal,
+  optionsSwalDelete: optionsSwalDelete,
+  deleteRowForGrid: deleteRowForGrid
 };
 
 /***/ }),
@@ -3449,11 +3502,16 @@ module.exports = {
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-var _require = __webpack_require__(/*! ../Core/AppUsage */ "./resources/js/Core/AppUsage.js"),
-    loadModal = _require.loadModal,
-    loadingContent = _require.loadingContent,
-    htmlLoading = _require.htmlLoading,
-    color = _require.color;
+var _require = __webpack_require__(/*! sweetalert2 */ "./node_modules/sweetalert2/dist/sweetalert2.all.js"),
+    Swal = _require["default"];
+
+var _require2 = __webpack_require__(/*! ../Core/AppUsage */ "./resources/js/Core/AppUsage.js"),
+    loadModal = _require2.loadModal,
+    loadingContent = _require2.loadingContent,
+    htmlLoading = _require2.htmlLoading,
+    color = _require2.color,
+    optionsSwalDelete = _require2.optionsSwalDelete,
+    deleteRowForGrid = _require2.deleteRowForGrid;
 
 $(function () {
   habilitaEventos();
@@ -3472,7 +3530,7 @@ var habilitaEventos = function habilitaEventos() {
 var habilitaBotoes = function habilitaBotoes() {
   $("#addUser").on("click", function () {
     var url = '/users/create';
-    AppUsage.loadModal(url, function () {
+    loadModal(url, function () {
       $("#formAddUser").on("submit", function (e) {
         e.preventDefault();
         formUser();
@@ -3482,19 +3540,22 @@ var habilitaBotoes = function habilitaBotoes() {
   $(".btnEditUser").on("click", function () {
     var id = $(this).attr("id");
     var url = '/users/edit/' + id;
-    AppUsage.loadModal(url, function () {
-      $("#changePassword").on("click", function () {
-        var inputPassword = $(modalObject + ' input[name="password"]');
-        var inputPasswordConf = $(modalObject + ' input[name="password_confirmation"]');
-
-        if (inputPassword.prop("disabled") && inputPasswordConf.prop("disabled")) {
-          inputPassword.prop("disabled", false);
-          inputPasswordConf.prop("disabled", false);
-        } else {
-          inputPassword.prop("disabled", true);
-          inputPasswordConf.prop("disabled", true);
-        }
+    loadModal(url, function () {
+      $("#formEditUser").on("submit", function (e) {
+        e.preventDefault();
+        formUser(id);
       });
+    });
+  });
+  $(".btnDeleteUser").on("click", function () {
+    var id = $(this).attr("id");
+    var url = '/users/delete/' + id;
+    Swal.fire(optionsSwalDelete).then(function (result) {
+      if (result.isConfirmed) {
+        deleteRowForGrid(url, function () {
+          getFilterUsers();
+        });
+      }
     });
   });
 };

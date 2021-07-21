@@ -4,9 +4,6 @@
     <p class="text-subtitle"> Gerenciamento de usuários </p>
 @endsection
 
-@section('content-title')
-   <p> Lista de usuários </p>
-@endsection
 @section("content-page")
     @component('components.filtro')
         <form id="searchFormUsers">
