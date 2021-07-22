@@ -29,6 +29,8 @@ Route::group(['middleware' => 'auth'], function(){
 
     Route::group(['prefix' => 'proventos'], function(){
         Route::get('/', 'ProventosController@index')->name('proventos.index');
+        Route::get('/create', 'ProventosController@create')->name('proventos.create');
+    
     });
 });
 

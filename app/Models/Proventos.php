@@ -18,7 +18,10 @@ class Proventos extends Model
 
     public $timestamps = true; 
 
-    public function getProventos(){
+    public function getProventos($request = []){
+        $conditions = [];
+        
+
         return $this->all();
     }
 

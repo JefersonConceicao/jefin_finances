@@ -14,7 +14,7 @@ class ProventosController extends Controller
     {
         $proventos = new Proventos;
 
-        $data = $proventos->getProventos();
+        $data = $proventos->getProventos($request->all());
         return view('proventos.index')
             ->with('dataProventos', $data);
     }
@@ -24,6 +24,7 @@ class ProventosController extends Controller
      */
     public function create()
     {
+        return view('proventos.create');
     }
 
     /**

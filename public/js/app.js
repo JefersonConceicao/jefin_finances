@@ -3356,6 +3356,7 @@ $(function () {
 var initialize = function initialize() {
   setActive();
   eventsHelper();
+  loadLibs();
 };
 
 var color = function color() {
@@ -3405,6 +3406,19 @@ var setActive = function setActive() {
   sidebarLink.map(function (element, value) {
     if ($(value).attr("href") == window.location.pathname) {
       $(value).parent().addClass("active");
+    } //VERIFICA SE EXISTE SUB-MENU
+
+
+    if ($(value).parent().hasClass('has-sub')) {
+      var sidebarItem = $(value).parent();
+      var subItens = sidebarItem.find('.submenu > .submenu-item > a');
+      Array.from(subItens).forEach(function (element) {
+        if ($(element).attr("href") == window.location.pathname) {
+          sidebarItem.addClass("active");
+          sidebarItem.find('.submenu').css('display', 'block');
+          $(element).parent().addClass("active");
+        }
+      });
     }
   });
 };
@@ -3423,6 +3437,18 @@ var eventsHelper = function eventsHelper() {
   $('.table-responsive').on('hide.bs.dropdown', function () {
     $(this).css("padding-bottom", "");
     $(this).css("overflow", "auto");
+  });
+};
+
+var loadLibs = function loadLibs() {
+  datetimepicker();
+};
+
+var datetimepicker = function datetimepicker() {
+  $.datetimepicker.setLocale('pt-BR');
+  $('.datepicker').datetimepicker({
+    timepicker: false,
+    format: 'd/m/Y'
   });
 };
 
@@ -3490,7 +3516,66 @@ module.exports = {
   color: color,
   loadModal: loadModal,
   optionsSwalDelete: optionsSwalDelete,
-  deleteRowForGrid: deleteRowForGrid
+  deleteRowForGrid: deleteRowForGrid,
+  loadLibs: loadLibs
+};
+
+/***/ }),
+
+/***/ "./resources/js/Logged/AppProventos.js":
+/*!*********************************************!*\
+  !*** ./resources/js/Logged/AppProventos.js ***!
+  \*********************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+var _require = __webpack_require__(/*! ../Core/AppUsage */ "./resources/js/Core/AppUsage.js"),
+    loadingContent = _require.loadingContent,
+    loadModal = _require.loadModal;
+
+$(function () {
+  habilitaBotoes();
+  habilitaEventos();
+});
+var grid = "#gridProventos";
+
+var habilitaEventos = function habilitaEventos() {
+  $("#searchFormProventos").on("submit", function (e) {
+    e.preventDefault();
+    getFilterProventos();
+  });
+};
+
+var habilitaBotoes = function habilitaBotoes() {
+  $("#addProvento").on("click", function () {
+    var url = '/proventos/create';
+    loadModal(url, function () {});
+  });
+};
+
+var formProventos = function formProventos(id) {};
+
+var getFilterProventos = function getFilterProventos(urlPaginate) {
+  var url = '/proventos/';
+  var form = '#searchFormProventos';
+  $.ajax({
+    type: "GET",
+    url: url,
+    data: $(form).serialize(),
+    dataType: "HTML",
+    beforeSend: function beforeSend() {
+      loadingContent(grid);
+    },
+    success: function success(response) {
+      $(grid).html($(response).find(grid + " >"));
+      habilitaBotoes();
+    }
+  });
+};
+
+module.exports = {
+  habilitaEventos: habilitaEventos,
+  habilitaBotoes: habilitaBotoes
 };
 
 /***/ }),
@@ -3639,6 +3724,7 @@ window.AppRegister = __webpack_require__(/*! ./Auth/AppRegister */ "./resources/
 window.AppAuth = __webpack_require__(/*! ./Auth/AppAuth */ "./resources/js/Auth/AppAuth.js");
 window.AppUsage = __webpack_require__(/*! ./Core/AppUsage */ "./resources/js/Core/AppUsage.js");
 window.AppUsers = __webpack_require__(/*! ./Logged/AppUsers */ "./resources/js/Logged/AppUsers.js");
+window.AppProventos = __webpack_require__(/*! ./Logged/AppProventos */ "./resources/js/Logged/AppProventos.js");
 $.ajaxSetup({
   headers: {
     'X-CSRF-TOKEN': $("meta[name='csrf-token']").attr("content")

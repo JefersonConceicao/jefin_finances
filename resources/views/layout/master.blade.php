@@ -26,6 +26,7 @@
     <link rel="stylesheet" href="{{ asset('css/mazer-theme/vendors/bootstrap-icons/bootstrap-icons.css') }}">
     <link rel="stylesheet" href="{{ asset('css/mazer-theme/vendors/fontawesome/all.min.css') }}">
     <link rel="stylesheet" href="{{ asset('css/mazer-theme/app.css') }} "/> 
+    <link rel="stylesheet" href="{{ asset('vendor/jquery-datetimepicker/build/jquery.datetimepicker.min.css')}}" />
     <link rel="stylesheet" href="{{ asset('css/app.css') }} "/>   
 </head>
 <body style="background-color:#e7e7e7">
@@ -39,6 +40,7 @@
     <script src="{{ asset('css/mazer-theme/vendors/jquery/jquery.min.js') }}"> </script>
     <script src="{{ asset('js/mazer-theme/bootstrap.bundle.min.js') }}"> </script>
     <script src="{{ asset('js/mazer-theme/main.js') }}"> </script>
+    <script src="{{ asset('vendor/jquery-datetimepicker/build/jquery.datetimepicker.full.min.js')}}"> </script>
     <script src="{{ asset('js/app.js') }}"> </script>
 </body>
 </html>

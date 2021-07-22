@@ -3,6 +3,7 @@ $(() => initialize());
 const initialize = () => {
     setActive()
     eventsHelper();
+    loadLibs();
 }
 
 const color = () => {
@@ -49,11 +50,26 @@ const showMessagesValidator = (form, errors) => {
 
 const setActive = () => {
    const sidebarLink = $(".sidebar-link");
-   sidebarLink.map((element, value )=> {
+
+    sidebarLink.map((element, value )=> {
        if($(value).attr("href") == window.location.pathname){
            $(value).parent().addClass("active");
        }
-   })
+
+       //VERIFICA SE EXISTE SUB-MENU
+       if($(value).parent().hasClass('has-sub')){
+           const sidebarItem = $(value).parent();
+           const subItens = sidebarItem.find('.submenu > .submenu-item > a');
+           
+            Array.from(subItens).forEach(element => {
+                if($(element).attr("href") == window.location.pathname){
+                    sidebarItem.addClass("active")
+                    sidebarItem.find('.submenu').css('display', 'block');
+                    $(element).parent().addClass("active");
+                }
+            })
+       }
+    })
 }
 
 const eventsHelper = () => {
@@ -72,6 +88,18 @@ const eventsHelper = () => {
         $(this).css("padding-bottom", "");
         $(this).css("overflow", "auto")
     })
+}
+
+const loadLibs = () => {
+    datetimepicker()
+}
+
+const datetimepicker = () => {
+    $.datetimepicker.setLocale('pt-BR');
+    $('.datepicker').datetimepicker({
+        timepicker: false,
+        format: 'd/m/Y'
+    });
 }
 
 const loadModal = (url, callback = null) => {
@@ -145,4 +173,5 @@ module.exports = {
     loadModal,
     optionsSwalDelete,
     deleteRowForGrid,
+    loadLibs,
 }

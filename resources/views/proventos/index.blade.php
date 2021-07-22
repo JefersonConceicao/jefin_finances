@@ -24,7 +24,8 @@
                         <input 
                             name="data_provento"
                             type="text"
-                            class="form-control"
+                            class="form-control datepicker"
+                            value={{ date('d/m/Y') }}
                         />
                     </div>
                 </div>
@@ -38,7 +39,7 @@
             </div>
         </form>
     @endcomponent
-        <div class="card">
+        <div class="card" id="gridProventos">
             <div class="card-header">
                 <div class="row">
                     <div class="col-md-6">
@@ -54,6 +55,17 @@
                             Novo <i class="fa fa-plus-square"> </i>
                         </button>
                     </div>
+                </div>
+            </div>
+            <div class="card-content">
+                <div class="card-body">
+                    @if(count($dataProventos))
+
+                    @else 
+                        <div class="text-center">
+                            <h4> Nenhum registro encontrado.</h4>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>

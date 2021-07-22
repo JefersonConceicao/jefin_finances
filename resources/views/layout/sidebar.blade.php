@@ -29,7 +29,7 @@
                 </a>
             </li>
             <li class="submenu-item"> 
-                <a href="/proventos/">
+                <a href="/despesas/">
                     <i class="fas fa-angle-right"></i>
                     &nbsp;
                     Despesas 
