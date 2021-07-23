@@ -58,9 +58,38 @@
                 </div>
             </div>
             <div class="card-content">
-                <div class="card-body">
+                <div class="card-body table-responsive">
                     @if(count($dataProventos))
-
+                        <table class="table table-hover"> 
+                            <thead> 
+                                <tr> 
+                                    <th> Descrição </th>
+                                    <th> Valor </th>
+                                    <th> Data </th>
+                                    <th width="2%"> Ações </th>
+                                </tr>
+                            </thead>
+                            <tbody> 
+                                @foreach($dataProventos as $provento)
+                                    <tr>     
+                                        <td> {{ $provento->descricao_provento }} </td>
+                                        <td> {{ number_format($provento->valor_provento, 1)}}</td>
+                                        <td> {{ converteData($provento->data_provento, 'd/m/Y') }} </td>
+                                        <td> 
+                                            <div class="text-center" style="display:flex">
+                                                <button class="btn btn-secondary rounded-pill"> 
+                                                    <i class="fa fa-edit"> </i>
+                                                </button>
+                                                &nbsp;
+                                                <button class="btn btn-danger rounded-pill"> 
+                                                    <i class="fa fa-trash"> </i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>   
+                                @endforeach
+                            </tbody>
+                        </table>
                     @else 
                         <div class="text-center">
                             <h4> Nenhum registro encontrado.</h4>

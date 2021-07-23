@@ -1,5 +1,5 @@
 @extends('layout.modal')
-@section('form-modal', 'formAddProvento')
+@section('modal-form', 'formAddProvento')
 @section('modal-header')
     <i class="fa fa-plus-square"></i> Cadastrar Provento 
 @endsection
@@ -21,11 +21,11 @@
     <div class="row">
         <div class="col-md-6">
             <div class="form-group">
-                <label> Valor Provento <span class="required"> * </span> </label>
+                <label> Valor Provento R$<span class="required"> * </span> </label>
                 <input 
                     name="valor_provento"
                     type="text"
-                    class="form-control"
+                    class="form-control decimalValue"
                 />
 
                 <div class="error_feedback"> </div>
@@ -37,7 +37,7 @@
                 <input 
                     name="data_provento"
                     type="text"
-                    class="form-control"
+                    class="form-control datepicker"
                 />
 
                 <div class="error_feedback"> </div>

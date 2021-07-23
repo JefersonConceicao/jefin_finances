@@ -3,7 +3,11 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+//REQUEST
+use App\Http\Requests\ProventosRequest;
+//MODEL
 use App\Models\Proventos;
+use Auth;
 
 class ProventosController extends Controller
 {
@@ -31,9 +35,13 @@ class ProventosController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(ProventosRequest $request)
     {
-        //
+        $proventos = new Proventos;
+        $user = Auth::user();
+
+        $data = $proventos->saveProvento($request->all(), $user);
+        return response()->json($data);
     }
 
     /**

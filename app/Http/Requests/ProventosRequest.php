@@ -3,28 +3,51 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Route;
 
 class ProventosRequest extends FormRequest
 {
     /**
-     * Determine if the user is authorized to make this request.
-     *
      * @return bool
      */
     public function authorize()
     {
-        return false;
+        return true;
     }
 
     /**
-     * Get the validation rules that apply to the request.
-     *
      * @return array
      */
     public function rules()
     {
+        $currentRoute = explode('.', Route::currentRouteName());
+        $validate = [];
+
+        switch(end($currentRoute)){
+            case 'store': 
+                $validate = [
+                    'descricao_provento' => 'required',
+                    'valor_provento' => 'required',
+                    'data_provento' => 'required|date_format:d/m/Y'
+                ]; 
+            break;
+            case 'update': 
+                $validate = [
+                    'descricao_provento' => 'required',
+                    'valor_provento' => 'required',
+                    'data_provento' => 'required|date_format:d/m/Y'
+                ];
+            break;
+        }
+
+        return $validate;
+    }
+
+    public function messages(){
         return [
-            //
+            'required' => 'Campo obrigatório',
+            'numeric' => 'Este campo deve conter apenas números',
+            'date' => 'Insira uma data válida'
         ];
     }
 }

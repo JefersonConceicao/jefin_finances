@@ -41,6 +41,8 @@
     <script src="{{ asset('js/mazer-theme/bootstrap.bundle.min.js') }}"> </script>
     <script src="{{ asset('js/mazer-theme/main.js') }}"> </script>
     <script src="{{ asset('vendor/jquery-datetimepicker/build/jquery.datetimepicker.full.min.js')}}"> </script>
+    <script src="{{ asset('vendor/inputmask/dist/jquery.inputmask.js') }}"> </script>
+    <script src="{{ asset('vendor/jquery-mask/dist/jquery.mask.min.js')}}"> </script>
     <script src="{{ asset('js/app.js') }}"> </script>
 </body>
 </html>

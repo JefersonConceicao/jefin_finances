@@ -91,15 +91,22 @@ const eventsHelper = () => {
 }
 
 const loadLibs = () => {
-    datetimepicker()
+    configDateTimePicker()
+    configMasks()
 }
 
-const datetimepicker = () => {
+const configDateTimePicker = () => {
     $.datetimepicker.setLocale('pt-BR');
     $('.datepicker').datetimepicker({
         timepicker: false,
         format: 'd/m/Y'
     });
+}
+
+const configMasks = () => {
+    $(".decimalValue").mask('#.##0,00', {
+        reverse: true,
+    })
 }
 
 const loadModal = (url, callback = null) => {
@@ -111,6 +118,8 @@ const loadModal = (url, callback = null) => {
         if(!!callback){
             callback();
         }
+
+        loadLibs()
     });
 }
 

@@ -3441,14 +3441,21 @@ var eventsHelper = function eventsHelper() {
 };
 
 var loadLibs = function loadLibs() {
-  datetimepicker();
+  configDateTimePicker();
+  configMasks();
 };
 
-var datetimepicker = function datetimepicker() {
+var configDateTimePicker = function configDateTimePicker() {
   $.datetimepicker.setLocale('pt-BR');
   $('.datepicker').datetimepicker({
     timepicker: false,
     format: 'd/m/Y'
+  });
+};
+
+var configMasks = function configMasks() {
+  $(".decimalValue").mask('#.##0,00', {
+    reverse: true
   });
 };
 
@@ -3460,6 +3467,8 @@ var loadModal = function loadModal(url) {
     if (!!callback) {
       callback();
     }
+
+    loadLibs();
   });
 };
 
@@ -3531,7 +3540,8 @@ module.exports = {
 
 var _require = __webpack_require__(/*! ../Core/AppUsage */ "./resources/js/Core/AppUsage.js"),
     loadingContent = _require.loadingContent,
-    loadModal = _require.loadModal;
+    loadModal = _require.loadModal,
+    htmlLoading = _require.htmlLoading;
 
 $(function () {
   habilitaBotoes();
@@ -3549,11 +3559,54 @@ var habilitaEventos = function habilitaEventos() {
 var habilitaBotoes = function habilitaBotoes() {
   $("#addProvento").on("click", function () {
     var url = '/proventos/create';
-    loadModal(url, function () {});
+    loadModal(url, function () {
+      $("#formAddProvento").on("submit", function (e) {
+        e.preventDefault();
+        formProventos();
+      });
+    });
   });
 };
 
-var formProventos = function formProventos(id) {};
+var formProventos = function formProventos(id) {
+  var url = typeof id === "undefined" ? '/proventos/store' : '/proventos/update/' + id;
+  var form = typeof id === "undefined" ? '#formAddProvento' : '#formEditProvento';
+  var type = typeof id === "undefined" ? 'POST' : 'PUT';
+  $.ajax({
+    type: type,
+    url: url,
+    data: $(form).serialize(),
+    dataType: "JSON",
+    beforeSend: function beforeSend() {
+      $(form + " .btnSubmit").prop("disabled", true).html(htmlLoading);
+    },
+    success: function success(response) {
+      Swal.fire({
+        toast: true,
+        position: 'bottom-left',
+        title: "<h5 style=\"color:white\"> ".concat(response.msg, " </h5>"),
+        icon: !response.error ? 'success' : 'error',
+        showConfirmButton: false,
+        timer: 3000,
+        background: response.error ? 'red' : color()["default"],
+        didOpen: function didOpen() {
+          $(modalObject).modal('hide');
+        }
+      });
+      getFilterUsers();
+    },
+    error: function error(jqXHR, textStatus, _error) {
+      var errors = jqXHR.responseJSON.errors;
+
+      if (!!errors) {
+        AppUsage.showMessagesValidator(form, errors);
+      }
+    },
+    complete: function complete() {
+      $(form + " .btnSubmit").prop("disabled", false).html("Salvar");
+    }
+  });
+};
 
 var getFilterProventos = function getFilterProventos(urlPaginate) {
   var url = '/proventos/';

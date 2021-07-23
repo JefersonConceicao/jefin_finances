@@ -30,7 +30,10 @@ Route::group(['middleware' => 'auth'], function(){
     Route::group(['prefix' => 'proventos'], function(){
         Route::get('/', 'ProventosController@index')->name('proventos.index');
         Route::get('/create', 'ProventosController@create')->name('proventos.create');
-    
+        Route::post('/store', 'ProventosController@store')->name('proventos.store');
+        Route::get('/edit/{id}', 'ProventosController@edit' )->name('proventos.edit');
+        Route::put('/update/{id}', 'ProventosController@update')->name('proventos.update');
+        Route::delete('/delete/{id}', 'ProventosController@delete')->name('proventos.delete');
     });
 });
 
