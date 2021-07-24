@@ -1,12 +1,25 @@
-const { loadingContent, loadModal, htmlLoading } = require('../Core/AppUsage');
+const { default: Swal } = require('sweetalert2');
+const { 
+    loadingContent, 
+    loadModal, 
+    htmlLoading, 
+    color,
+    optionsSwalDelete, 
+    deleteRowForGrid
+} = require('../Core/AppUsage');
+
 $(() => {
     habilitaBotoes()
     habilitaEventos()
 })
 
+const modalObject = "#nivel1";
 const grid = "#gridProventos";
 
 const habilitaEventos = () => {
+    getFilterProventos();
+
+
     $("#searchFormProventos").on("submit", function(e){
         e.preventDefault()
         getFilterProventos()
@@ -24,6 +37,31 @@ const habilitaBotoes = () => {
             }); 
         });
     })
+
+    $(".btnEditProvento").on("click", function(){
+        const id = $(this).attr("id");
+        const url = '/proventos/edit/' + id;
+
+        loadModal(url, function(){
+            $("#formEditProvento").on("submit", function(e){
+                e.preventDefault()
+                formProventos(id)
+            });
+        });
+    });
+
+    $(".btnDeleteProvento").on("click", function(){
+        const id = $(this).attr("id");
+        const url = '/proventos/delete/' + id;
+
+        Swal.fire(optionsSwalDelete).then(result => {
+            if(result.isConfirmed){
+                deleteRowForGrid(url, function(){
+                    getFilterProventos()
+                });
+            }
+        })
+    });
 }
 
 const formProventos = id => {
@@ -55,7 +93,7 @@ const formProventos = id => {
                 }
             }); 
             
-            getFilterUsers();
+            getFilterProventos();
         },
         error:function(jqXHR, textStatus, error){
             const errors = jqXHR.responseJSON.errors;

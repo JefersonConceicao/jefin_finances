@@ -38,6 +38,7 @@
                     name="data_provento"
                     type="text"
                     class="form-control datepicker"
+                    value="{{ date('d/m/Y') }}"
                 />
 
                 <div class="error_feedback"> </div>

@@ -3531,6 +3531,42 @@ module.exports = {
 
 /***/ }),
 
+/***/ "./resources/js/Logged/AppDespesas.js":
+/*!********************************************!*\
+  !*** ./resources/js/Logged/AppDespesas.js ***!
+  \********************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+var _require = __webpack_require__(/*! ../Core/AppUsage */ "./resources/js/Core/AppUsage.js"),
+    loadingContent = _require.loadingContent,
+    loadModal = _require.loadModal,
+    htmlLoading = _require.htmlLoading,
+    color = _require.color,
+    optionsSwalDelete = _require.optionsSwalDelete,
+    deleteRowForGrid = _require.deleteRowForGrid;
+
+$(function () {
+  habilitaBotoes();
+  habilitaEventos();
+});
+
+var habilitaEventos = function habilitaEventos() {};
+
+var habilitaBotoes = function habilitaBotoes() {
+  $("#addDespesa").on("click", function () {
+    var url = '/despesas/create';
+    loadModal(url, function () {});
+  });
+};
+
+module.exports = {
+  habilitaBotoes: habilitaBotoes,
+  habilitaEventos: habilitaEventos
+};
+
+/***/ }),
+
 /***/ "./resources/js/Logged/AppProventos.js":
 /*!*********************************************!*\
   !*** ./resources/js/Logged/AppProventos.js ***!
@@ -3538,18 +3574,26 @@ module.exports = {
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-var _require = __webpack_require__(/*! ../Core/AppUsage */ "./resources/js/Core/AppUsage.js"),
-    loadingContent = _require.loadingContent,
-    loadModal = _require.loadModal,
-    htmlLoading = _require.htmlLoading;
+var _require = __webpack_require__(/*! sweetalert2 */ "./node_modules/sweetalert2/dist/sweetalert2.all.js"),
+    Swal = _require["default"];
+
+var _require2 = __webpack_require__(/*! ../Core/AppUsage */ "./resources/js/Core/AppUsage.js"),
+    loadingContent = _require2.loadingContent,
+    loadModal = _require2.loadModal,
+    htmlLoading = _require2.htmlLoading,
+    color = _require2.color,
+    optionsSwalDelete = _require2.optionsSwalDelete,
+    deleteRowForGrid = _require2.deleteRowForGrid;
 
 $(function () {
   habilitaBotoes();
   habilitaEventos();
 });
+var modalObject = "#nivel1";
 var grid = "#gridProventos";
 
 var habilitaEventos = function habilitaEventos() {
+  getFilterProventos();
   $("#searchFormProventos").on("submit", function (e) {
     e.preventDefault();
     getFilterProventos();
@@ -3564,6 +3608,27 @@ var habilitaBotoes = function habilitaBotoes() {
         e.preventDefault();
         formProventos();
       });
+    });
+  });
+  $(".btnEditProvento").on("click", function () {
+    var id = $(this).attr("id");
+    var url = '/proventos/edit/' + id;
+    loadModal(url, function () {
+      $("#formEditProvento").on("submit", function (e) {
+        e.preventDefault();
+        formProventos(id);
+      });
+    });
+  });
+  $(".btnDeleteProvento").on("click", function () {
+    var id = $(this).attr("id");
+    var url = '/proventos/delete/' + id;
+    Swal.fire(optionsSwalDelete).then(function (result) {
+      if (result.isConfirmed) {
+        deleteRowForGrid(url, function () {
+          getFilterProventos();
+        });
+      }
     });
   });
 };
@@ -3593,7 +3658,7 @@ var formProventos = function formProventos(id) {
           $(modalObject).modal('hide');
         }
       });
-      getFilterUsers();
+      getFilterProventos();
     },
     error: function error(jqXHR, textStatus, _error) {
       var errors = jqXHR.responseJSON.errors;
@@ -3778,6 +3843,7 @@ window.AppAuth = __webpack_require__(/*! ./Auth/AppAuth */ "./resources/js/Auth/
 window.AppUsage = __webpack_require__(/*! ./Core/AppUsage */ "./resources/js/Core/AppUsage.js");
 window.AppUsers = __webpack_require__(/*! ./Logged/AppUsers */ "./resources/js/Logged/AppUsers.js");
 window.AppProventos = __webpack_require__(/*! ./Logged/AppProventos */ "./resources/js/Logged/AppProventos.js");
+window.AppDespesas = __webpack_require__(/*! ./Logged/AppDespesas */ "./resources/js/Logged/AppDespesas.js");
 $.ajaxSetup({
   headers: {
     'X-CSRF-TOKEN': $("meta[name='csrf-token']").attr("content")

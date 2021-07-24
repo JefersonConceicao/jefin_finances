@@ -18,9 +18,42 @@ class Proventos extends Model
 
     public $timestamps = true; 
 
-    public function getProventos($request = []){
-        $conditions = [];
-        return $this->all();
+    public function getProventos($request = [], $user){
+        $conditions = [];   
+        $conditions[] = ['user_id', '=', $user->id];
+
+        if(isset($request['descricao_provento']) && !empty($request['descricao_provento'])){
+            $conditions[] = ['descricao_provento', 'LIKE', "%".$request['descricao_provento']."%"];
+        }
+
+        $dataWithFilter = $this
+            ->where($conditions)
+            ->whereMonth('data_provento', !empty($request['mes']) ? $request['mes'] : null)
+            ->whereYear('data_provento',  !empty($request['ano']) ? $request['ano'] : null)
+            ->get();
+
+      
+        if(empty($request['mes']) && isset($request['ano']) && !empty($request['ano'])){
+            return $this
+                ->where($conditions)
+                ->whereYear('data_provento', $request['ano'])
+                ->get();
+        }
+
+        if(empty($request['ano']) && isset($request['mes']) && !empty($request['mes'])){
+            return $this
+            ->where($conditions)
+            ->whereMonth('data_provento', $request['mes'])
+            ->get();
+        }
+
+        if(empty($request['mes']) && empty($request['ano'])){
+            return $this
+                ->where($conditions)
+                ->get();
+        }
+
+        return $dataWithFilter;
     }
 
     public function saveProvento($request = [], $user){
@@ -28,7 +61,7 @@ class Proventos extends Model
             $request['user_id'] = $user->id;
 
             if(isset($request['valor_provento']) && !empty($request['valor_provento'])){
-                $request['valor_provento'] = floatVal(clearSpecialCaracters($request['valor_provento']));
+                $request['valor_provento'] = setToDecimal($request['valor_provento']);
             }
 
             if(isset($request['data_provento']) && !empty($request['data_provento'])){
@@ -50,11 +83,42 @@ class Proventos extends Model
         }
     }
 
-    public function updateProvento(){
+    public function updateProvento($id, $request = []){
+        try{
+            if(isset($request['valor_provento']) && !empty($request['valor_provento'])){
+                $request['valor_provento'] = setToDecimal($request['valor_provento']);
+            }  
 
+            if(isset($request['data_provento']) && !empty($request['data_provento'])){
+                $request['data_provento'] = converteData(str_replace('/','-', $request['data_provento']), 'Y-m-d');
+            }
+
+            $provento = $this->find($id);
+            $provento->fill($request)->save();
+
+            return [
+                'error' => false,
+                'msg' => 'Provento alterado!'
+            ];
+        }catch(\Exception $error){
+            return [
+                'error' => false,
+                'msg' => 'Não foi possível alterar o registro.',
+            ];
+        }
     }
 
-    public function deleteProvento(){
-
+    public function deleteProvento($id){
+        if($this->find($id)->delete()){
+            return [
+                'error' => false,
+                'msg' => 'Registro excluído com sucesso!',
+            ];
+        }else{
+            return [
+                'error' => true,
+                'msg' => 'Não foi possível excluír o registro, tente de novo',
+            ];
+        }
     }
 }

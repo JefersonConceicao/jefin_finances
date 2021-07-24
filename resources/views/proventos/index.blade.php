@@ -8,7 +8,7 @@
     @component('components.filtro')
         <form id="searchFormProventos">
             <div class="row">
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <div class="form-group">
                         <label> Nome/Descrição Provento </label>
                         <input 
@@ -18,16 +18,26 @@
                         />
                     </div>
                 </div>  
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <div class="form-group">
-                        <label> Data Provento </label>
-                        <input 
-                            name="data_provento"
-                            type="text"
-                            class="form-control datepicker"
-                            value={{ date('d/m/Y') }}
-                        />
+                        <label> Mês </label>
+                        <select name="mes" class="form-select"> 
+                                <option value=""> Selecione </option>
+                            @foreach($optionsMeses as $k => $v)
+                                <option value="{{$k}}" @if($k == date('m')) selected @endif> {{ $v }} </option>
+                            @endforeach
+                        </select>
                     </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label> Ano </label>
+                        <input 
+                            name="ano"
+                            type="text"
+                            class="form-control"
+                            value="{{ date('Y') }}"
+                        />
                 </div>
             </div>
             <div class="row">
@@ -60,7 +70,7 @@
             <div class="card-content">
                 <div class="card-body table-responsive">
                     @if(count($dataProventos))
-                        <table class="table table-hover"> 
+                        <table class="table table-hover table-striped"> 
                             <thead> 
                                 <tr> 
                                     <th> Descrição </th>
@@ -73,15 +83,21 @@
                                 @foreach($dataProventos as $provento)
                                     <tr>     
                                         <td> {{ $provento->descricao_provento }} </td>
-                                        <td> {{ number_format($provento->valor_provento, 1)}}</td>
+                                        <td> {{ number_format($provento->valor_provento, 2, ',','.') }}</td>
                                         <td> {{ converteData($provento->data_provento, 'd/m/Y') }} </td>
                                         <td> 
                                             <div class="text-center" style="display:flex">
-                                                <button class="btn btn-secondary rounded-pill"> 
+                                                <button 
+                                                    class="btn btn-secondary rounded-pill btnEditProvento"
+                                                    id="{{ $provento->id }}"
+                                                > 
                                                     <i class="fa fa-edit"> </i>
                                                 </button>
                                                 &nbsp;
-                                                <button class="btn btn-danger rounded-pill"> 
+                                                <button 
+                                                    class="btn btn-danger rounded-pill btnDeleteProvento"
+                                                    id="{{ $provento->id }}"
+                                                > 
                                                     <i class="fa fa-trash"> </i>
                                                 </button>
                                             </div>

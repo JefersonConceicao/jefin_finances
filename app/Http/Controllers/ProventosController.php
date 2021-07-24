@@ -17,10 +17,13 @@ class ProventosController extends Controller
     public function index(Request $request)
     {
         $proventos = new Proventos;
+        $user = Auth::user(); 
 
-        $data = $proventos->getProventos($request->all());
+        $data = $proventos->getProventos($request->all(), $user);
+
         return view('proventos.index')
-            ->with('dataProventos', $data);
+            ->with('dataProventos', $data)
+            ->with('optionsMeses', $this->optionsMeses);
     }
 
     /**
@@ -48,18 +51,13 @@ class ProventosController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
-    {
-        //
-    }
-
-    /**
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function edit($id)
     {
-        //
+        $proventos = new Proventos;
+
+        $data = $proventos->find($id);
+        return view('proventos.edit')   
+            ->with('provento', $data);
     }
 
     /**
@@ -67,17 +65,23 @@ class ProventosController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(ProventosRequest $request, $id)
     {
-        //
+        $proventos = new Proventos;
+
+        $data = $proventos->updateProvento($id, $request->all());
+        return response()->json($data);
     }
 
     /**
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function delete($id)
     {
-        //
+        $proventos = new Proventos;
+
+        $data = $proventos->deleteProvento($id);
+        return response()->json($data);
     }
 }

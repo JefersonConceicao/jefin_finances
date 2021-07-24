@@ -6,6 +6,7 @@ window.AppAuth = require('./Auth/AppAuth');
 window.AppUsage = require('./Core/AppUsage');
 window.AppUsers = require('./Logged/AppUsers');
 window.AppProventos = require('./Logged/AppProventos');
+window.AppDespesas = require('./Logged/AppDespesas');
 
 $.ajaxSetup({
     headers: {

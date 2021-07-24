@@ -35,6 +35,11 @@ Route::group(['middleware' => 'auth'], function(){
         Route::put('/update/{id}', 'ProventosController@update')->name('proventos.update');
         Route::delete('/delete/{id}', 'ProventosController@delete')->name('proventos.delete');
     });
+
+    Route::group(['prefix' => 'despesas'], function(){
+        Route::get('/', 'DespesasController@index')->name('despesas.index');
+        Route::get('/create', 'DespesasController@create')->name('despesas.create');
+    }); 
 });
 
 

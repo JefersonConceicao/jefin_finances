@@ -17,8 +17,8 @@
 
     <li class="sidebar-item has-sub">
         <a href="#" class="sidebar-link">
-            <i class="fas fa-money-bill-wave-alt"></i>
-            <span> Meu dinheiro  </span>
+            <i class="fas fa-hand-holding-usd"></i>
+            <span> Meu dinheiro </span>
         </a>
         <ul class="submenu"> 
             <li class="submenu-item"> 
