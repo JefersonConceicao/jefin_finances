@@ -35,6 +35,14 @@
                     Despesas 
                 </a>
             </li>
+
+            <li class="submenu-item"> 
+                <a href="/tiposDespesas/">
+                    <i class="fas fa-angle-right"></i>
+                    &nbsp;
+                    Despesas Tipos
+                </a>
+            </li>
         </ul>
     </li>
 </ul>

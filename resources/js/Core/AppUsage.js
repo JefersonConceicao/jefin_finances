@@ -158,7 +158,7 @@ const deleteRowForGrid = (url, onSuccess = null, onError = null) => {
                 toast:true,
                 position: 'bottom-left',
                 title: `<h5 style="color:white"> 
-                            Ocorreu um erro interno, tente de novo ou abra um chamado 
+                           Não foi possível excluir, pois o registro já está sendo utilizado.
                         </h5>`,
                 icon: 'error',
                 showConfirmButton: false,

@@ -16,25 +16,6 @@
             </div>
         </div>
     </div>
-
-    <div 
-        id="nivel2" 
-        class="modal fade text-left show" 
-        tabindex="-1" 
-        aria-labelledby="myModalLabel160"
-        style="display:none; padding-right:17px"
-        aria-modal="true"
-        role="dialog"
-        aria-hidden="true"
-        data-bs-backdrop="static"
-    >
-        <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document"> 
-            <div class="modal-content">
-                @include('layout.modal')
-            </div>
-        </div>
-    </div>
-
 @section('content')
    
     <div id="app">

@@ -15,3 +15,7 @@ function setToDecimal($value){
     //altera virgulas decimais por ponto e converte em float
     return floatVal(str_replace(',','.',$value));
 } 
+
+function convertValorReal($number){
+    return number_format($number, 2, ',','.');
+}

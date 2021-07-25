@@ -3504,7 +3504,7 @@ var deleteRowForGrid = function deleteRowForGrid(url) {
       Swal.fire({
         toast: true,
         position: 'bottom-left',
-        title: "<h5 style=\"color:white\"> \n                            Ocorreu um erro interno, tente de novo ou abra um chamado \n                        </h5>",
+        title: "<h5 style=\"color:white\"> \n                           N\xE3o foi poss\xEDvel excluir, pois o registro j\xE1 est\xE1 sendo utilizado.\n                        </h5>",
         icon: 'error',
         showConfirmButton: false,
         timer: 3500,
@@ -3538,25 +3538,181 @@ module.exports = {
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-var _require = __webpack_require__(/*! ../Core/AppUsage */ "./resources/js/Core/AppUsage.js"),
-    loadingContent = _require.loadingContent,
-    loadModal = _require.loadModal,
-    htmlLoading = _require.htmlLoading,
-    color = _require.color,
-    optionsSwalDelete = _require.optionsSwalDelete,
-    deleteRowForGrid = _require.deleteRowForGrid;
+var _require = __webpack_require__(/*! sweetalert2 */ "./node_modules/sweetalert2/dist/sweetalert2.all.js"),
+    Swal = _require["default"];
+
+var _require2 = __webpack_require__(/*! ../Core/AppUsage */ "./resources/js/Core/AppUsage.js"),
+    loadingContent = _require2.loadingContent,
+    loadModal = _require2.loadModal,
+    htmlLoading = _require2.htmlLoading,
+    color = _require2.color,
+    optionsSwalDelete = _require2.optionsSwalDelete,
+    deleteRowForGrid = _require2.deleteRowForGrid;
 
 $(function () {
   habilitaBotoes();
   habilitaEventos();
 });
+var modalObject = "#nivel1";
+var grid = "#gridDespesas";
 
-var habilitaEventos = function habilitaEventos() {};
+var habilitaEventos = function habilitaEventos() {
+  getFilterDespesas();
+  $("#searchFormDespesas").on("submit", function (e) {
+    e.preventDefault();
+    getFilterDespesas();
+  });
+};
 
 var habilitaBotoes = function habilitaBotoes() {
   $("#addDespesa").on("click", function () {
     var url = '/despesas/create';
-    loadModal(url, function () {});
+    loadModal(url, function () {
+      $("#formAddDespesas").on("submit", function (e) {
+        e.preventDefault();
+        formDespesas();
+      });
+    });
+  });
+  $(".rowSettingsDespesa").on("click", function (e) {
+    if (e.target.tagName != "TD") {
+      return;
+    }
+
+    var id = $(this).attr("id");
+    var url = '/despesas/edit/' + id;
+    loadModal(url, function () {
+      $("#formEditDespesas").on("submit", function (e) {
+        e.preventDefault();
+        formDespesas(id);
+      });
+    });
+  });
+  $(".btnDeleteDespesa").on("click", function () {
+    var id = $(this).parents('tr').attr("id");
+    var url = '/despesas/delete/' + id;
+    Swal.fire(optionsSwalDelete).then(function (result) {
+      if (result.isConfirmed) {
+        deleteRowForGrid(url, function () {
+          getFilterDespesas();
+        });
+      }
+    });
+  });
+  $(".btnDespesaPago").on("click", function () {
+    var buttonElement = $(this);
+    var id = buttonElement.parents('tr').attr("id");
+    var url = '/despesas/payDespesa/' + id;
+    $.ajax({
+      type: "PUT",
+      url: url,
+      dataType: "JSON",
+      beforeSend: function beforeSend() {
+        buttonElement.prop("disabled", true).html("<i style=\"font-size:20px;\" class=\"fas fa-circle-notch fa-spin\">  </i>");
+      },
+      success: function success(response) {
+        Swal.fire({
+          toast: true,
+          position: 'bottom-left',
+          title: "<h5 style=\"color:white\"> ".concat(response.msg, " </h5>"),
+          icon: !response.error ? 'success' : 'error',
+          showConfirmButton: false,
+          timer: 3000,
+          background: response.error ? 'red' : color()["default"]
+        });
+        getFilterDespesas();
+      },
+      complete: function complete() {
+        buttonElement.prop("disabled", true).html('<i class="fas fa-check-square"></i>');
+      }
+    });
+  });
+  $("#copyDespesas").on("click", function () {
+    var buttonElement = $(this);
+    var url = '/despesas/copyDespesas';
+    var form = "#searchFormDespesas";
+    $.ajax({
+      type: "POST",
+      url: url,
+      data: $(form).serialize(),
+      dataType: "JSON",
+      beforeSend: function beforeSend() {
+        buttonElement.prop("disabled", true).html(htmlLoading);
+      },
+      success: function success(response) {
+        Swal.fire({
+          toast: true,
+          position: 'bottom-left',
+          title: "<h5 style=\"color:white\"> ".concat(response.msg, " </h5>"),
+          icon: !response.error ? 'success' : 'error',
+          showConfirmButton: false,
+          timer: 3000,
+          background: response.error ? 'red' : color()["default"]
+        });
+        getFilterDespesas();
+      },
+      complete: function complete() {
+        buttonElement.prop("disabled", false).html(" Repetir utlimas despesas ");
+      }
+    });
+  });
+};
+
+var formDespesas = function formDespesas(id) {
+  var url = typeof id === "undefined" ? '/despesas/store' : '/despesas/update/' + id;
+  var form = typeof id === "undefined" ? '#formAddDespesas' : '#formEditDespesas';
+  var type = typeof id === "undefined" ? 'POST' : 'PUT';
+  $.ajax({
+    type: type,
+    url: url,
+    data: $(form).serialize(),
+    dataType: "JSON",
+    beforeSend: function beforeSend() {
+      $(form + " .btnSubmit").prop("disabled", true).html(htmlLoading);
+    },
+    success: function success(response) {
+      Swal.fire({
+        toast: true,
+        position: 'bottom-left',
+        title: "<h5 style=\"color:white\"> ".concat(response.msg, " </h5>"),
+        icon: !response.error ? 'success' : 'error',
+        showConfirmButton: false,
+        timer: 3000,
+        background: response.error ? 'red' : color()["default"],
+        didOpen: function didOpen() {
+          $(modalObject).modal('hide');
+        }
+      });
+      getFilterDespesas();
+    },
+    error: function error(jqXHR, textStatus, _error) {
+      var errors = jqXHR.responseJSON.errors;
+
+      if (!!errors) {
+        AppUsage.showMessagesValidator(form, errors);
+      }
+    },
+    complete: function complete() {
+      $(form + " .btnSubmit").prop("disabled", false).html("Salvar");
+    }
+  });
+};
+
+var getFilterDespesas = function getFilterDespesas() {
+  var url = '/despesas/';
+  var form = "#searchFormDespesas";
+  $.ajax({
+    type: "GET",
+    url: url,
+    data: $(form).serialize(),
+    dataType: "HTML",
+    beforeSend: function beforeSend() {
+      loadingContent(grid);
+    },
+    success: function success(response) {
+      $(grid).html($(response).find(grid + " >"));
+      habilitaBotoes();
+    }
   });
 };
 
@@ -3676,6 +3832,136 @@ var formProventos = function formProventos(id) {
 var getFilterProventos = function getFilterProventos(urlPaginate) {
   var url = '/proventos/';
   var form = '#searchFormProventos';
+  $.ajax({
+    type: "GET",
+    url: url,
+    data: $(form).serialize(),
+    dataType: "HTML",
+    beforeSend: function beforeSend() {
+      loadingContent(grid);
+    },
+    success: function success(response) {
+      $(grid).html($(response).find(grid + " >"));
+      habilitaBotoes();
+    }
+  });
+};
+
+module.exports = {
+  habilitaEventos: habilitaEventos,
+  habilitaBotoes: habilitaBotoes
+};
+
+/***/ }),
+
+/***/ "./resources/js/Logged/AppTipoDespesas.js":
+/*!************************************************!*\
+  !*** ./resources/js/Logged/AppTipoDespesas.js ***!
+  \************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+var _require = __webpack_require__(/*! sweetalert2 */ "./node_modules/sweetalert2/dist/sweetalert2.all.js"),
+    Swal = _require["default"];
+
+var _require2 = __webpack_require__(/*! ../Core/AppUsage */ "./resources/js/Core/AppUsage.js"),
+    loadModal = _require2.loadModal,
+    htmlLoading = _require2.htmlLoading,
+    color = _require2.color,
+    loadingContent = _require2.loadingContent,
+    deleteRowForGrid = _require2.deleteRowForGrid,
+    optionsSwalDelete = _require2.optionsSwalDelete;
+
+$(function () {
+  habilitaBotoes();
+  habilitaEventos();
+});
+var modalObject = "#nivel1";
+var grid = "#gridTiposDespesa";
+
+var habilitaEventos = function habilitaEventos() {
+  $("#serachFormTiposDespesas").on("submit", function (e) {
+    e.preventDefault();
+    getFilterTipoDespesas();
+  });
+};
+
+var habilitaBotoes = function habilitaBotoes() {
+  $("#addTiposDespesa").on("click", function () {
+    var url = '/tiposDespesas/create';
+    loadModal(url, function () {
+      $("#formAddTipoDespesa").on("submit", function (e) {
+        e.preventDefault();
+        formTipoDespesas();
+      });
+    });
+  });
+  $(".btnEditTiposDespesa").on("click", function (e) {
+    var id = $(this).attr("id");
+    var url = '/tiposDespesas/edit/' + id;
+    loadModal(url, function () {
+      $("#formEditTipoDespesa").on("submit", function (e) {
+        e.preventDefault();
+        formTipoDespesas(id);
+      });
+    });
+  });
+  $(".btnDeleteTiposDespesa").on("click", function () {
+    var id = $(this).attr("id");
+    var url = '/tiposDespesas/delete/' + id;
+    Swal.fire(optionsSwalDelete).then(function (result) {
+      if (result.isConfirmed) {
+        deleteRowForGrid(url, function () {
+          getFilterTipoDespesas();
+        });
+      }
+    });
+  });
+};
+
+var formTipoDespesas = function formTipoDespesas(id) {
+  var url = typeof id === "undefined" ? '/tiposDespesas/store' : '/tiposDespesas/update/' + id;
+  var form = typeof id === "undefined" ? '#formAddTipoDespesa' : '#formEditTipoDespesa';
+  var type = typeof id === "undefined" ? 'POST' : 'PUT';
+  $.ajax({
+    type: type,
+    url: url,
+    data: $(form).serialize(),
+    dataType: "JSON",
+    beforeSend: function beforeSend() {
+      $(form + " .btnSubmit").prop("disabled", true).html(htmlLoading);
+    },
+    success: function success(response) {
+      Swal.fire({
+        toast: true,
+        position: 'bottom-left',
+        title: "<h5 style=\"color:white\"> ".concat(response.msg, " </h5>"),
+        icon: !response.error ? 'success' : 'error',
+        showConfirmButton: false,
+        timer: 3000,
+        background: response.error ? 'red' : color()["default"],
+        didOpen: function didOpen() {
+          $(modalObject).modal('hide');
+        }
+      });
+      getFilterTipoDespesas();
+    },
+    error: function error(jqXHR, textStatus, _error) {
+      var errors = jqXHR.responseJSON.errors;
+
+      if (!!errors) {
+        AppUsage.showMessagesValidator(form, errors);
+      }
+    },
+    complete: function complete() {
+      $(form + " .btnSubmit").prop("disabled", false).html("Salvar");
+    }
+  });
+};
+
+var getFilterTipoDespesas = function getFilterTipoDespesas() {
+  var url = '/tiposDespesas/';
+  var form = "#serachFormTiposDespesas";
   $.ajax({
     type: "GET",
     url: url,
@@ -3844,6 +4130,7 @@ window.AppUsage = __webpack_require__(/*! ./Core/AppUsage */ "./resources/js/Cor
 window.AppUsers = __webpack_require__(/*! ./Logged/AppUsers */ "./resources/js/Logged/AppUsers.js");
 window.AppProventos = __webpack_require__(/*! ./Logged/AppProventos */ "./resources/js/Logged/AppProventos.js");
 window.AppDespesas = __webpack_require__(/*! ./Logged/AppDespesas */ "./resources/js/Logged/AppDespesas.js");
+window.AppTipoDespesas = __webpack_require__(/*! ./Logged/AppTipoDespesas */ "./resources/js/Logged/AppTipoDespesas.js");
 $.ajaxSetup({
   headers: {
     'X-CSRF-TOKEN': $("meta[name='csrf-token']").attr("content")

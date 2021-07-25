@@ -22,7 +22,7 @@
                     <div class="form-group">
                         <label> Mês </label>
                         <select name="mes" class="form-select"> 
-                                <option value=""> Selecione </option>
+                                <option value=""> Todos os Meses </option>
                             @foreach($optionsMeses as $k => $v)
                                 <option value="{{$k}}" @if($k == date('m')) selected @endif> {{ $v }} </option>
                             @endforeach
@@ -38,10 +38,11 @@
                             class="form-control"
                             value="{{ date('Y') }}"
                         />
+                    </div>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-md-12" style="margin-top:2%;">
+            <div class="row"  style="margin-top:2%;"> 
+                <div class="col-md-12">
                     <button class="btn btn-primary rounded-pill" type="submit">
                         <i class="fa fa-search"> </i> Pesquisar
                     </button>
@@ -83,7 +84,7 @@
                                 @foreach($dataProventos as $provento)
                                     <tr>     
                                         <td> {{ $provento->descricao_provento }} </td>
-                                        <td> {{ number_format($provento->valor_provento, 2, ',','.') }}</td>
+                                        <td> {{ convertValorReal($provento->valor_provento) }}</td>
                                         <td> {{ converteData($provento->data_provento, 'd/m/Y') }} </td>
                                         <td> 
                                             <div class="text-center" style="display:flex">
