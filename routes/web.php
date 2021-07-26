@@ -55,6 +55,15 @@ Route::group(['middleware' => 'auth'], function(){
         Route::put('/payDespesa/{id}', 'DespesasController@delcararPagamentoDespesa')->name('despesa.pay');
         Route::post('/copyDespesas', 'DespesasController@copyDespesas')->name('despesas.copyDespesas');
     }); 
+
+    Route::group(['prefix' => 'lancamentos'], function(){
+        Route::get('/', 'LancamentosController@index')->name('lancamentos.index');
+        Route::get('/create', 'LancamentosController@create')->name('lancamentos.create');
+        Route::post('/store', 'LancamentosController@store')->name('lancamentos.store');
+        Route::get('/edit/{id}', 'LancamentosController@edit')->name('lancamentos.edit');
+        Route::put('/update/{id}', 'LancamentosController@update')->name('lancamentos.update');
+        Route::delete('/delete/{id}', 'LancamentosController@delete')->name('lancamentos.delete');
+    });
 });
 
 

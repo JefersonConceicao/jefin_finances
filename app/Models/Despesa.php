@@ -76,6 +76,10 @@ class Despesa extends Model
                 $request['valor_total'] = setToDecimal($request['valor_total']);
             }
 
+            if(isset($request['created_at']) && !empty($request['created_at'])){
+                $request['created_at'] = converteData(str_replace('/', '-', $request['created_at']), 'Y-m-d H:i:s');
+            }
+            
             $this->fill($request)->save(); 
             return [ 
                 'error' => false,
@@ -94,6 +98,10 @@ class Despesa extends Model
         try{
             if(isset($request['valor_total']) && !empty($request['valor_total'])){
                 $request['valor_total'] = setToDecimal($request['valor_total']);
+            }
+
+            if(isset($request['created_at']) && !empty($request['created_at'])){
+                $request['created_at'] = converteData(str_replace('/', '-', $request['created_at']), 'Y-m-d H:i:s');
             }
 
             $despesa = $this->find($id);

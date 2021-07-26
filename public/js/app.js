@@ -3723,6 +3723,77 @@ module.exports = {
 
 /***/ }),
 
+/***/ "./resources/js/Logged/AppLancamentos.js":
+/*!***********************************************!*\
+  !*** ./resources/js/Logged/AppLancamentos.js ***!
+  \***********************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+var _require = __webpack_require__(/*! ../Core/AppUsage */ "./resources/js/Core/AppUsage.js"),
+    loadingContent = _require.loadingContent,
+    loadModal = _require.loadModal,
+    htmlLoading = _require.htmlLoading;
+
+$(function () {
+  habilitaEventos();
+  habilitaBotoes();
+});
+var modalObject = "#nivel1";
+var grid = "#gridLancamentos";
+
+var habilitaEventos = function habilitaEventos() {
+  $("#searchFormLancamentos").on("submit", function (e) {
+    e.preventDefault();
+    getFilterLancamento();
+  });
+  $("#addLancamento").on("click", function () {
+    var url = '/lancamentos/create';
+    loadModal(url, function () {
+      optionsFormLancamento();
+    });
+  });
+};
+
+var habilitaBotoes = function habilitaBotoes() {};
+
+var formLancamento = function formLancamento() {};
+
+var getFilterLancamento = function getFilterLancamento() {
+  var url = '/despesas/';
+  var form = '#searchFormLancamentos';
+  $.ajax({
+    type: "GET",
+    url: url,
+    data: $(form).serialize(),
+    dataType: "HTML",
+    beforeSend: function beforeSend() {
+      loadingContent(grid);
+    },
+    success: function success(response) {
+      $(grid).html($(response).find(grid + " >"));
+      habilitaBotoes();
+    }
+  });
+};
+
+var optionsFormLancamento = function optionsFormLancamento() {
+  $(modalObject + ' select[name="despesa"]').on("change", function () {
+    if ($(this).val() == "S") {
+      $("#inputDespesa").show();
+    } else {
+      $("#inputDespesa").hide();
+    }
+  });
+};
+
+module.exports = {
+  habilitaEventos: habilitaEventos,
+  habilitaBotoes: habilitaBotoes
+};
+
+/***/ }),
+
 /***/ "./resources/js/Logged/AppProventos.js":
 /*!*********************************************!*\
   !*** ./resources/js/Logged/AppProventos.js ***!
@@ -4131,6 +4202,7 @@ window.AppUsers = __webpack_require__(/*! ./Logged/AppUsers */ "./resources/js/L
 window.AppProventos = __webpack_require__(/*! ./Logged/AppProventos */ "./resources/js/Logged/AppProventos.js");
 window.AppDespesas = __webpack_require__(/*! ./Logged/AppDespesas */ "./resources/js/Logged/AppDespesas.js");
 window.AppTipoDespesas = __webpack_require__(/*! ./Logged/AppTipoDespesas */ "./resources/js/Logged/AppTipoDespesas.js");
+window.AppLancamentos = __webpack_require__(/*! ./Logged/AppLancamentos */ "./resources/js/Logged/AppLancamentos.js");
 $.ajaxSetup({
   headers: {
     'X-CSRF-TOKEN': $("meta[name='csrf-token']").attr("content")

@@ -27,14 +27,16 @@ class DespesasRequest extends FormRequest
                     'nome_despesa' => 'required',
                     'despesa_tipo_id' => 'required',
                     'valor_total' => 'required',
-                    'ativo' => 'required'
+                    'ativo' => 'required',
+                    'created_at' => 'required' 
                 ];
             case 'update': 
                 return [
                     'nome_despesa' => 'required',
                     'despesa_tipo_id' => 'required',
                     'valor_total' => 'required',
-                    'ativo' => 'required'
+                    'ativo' => 'required',
+                    'created_at' => 'required' 
                 ];  
         }
     }

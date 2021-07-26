@@ -30,7 +30,7 @@
         </div>  
     </div>
     <div class="row">
-        <div class="col-md-6"> 
+        <div class="col-md-12"> 
             <div class="form-group">
                 <label> Tipo de Despesa <span class="required"> * </span> </label>
                 <select name="despesa_tipo_id" class="form-select"> 
@@ -43,6 +43,8 @@
                 <div class="error_feedback"> </div>
             </div>
         </div>
+    </div>
+    <div class="row">
         <div class="col-md-6"> 
             <div class="form-group">
                 <label> Valor (R$) <span class="required"> * </span> </label>
@@ -56,7 +58,20 @@
                 <div class="error_feedback"> </div>
             </div>
         </div>
-    </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                <label> Data Criação <span class="required">  * </span> </label>
+                <input 
+                    name="created_at"
+                    type="text"
+                    class="form-control datepicker"
+                    value="{{ date('d/m/Y') }}"
+                />
+
+                <div class="error_feedback"> </div>
+            </div>
+        </div>
+    </div> 
 @endsection
 
 @section('btn_fechar', 'Fechar')

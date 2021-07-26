@@ -71,7 +71,7 @@
             <div class="card-content">
                 <div class="card-body table-responsive">
                     @if(count($dataProventos))
-                        <table class="table table-hover table-striped"> 
+                        <table class="table table-hover"> 
                             <thead> 
                                 <tr> 
                                     <th> Descrição </th>
