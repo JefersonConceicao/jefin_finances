@@ -5,14 +5,26 @@
 @endsection
 
 @section('content-page')
-    <div class="row"> 
-        <div class="col-md-12 ">
-            <button class="btn btn-primary rounded-pill float-end" id="addLancamento"> 
-               <i class="fa fa-plus-square"> </i> Novo Lancamento
-            </button>
+    <div class="card">
+        <div class="card-body">
+            <div class="row"> 
+                <div class="col-md-6 ">
+                    <div class="form-group">
+                        <label> Mês </label>
+                        <select class="form-select" name="data"> 
+                            <option> Selecione </option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <button class="btn btn-primary rounded-pill float-end" id="addLancamento" style="margin-top:15px;"> 
+                    <i class="fa fa-plus-square"> </i> Novo Lancamento
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
-    
+        
     <div class="row">
         <div class="col-md-6 col-lg-4">
         <b> Despesas </b>
