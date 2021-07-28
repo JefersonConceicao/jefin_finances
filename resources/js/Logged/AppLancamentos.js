@@ -14,6 +14,8 @@ const modalObject = "#nivel1";
 const grid = "#gridLancamentos"
 
 const habilitaEventos = () => {
+    getFilterLancamento()
+    
     $("#searchFormLancamentos").on("submit", function(e){
         e.preventDefault()
         getFilterLancamento()
@@ -38,7 +40,7 @@ const formLancamento = () => {
 }
 
 const getFilterLancamento = () => {
-    const url = '/despesas/';
+    const url = '/lancamentos/';
     const form = '#searchFormLancamentos';
 
     $.ajax({

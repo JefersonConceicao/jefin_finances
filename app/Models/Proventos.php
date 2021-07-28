@@ -29,28 +29,28 @@ class Proventos extends Model
         $dataWithFilter = $this
             ->where($conditions)
             ->whereMonth('data_provento', !empty($request['mes']) ? $request['mes'] : null)
-            ->whereYear('data_provento',  !empty($request['ano']) ? $request['ano'] : null)
-            ->get();
+            ->whereYear('data_provento',  !empty($request['ano']) ? $request['ano'] : null);
+           
 
       
         if(empty($request['mes']) && isset($request['ano']) && !empty($request['ano'])){
             return $this
                 ->where($conditions)
-                ->whereYear('data_provento', $request['ano'])
-                ->get();
+                ->whereYear('data_provento', $request['ano']);
+             
         }
 
         if(empty($request['ano']) && isset($request['mes']) && !empty($request['mes'])){
             return $this
             ->where($conditions)
-            ->whereMonth('data_provento', $request['mes'])
-            ->get();
+            ->whereMonth('data_provento', $request['mes']);
+           
         }
 
         if(empty($request['mes']) && empty($request['ano'])){
             return $this
-                ->where($conditions)
-                ->get();
+                ->where($conditions);
+               
         }
 
         return $dataWithFilter;

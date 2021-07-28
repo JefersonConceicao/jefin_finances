@@ -1,6 +1,6 @@
 @extends('layout.page')
 @section('content_header')
-    <h3> Proventos </h3>
+    <h3> Receitas </h3>
     <p class="text-subtitle"> Entrada de recursos </p>
 @endsection
 
@@ -50,6 +50,7 @@
             </div>
         </form>
     @endcomponent
+    
         <div class="card" id="gridProventos">
             <div class="card-header">
                 <div class="row">
@@ -110,6 +111,10 @@
                     @else 
                         <div class="text-center">
                             <h4> Nenhum registro encontrado.</h4>
+
+                            <button class="btn btn-primary rounded-pill"> 
+                                Repetir proventos do mês anterior
+                            </button>   
                         </div>
                     @endif
                 </div>

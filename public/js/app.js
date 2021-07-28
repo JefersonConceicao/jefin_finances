@@ -3743,6 +3743,7 @@ var modalObject = "#nivel1";
 var grid = "#gridLancamentos";
 
 var habilitaEventos = function habilitaEventos() {
+  getFilterLancamento();
   $("#searchFormLancamentos").on("submit", function (e) {
     e.preventDefault();
     getFilterLancamento();
@@ -3760,7 +3761,7 @@ var habilitaBotoes = function habilitaBotoes() {};
 var formLancamento = function formLancamento() {};
 
 var getFilterLancamento = function getFilterLancamento() {
-  var url = '/despesas/';
+  var url = '/lancamentos/';
   var form = '#searchFormLancamentos';
   $.ajax({
     type: "GET",

@@ -25,7 +25,7 @@
                 <a href="/proventos/">
                     <i class="fas fa-angle-right"></i>
                     &nbsp;
-                    Proventos 
+                    Receitas 
                 </a>
             </li>
             <li class="submenu-item"> 

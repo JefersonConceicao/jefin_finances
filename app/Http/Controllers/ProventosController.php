@@ -19,7 +19,7 @@ class ProventosController extends Controller
         $proventos = new Proventos;
         $user = Auth::user(); 
 
-        $data = $proventos->getProventos($request->all(), $user);
+        $data = $proventos->getProventos($request->all(), $user)->get();
 
         return view('proventos.index')
             ->with('dataProventos', $data)
