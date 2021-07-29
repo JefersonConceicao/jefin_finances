@@ -112,7 +112,7 @@
                         <div class="text-center">
                             <h4> Nenhum registro encontrado.</h4>
 
-                            <button class="btn btn-primary rounded-pill"> 
+                            <button class="btn btn-primary rounded-pill" id="copyProventos"> 
                                 Repetir proventos do mês anterior
                             </button>   
                         </div>

@@ -34,6 +34,7 @@ Route::group(['middleware' => 'auth'], function(){
         Route::get('/edit/{id}', 'ProventosController@edit' )->name('proventos.edit');
         Route::put('/update/{id}', 'ProventosController@update')->name('proventos.update');
         Route::delete('/delete/{id}', 'ProventosController@delete')->name('proventos.delete');
+        Route::post('/copyProventos', 'ProventosController@copyProventos')->name('proventos.copy');
     });
 
     Route::group(['prefix' => 'tiposDespesas'], function(){

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use DB;
 
 class Proventos extends Model
 {
@@ -120,5 +121,40 @@ class Proventos extends Model
                 'msg' => 'Não foi possível excluír o registro, tente de novo',
             ];
         }
+    }
+
+    public function copyLastMonth($request = []){
+        try{
+            $lastProventos = $this
+                ->whereMonth('data_provento', $request['mes'] - 1)
+                ->whereYear('data_provento', $request['ano']);
+
+            if($lastProventos->count() > 0){
+                DB::beginTransaction();
+                foreach($lastProventos->get()->toArray() as $k => $v){
+                    $formData = [
+                        'user_id' => $v['user_id'],
+                        'valor_provento' => $v['valor_provento'],
+                        'data_provento' => $request['ano'].'-'.$request['mes'].'-'.date('d'),
+                        'descricao_provento' => $v['descricao_provento']
+                    ];
+
+                    $this->create($formData);
+                    unset($formData);
+                }       
+            }
+
+            DB::commit();
+            return [
+                'error' => false,
+                'msg' => 'Proventos adicionados!'
+            ];
+        }catch(\Exception $error){
+            DB::rollback();
+            return [
+                'error' => true,
+                'msg' => 'Não foi possível adicionar os proventos, tente de novo'
+            ];
+        }   
     }
 }

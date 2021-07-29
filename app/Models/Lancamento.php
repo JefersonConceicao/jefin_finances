@@ -11,7 +11,8 @@ class Lancamento extends Model
         'data_lancamento',
         'despesa_id',
         'valor',
-        'descricao'
+        'descricao',
+        'user_id'
     ];
     
     public $timestamps = false;
@@ -46,4 +47,38 @@ class Lancamento extends Model
             ->doesntHave('despesa')
             ->get();
     } 
+
+    public function saveLancamento($request = [], $user){
+        try{  
+            $request['data_lancamento'] = date('Y-m-d H:i:s');
+            $request['user_id'] = $user->id; 
+
+            if(isset($request['valor']) && !empty($request['valor'])){
+                $request['valor'] = setToDecimal($request['valor']);
+            }
+
+            $this->fill($request)->save();
+
+            if(isset($request['despesa_id']) && !empty($request['despesa_id'])){
+                dd($this->despesa()->update([
+                    'pago' => 1
+                ]));
+            }   
+            
+            return [
+                'error' => false,
+                'msg' => 'Novo lançamento efetuado',
+            ];
+        }catch(\Exception $error){
+            return [
+                'error' => true,
+                'msg' => 'Não foi possível efetuar o lançamento, tente de novo',
+                'error_message' => $error->getMessage()
+            ];
+        }   
+    }
+
+    public function deleteLancamento($id){
+
+    }
 }

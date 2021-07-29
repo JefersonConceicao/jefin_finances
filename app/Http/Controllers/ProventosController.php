@@ -84,4 +84,11 @@ class ProventosController extends Controller
         $data = $proventos->deleteProvento($id);
         return response()->json($data);
     }
+
+    public function copyProventos(Request $request){
+        $proventos = new Proventos; 
+
+        $data = $proventos->copyLastMonth($request->all());
+        return response()->json($data);
+    }
 }

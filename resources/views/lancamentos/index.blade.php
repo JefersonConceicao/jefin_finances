@@ -6,7 +6,7 @@
 @section('breadcrumb')
     <div class="row">
         <div class="col-md-12">
-            <button class="btn btn-primary rounded-pill float-end"> 
+            <button class="btn btn-primary rounded-pill float-end" id="addLancamento"> 
                <i class="fa fa-plus-square"> </i> Novo 
             </button>       
         </div>
@@ -62,9 +62,6 @@
             <div class="col-md-6 col-lg-4">
                 <h6> Geral </h6>
                 <div class="card"> 
-                    <div class="card-header"> 
-                    
-                    </div>
                     <div class="card-body"> 
                         <div class="card-content table-responsive"> 
                             <table class="table table-hover"> 
@@ -81,7 +78,7 @@
                                             <td> {{ $lancamento->descricao }} </td>
                                             <td> {{ convertValorReal($lancamento->valor) }} </td>
                                             <td> 
-                                                <button class="btn btn-danger rounded-pill btnExcluirLancamento"> 
+                                                <button id={{ $lancamento->id }} class="btn btn-danger rounded-pill btnExcluirLancamento"> 
                                                     <i class="fa fa-trash"> </i>
                                                 </button>
                                             </td>
@@ -97,8 +94,6 @@
             <div class="col-md-6 col-lg-4">
             <h6> Despesas </h6>
                 <div class="card"> 
-                    <div class="card-header"> 
-                    </div>
                     <div class="card-body"> 
                         <div class="card-content table-responsive"> 
                             <table class="table table-hover"> 
@@ -115,7 +110,7 @@
                                             <td> {{ $lancamentoDespesa->descricao }} </td>
                                             <td> {{ convertValorReal($lancamentoDespesa->valor) }} </td>
                                             <td> 
-                                                <button class="btn btn-danger rounded-pill btnExcluirLancamento"> 
+                                                <button id="{{$lancamentoDespesa->id}}" class="btn btn-danger rounded-pill btnExcluirLancamento"> 
                                                     <i class="fa fa-trash"> </i>
                                                 </button>
                                             </td>
@@ -131,9 +126,6 @@
             <div class="col-md-6 col-lg-4">
                 <h6> Outros gastos </h6>
                 <div class="card"> 
-                    <div class="card-header"> 
-                    
-                    </div>
                     <div class="card-body"> 
                         <div class="card-content table-responsive"> 
                             <table class="table table-hover"> 
@@ -150,7 +142,7 @@
                                             <td> {{ $outrosLancamentos->descricao }} </td>
                                             <td> {{ convertValorReal($outrosLancamentos->valor) }} </td>
                                             <td> 
-                                                <button class="btn btn-danger rounded-pill btnExcluirLancamento"> 
+                                                <button id="{{$outrosLancamentos->id}}"class="btn btn-danger rounded-pill btnExcluirLancamento"> 
                                                     <i class="fa fa-trash"> </i>
                                                 </button>
                                             </td>

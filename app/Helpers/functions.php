@@ -17,5 +17,5 @@ function setToDecimal($value){
 } 
 
 function convertValorReal($number){
-    return number_format($number, 2, ',','.');
+    return "R$ ".number_format($number, 2, ',','.');
 }

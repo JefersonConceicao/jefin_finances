@@ -7,7 +7,7 @@
     <div class="row">
         <div class="col-md-8">
             <div class="form-group"> 
-                <label> Descrição </label>
+                <label> Descrição <span class="required"> * </span> </label>
                 <input 
                     type="text"
                     name="descricao"
@@ -20,7 +20,7 @@
         
         <div class="col-md-4">
             <div class="form-group">
-                <label> Despesa </label>
+                <label> Despesa  </label>
                 <select name="despesa" class="form-select">
                     <option value="N" selected> Não </option>
                     <option value="S"> Sim </option>
@@ -31,9 +31,12 @@
     <div class="row" id="inputDespesa" style="display:none">
         <div class="col-md-12"> 
             <div class="form-group">
-                <label> Despesa </label> 
+                <label> Selecione a Despesa </label> 
                 <select class="form-select" name="despesa_id"> 
-                    <option> Nenhum registro encontrado. </option>
+                    <option value=""> Selecione </option>
+                    @foreach($optionsDespesas as $k => $v)
+                        <option value="{{ $k }}"> {{ $v }} </option>
+                    @endforeach
                 </select>
             </div>
         </div>

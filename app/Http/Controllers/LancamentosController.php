@@ -10,6 +10,7 @@ use App\Http\Requests\LancamentosRequest;
 //MODEL
 use App\Models\Lancamento;
 use App\Models\Proventos;
+use App\Models\Despesa;
 
 class LancamentosController extends Controller
 {
@@ -42,8 +43,12 @@ class LancamentosController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function create()
-    {
-        return view('lancamentos.create');
+    {   
+        $despesa = new Despesa;
+
+        $optionsDespesas = $despesa->optionsDespesasMesAtual();
+        return view('lancamentos.create')
+            ->with('optionsDespesas', $optionsDespesas);
     }
 
     /**
@@ -52,7 +57,11 @@ class LancamentosController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $lancamento = new Lancamento;
+        $user = Auth::user();
+
+        $data = $lancamento->saveLancamento($request->all(), $user);
+        return response()->json($data);
     }
 
     /**

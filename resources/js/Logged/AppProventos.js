@@ -62,6 +62,42 @@ const habilitaBotoes = () => {
             }
         })
     });
+
+    $("#copyProventos").on("click", function(){
+        const buttonElement = $(this);
+        const url = '/proventos/copyProventos';
+        const form = '#searchFormProventos';
+
+       $.ajax({
+           type: "POST",
+           url,
+           data: $(form).serialize(),
+           dataType: "JSON",
+           beforeSend:function(){
+                buttonElement
+                    .prop("disabled", true)
+                    .html(htmlLoading)
+           },
+           success: function (response) {
+                Swal.fire({
+                    toast:true,
+                    position: 'bottom-left',
+                    title: `<h5 style="color:white"> ${response.msg} </h5>`,
+                    icon: !response.error ? 'success' : 'error',
+                    showConfirmButton: false,
+                    timer:3000,
+                    background: response.error ? 'red' : color().default
+                }); 
+                
+                getFilterProventos();
+           },
+           complete:function(){
+               buttonElement
+                    .prop("disabled", false)
+                    .html(`Repetir proventos do mês anterior`)
+           }
+       });
+    });
 }
 
 const formProventos = id => {

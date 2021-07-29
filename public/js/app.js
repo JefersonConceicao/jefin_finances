@@ -3733,7 +3733,8 @@ module.exports = {
 var _require = __webpack_require__(/*! ../Core/AppUsage */ "./resources/js/Core/AppUsage.js"),
     loadingContent = _require.loadingContent,
     loadModal = _require.loadModal,
-    htmlLoading = _require.htmlLoading;
+    htmlLoading = _require.htmlLoading,
+    color = _require.color;
 
 $(function () {
   habilitaEventos();
@@ -3752,13 +3753,55 @@ var habilitaEventos = function habilitaEventos() {
     var url = '/lancamentos/create';
     loadModal(url, function () {
       optionsFormLancamento();
+      $("#formAddLancamento").on("submit", function (e) {
+        e.preventDefault();
+        formLancamento();
+      });
     });
   });
 };
 
 var habilitaBotoes = function habilitaBotoes() {};
 
-var formLancamento = function formLancamento() {};
+var formLancamento = function formLancamento(id) {
+  var url = typeof id === "undefined" ? '/lancamentos/store' : '/lancamentos/update/' + id;
+  var form = typeof id === "undefined" ? '#formAddLancamento' : '#formEditLancamento';
+  var type = typeof id === "undefined" ? 'POST' : 'PUT';
+  $.ajax({
+    type: type,
+    url: url,
+    data: $(form).serialize(),
+    dataType: "JSON",
+    beforeSend: function beforeSend() {
+      $(form + " .btnSubmit").prop("disabled", true).html(htmlLoading);
+    },
+    success: function success(response) {
+      Swal.fire({
+        toast: true,
+        position: 'bottom-left',
+        title: "<h5 style=\"color:white\"> ".concat(response.msg, " </h5>"),
+        icon: !response.error ? 'success' : 'error',
+        showConfirmButton: false,
+        timer: 3000,
+        background: response.error ? 'red' : color()["default"],
+        didOpen: function didOpen() {
+          $(modalObject).modal('hide');
+        }
+      });
+      getFilterLancamento();
+    },
+    error: function error(jqXHR, textStatus, _error) {
+      var errors = jqXHR.responseJSON.errors;
+
+      if (!!errors) {
+        AppUsage.showMessagesValidator(form, errors);
+      }
+    },
+    complete: function complete() {
+      $(form + " .btnSubmit").prop("disabled", false).html("Salvar");
+    }
+  });
+};
 
 var getFilterLancamento = function getFilterLancamento() {
   var url = '/lancamentos/';
@@ -3782,8 +3825,10 @@ var optionsFormLancamento = function optionsFormLancamento() {
   $(modalObject + ' select[name="despesa"]').on("change", function () {
     if ($(this).val() == "S") {
       $("#inputDespesa").show();
+      $("#inputDespesa").prop("disabled", false);
     } else {
       $("#inputDespesa").hide();
+      $("#inputDespesa").prop("disabled", true);
     }
   });
 };
@@ -3856,6 +3901,35 @@ var habilitaBotoes = function habilitaBotoes() {
         deleteRowForGrid(url, function () {
           getFilterProventos();
         });
+      }
+    });
+  });
+  $("#copyProventos").on("click", function () {
+    var buttonElement = $(this);
+    var url = '/proventos/copyProventos';
+    var form = '#searchFormProventos';
+    $.ajax({
+      type: "POST",
+      url: url,
+      data: $(form).serialize(),
+      dataType: "JSON",
+      beforeSend: function beforeSend() {
+        buttonElement.prop("disabled", true).html(htmlLoading);
+      },
+      success: function success(response) {
+        Swal.fire({
+          toast: true,
+          position: 'bottom-left',
+          title: "<h5 style=\"color:white\"> ".concat(response.msg, " </h5>"),
+          icon: !response.error ? 'success' : 'error',
+          showConfirmButton: false,
+          timer: 3000,
+          background: response.error ? 'red' : color()["default"]
+        });
+        getFilterProventos();
+      },
+      complete: function complete() {
+        buttonElement.prop("disabled", false).html("Repetir proventos do m\xEAs anterior");
       }
     });
   });

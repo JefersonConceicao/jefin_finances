@@ -199,4 +199,13 @@ class Despesa extends Model
             ];
         }
     }
+
+    public function optionsDespesasMesAtual(){
+       return $this
+        ->whereMonth('created_at', date('m'))
+        ->whereYear('created_at', date('Y'))
+        ->where('pago', 0)
+        ->pluck('nome_despesa', 'id')
+        ->toArray();
+    }
 }
