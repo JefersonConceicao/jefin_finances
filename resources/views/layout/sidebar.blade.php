@@ -9,7 +9,7 @@
     </li>
 
     <li class="sidebar-item">
-        <a href="/users/" class="sidebar-link">
+        <a href="/users" class="sidebar-link">
             <i class="fa fa-users"> </i> 
             <span> Usuários </span>
         </a>
@@ -22,14 +22,14 @@
         </a>
         <ul class="submenu"> 
             <li class="submenu-item"> 
-                <a href="/proventos/">
+                <a href="/proventos">
                     <i class="fas fa-angle-right"></i>
                     &nbsp;
                     Receitas 
                 </a>
             </li>
             <li class="submenu-item"> 
-                <a href="/despesas/">
+                <a href="/despesas">
                     <i class="fas fa-angle-right"></i>
                     &nbsp;
                     Despesas 
@@ -37,7 +37,7 @@
             </li>
 
             <li class="submenu-item"> 
-                <a href="/tiposDespesas/">
+                <a href="/tiposDespesas">
                     <i class="fas fa-angle-right"></i>
                     &nbsp;
                     Despesas Tipos
@@ -47,7 +47,7 @@
     </li>
 
     <li class="sidebar-item">
-        <a href="/lancamentos/" class="sidebar-link"> 
+        <a href="/lancamentos" class="sidebar-link"> 
             <i class="fa fa-exchange-alt"></i>
             &nbsp;
             <span> Lançamentos </span>
