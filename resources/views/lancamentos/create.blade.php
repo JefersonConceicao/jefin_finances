@@ -42,7 +42,7 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-md-12">
+        <div class="col-md-6">
             <div class="form-group">
                 <label> Valor <span class="required"> * </span> </label>
                 <input 
@@ -52,6 +52,17 @@
                 />
 
                 <div class="error_feedback"> </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                <label> Data Lançamento <span class="required"> * </span> </label>
+                <input 
+                    name="data_lancamento"
+                    type="text"
+                    class="form-control datePicker"
+                    value={{ date('d/m/Y')}}
+                />
             </div>
         </div>
     </div>

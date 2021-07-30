@@ -26,8 +26,7 @@ class Lancamento extends Model
         return $this
             ->where('user_id', $user->id)
             ->whereMonth('data_lancamento', !empty($request['mes']) ? $request['mes'] : '')
-            ->whereYear('data_lancamento', !empty($request['ano']) ? $request['ano'] : '')
-            ->get();
+            ->whereYear('data_lancamento', !empty($request['ano']) ? $request['ano'] : '');
     }
 
     public function getLancamentosDespesa($request = [], $user){
@@ -50,8 +49,11 @@ class Lancamento extends Model
 
     public function saveLancamento($request = [], $user){
         try{  
-            $request['data_lancamento'] = date('Y-m-d H:i:s');
             $request['user_id'] = $user->id; 
+
+            if(isset($request['data_lancamento']) && !empty($request['data_lancamento'])){
+                $request['data_lancamento'] = converteData(str_replace('/', '-',$request['data_lancamento']), 'Y-m-d');
+            }
 
             if(isset($request['valor']) && !empty($request['valor'])){
                 $request['valor'] = setToDecimal($request['valor']);
@@ -60,9 +62,9 @@ class Lancamento extends Model
             $this->fill($request)->save();
 
             if(isset($request['despesa_id']) && !empty($request['despesa_id'])){
-                dd($this->despesa()->update([
+                $this->despesa()->update([
                     'pago' => 1
-                ]));
+                ]);
             }   
             
             return [
@@ -79,6 +81,10 @@ class Lancamento extends Model
     }
 
     public function deleteLancamento($id){
+        $this->find($id)->despesa()->update([
+            'pago' => 0
+        ]);
+
         if($this->find($id)->delete()){
             return [
                 'error' => false,

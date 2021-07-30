@@ -27,16 +27,19 @@ class LancamentosController extends Controller
             ->getProventos($request->all(), $user)
             ->sum('valor_provento');
 
-        $dataLancamentos = $lancamento->getLancamentos($request->all(), $user);
+        $totalLancamentos = $lancamento
+            ->getLancamentos($request->all(), $user)
+            ->sum('valor');
+
         $dataLancamentosDespesa = $lancamento->getLancamentosDespesa($request->all(), $user);
         $dataOutrosLancamentos = $lancamento->getOutrosLancamentos($request->all(), $user);
-
+        
         return view('lancamentos.index')
             ->with('optionsMeses', $this->optionsMeses)
             ->with('totalProventos', $totalProventos)
-            ->with('dataLancamentos', $dataLancamentos)
             ->with('dataLancamentosDespesa', $dataLancamentosDespesa)
-            ->with('dataOutrosLancamentos', $dataOutrosLancamentos);
+            ->with('dataOutrosLancamentos', $dataOutrosLancamentos)
+            ->with('totalLancamentos', $totalLancamentos);
     }
 
     /**
