@@ -1,10 +1,4 @@
-const { 
-    loadingContent,
-    loadModal,
-    htmlLoading,
-    color
-} = require('../Core/AppUsage');
-
+const { loadingContent, loadModal, htmlLoading, color, deleteRowForGrid} = require('../Core/AppUsage');
 
 $(() => {
     habilitaEventos()
@@ -34,12 +28,17 @@ const habilitaEventos = () => {
             }); 
         });
     });
-
 }
 
 const habilitaBotoes = () => {
-    
+    $(".btnExcluirLancamento").on("click", function(){
+        const id = $(this).attr("id");
+        const url = '/lancamentos/delete/' + id;
 
+        deleteRowForGrid(url, function(){
+            getFilterLancamento();
+        });                
+    }); 
 }
 
 const formLancamento = id => {

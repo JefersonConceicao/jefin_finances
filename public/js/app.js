@@ -3734,7 +3734,8 @@ var _require = __webpack_require__(/*! ../Core/AppUsage */ "./resources/js/Core/
     loadingContent = _require.loadingContent,
     loadModal = _require.loadModal,
     htmlLoading = _require.htmlLoading,
-    color = _require.color;
+    color = _require.color,
+    deleteRowForGrid = _require.deleteRowForGrid;
 
 $(function () {
   habilitaEventos();
@@ -3761,7 +3762,15 @@ var habilitaEventos = function habilitaEventos() {
   });
 };
 
-var habilitaBotoes = function habilitaBotoes() {};
+var habilitaBotoes = function habilitaBotoes() {
+  $(".btnExcluirLancamento").on("click", function () {
+    var id = $(this).attr("id");
+    var url = '/lancamentos/delete/' + id;
+    deleteRowForGrid(url, function () {
+      getFilterLancamento();
+    });
+  });
+};
 
 var formLancamento = function formLancamento(id) {
   var url = typeof id === "undefined" ? '/lancamentos/store' : '/lancamentos/update/' + id;

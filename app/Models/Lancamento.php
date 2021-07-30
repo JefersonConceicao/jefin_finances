@@ -79,6 +79,16 @@ class Lancamento extends Model
     }
 
     public function deleteLancamento($id){
-
+        if($this->find($id)->delete()){
+            return [
+                'error' => false,
+                'msg' => 'Registro excluído com sucesso!'      
+            ];  
+        }else{
+            return [
+                'error' => true,
+                'msg' => 'Não foi possível salvar o registro, tente de novo'    
+            ];
+        }
     }
 }
