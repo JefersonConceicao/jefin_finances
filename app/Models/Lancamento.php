@@ -24,9 +24,7 @@ class Lancamento extends Model
 
     public function getLancamentos($request = [], $user){
         return $this
-            ->where('user_id', $user->id)
-            ->whereMonth('data_lancamento', !empty($request['mes']) ? $request['mes'] : '')
-            ->whereYear('data_lancamento', !empty($request['ano']) ? $request['ano'] : '');
+            ->where('user_id', $user->id);
     }
 
     public function getLancamentosDespesa($request = [], $user){

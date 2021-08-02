@@ -22,6 +22,7 @@
     <link rel="stylesheet" href="{{ asset('css/mazer-theme/pages/dripicons.css') }} ">
     <link rel="stylesheet" href="{{ asset('css/mazer-theme/pages/email.css') }} ">
     <link rel="stylesheet" href="{{ asset('css/mazer-theme/pages/error.css') }} ">
+    <link rel="stylesheet" href="{{ asset('css/mazer-theme/vendors/iconly/bold.css') }}" />
     <link rel="stylesheet" href="{{ asset('css/mazer-theme/vendors/perfect-scrollbar/perfect-scrollbar.css') }}"  />
     <link rel="stylesheet" href="{{ asset('css/mazer-theme/vendors/bootstrap-icons/bootstrap-icons.css') }}">
     <link rel="stylesheet" href="{{ asset('css/mazer-theme/vendors/fontawesome/all.min.css') }}">

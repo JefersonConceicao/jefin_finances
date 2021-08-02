@@ -153,15 +153,16 @@ class Despesa extends Model
         }
     }
 
-    public function copyDespesas($request = []){
+    public function copyDespesas($request = [], $user){
         try{
             $this->timestamps = false;
             $anteriorDate = $request['mes'] - 1;
             
             $despMesAnterior = $this
             ->whereMonth('created_at', $anteriorDate)
-            ->whereYear('created_at', $request['ano']);
-            
+            ->whereYear('created_at', $request['ano'])
+            ->where('user_id', $user->id);
+
             if($despMesAnterior->count() == 0){
                return [
                     'error' => true,

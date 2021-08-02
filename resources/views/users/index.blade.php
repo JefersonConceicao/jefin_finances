@@ -63,7 +63,7 @@
                                         <th> E-mail </th>
                                         <th> Criado em </th>
                                         <th width="5%"> Ativo </th>
-                                        <th width="2%"> Ações </th> 
+                                        @if(Auth::user()->id == 16) <th width="2%"> Ações </th> @endif
                                     </tr>
                                 </thead>
                                 <tbody> 
@@ -77,23 +77,25 @@
                                                     {{ $user->ativo ? "Sim" : "Não"}}
                                                 </span>
                                             </td>
-                                            <td> 
-                                                <div class="text-center" style="display:flex;">
-                                                    <button 
-                                                        class="btnEditUser btn btn-secondary rounded-pill"
-                                                        id="{{ $user->id }}"    
-                                                    >
-                                                        <i class="fa fa-edit"> </i>
-                                                    </button>
-                                                    &nbsp;
-                                                    <button 
-                                                        class="btnDeleteUser btn btn-danger rounded-pill"
-                                                        id="{{ $user->id }}"
-                                                    >
-                                                        <i class="fa fa-trash"> </i>
-                                                    </button>
-                                                </div>
-                                            </td>
+                                            @if(Auth::user()->id == 16)
+                                                <td> 
+                                                    <div class="text-center" style="display:flex;">
+                                                        <button 
+                                                            class="btnEditUser btn btn-secondary rounded-pill"
+                                                            id="{{ $user->id }}"    
+                                                        >
+                                                            <i class="fa fa-edit"> </i>
+                                                        </button>
+                                                        &nbsp;
+                                                        <button 
+                                                            class="btnDeleteUser btn btn-danger rounded-pill"
+                                                            id="{{ $user->id }}"
+                                                        >
+                                                            <i class="fa fa-trash"> </i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            @endif
                                         </tr>
                                     @endforeach
                                 </tbody>

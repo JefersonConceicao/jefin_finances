@@ -1,5 +1,6 @@
 //LIBS
 window.Swal = require('sweetalert2');
+window.Chart = require('chart.js');
 
 window.AppRegister = require('./Auth/AppRegister');
 window.AppAuth = require('./Auth/AppAuth');
@@ -9,6 +10,7 @@ window.AppProventos = require('./Logged/AppProventos');
 window.AppDespesas = require('./Logged/AppDespesas');
 window.AppTipoDespesas = require('./Logged/AppTipoDespesas');
 window.AppLancamentos = require('./Logged/AppLancamentos');
+window.AppDashboard = require('./Logged/AppDashboard');
 
 $.ajaxSetup({
     headers: {

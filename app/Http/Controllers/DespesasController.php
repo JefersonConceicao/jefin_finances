@@ -112,8 +112,9 @@ class DespesasController extends Controller
 
     public function copyDespesas(Request $request){
         $despesa = new Despesa;
+        $user = Auth::user();
         
-        $data = $despesa->copyDespesas($request->all());
+        $data = $despesa->copyDespesas($request->all(), $user);
         return response()->json($data);
     }
 }

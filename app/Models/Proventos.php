@@ -32,8 +32,6 @@ class Proventos extends Model
             ->whereMonth('data_provento', !empty($request['mes']) ? $request['mes'] : null)
             ->whereYear('data_provento',  !empty($request['ano']) ? $request['ano'] : null);
            
-
-      
         if(empty($request['mes']) && isset($request['ano']) && !empty($request['ano'])){
             return $this
                 ->where($conditions)
