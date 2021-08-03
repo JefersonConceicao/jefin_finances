@@ -53,12 +53,11 @@ class Lancamento extends Model
             ->get();
     }
 
-    public function getLancamentosGroupData(){
-        $data = $this 
-            ->where('user_id', 16)
-            ->orderBy('data_lancamento')
+    public function getLancamentosGroupData($user){
+        return $this
+            ->select('*')
+            ->where('user_id', $user->id)
             ->get();
-
     }
     
     public function saveLancamento($request = [], $user){

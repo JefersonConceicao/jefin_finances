@@ -1,22 +1,69 @@
+const { format, parseISO } = require('date-fns');
+const { pt } = require('date-fns/locale')
+
 $(() => {
     initChart();
 });
 
-const initChart = () => {
-   const myGraph = $("#myChart");
-   const chart = new Chart(myGraph, {
+const randomColors = () => {    
+    const lettersHexaDecimal = "0123456789ABCDEF";
+    let color = '#';
+
+    for(let i = 0; i < 6; i++){
+        color += lettersHexaDecimal[Math.floor(Math.random() * 16)]
+    }
+
+    return color;
+} 
+
+const initChart = () => {   
+    $.get("/lancamentos/getGastosGraphs",
+        function (response, textStatus, jqXHR) {
+            renderGraph(response);
+        },
+        "JSON"
+    );
+}
+
+const renderGraph = (data) => {
+    const arrayDates = Object.keys(data)
+
+    const months = arrayDates.map(value => (
+        format(parseISO(value), 'MMMM', {
+            locale: pt
+        })
+    ));
+
+    const gastos = arrayDates.map((month, index) => {
+        const array = data[month].map(gastos => (parseFloat(gastos.valor)))
+        return array.reduce((total, next) => (total + next))
+    });
+
+    const colors = arrayDates.map(() => randomColors());
+
+    const myGraph = $("#myChart");
+    const chart = new Chart(myGraph, {
         type: 'bar',
         data: {
-            labels: ['Janeiro', 'Fevereiro', 'Março'],
-            datasets:[{
-                label: 'Comparativo de gastos',
-                data: [20,20,20],
-                backgroundColor: [
-                    'rgba(255, 99, 132, 0.2)',
-                    'rgba(54, 162, 235, 0.4)',
-                    'rgba(255, 206, 86, 0.3)',
-                ]
-            }]
+            labels: months,
+            datasets:[
+                {  
+                    label: '',
+                    data: gastos,
+                    backgroundColor:colors,
+                },
+            ]
         },
-   });
+        options:{
+            scales:{
+                yAxes:[
+                    {   
+                        ticks:{
+                            beginAtZero: true,
+                        }
+                    },
+                ],
+            },
+        }
+    });
 }

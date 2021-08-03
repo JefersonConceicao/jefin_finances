@@ -78,4 +78,17 @@ class LancamentosController extends Controller
         $data = $lancamento->deleteLancamento($id);
         return response()->json($data);
     }
+
+    public function dataGastosGraficos(){
+        $user = Auth::user();
+        $lancamento = new Lancamento;
+
+        $data = $lancamento
+            ->getLancamentosGroupData($user)
+            ->groupBy(function($item){
+                return converteData($item->data_lancamento, 'Y-m');
+            });
+            
+        return response()->json($data);
+    }
 }

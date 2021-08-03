@@ -9,9 +9,10 @@
     </li>
 
     <li class="sidebar-item">
-        <a href="/users" class="sidebar-link">
-            <i class="fa fa-users"> </i> 
-            <span> Usuários </span>
+        <a href="/lancamentos" class="sidebar-link"> 
+            <i class="fa fa-exchange-alt"></i>
+            &nbsp;
+            <span> Lançamentos </span>
         </a>
     </li>
 
@@ -47,10 +48,9 @@
     </li>
 
     <li class="sidebar-item">
-        <a href="/lancamentos" class="sidebar-link"> 
-            <i class="fa fa-exchange-alt"></i>
-            &nbsp;
-            <span> Lançamentos </span>
+        <a href="/users" class="sidebar-link">
+            <i class="fa fa-users"> </i> 
+            <span> Usuários </span>
         </a>
     </li>
 </ul>

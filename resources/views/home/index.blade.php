@@ -71,7 +71,7 @@
                     </div>
                     <div class="card-body">
                         {{-- GRAFICO COMPARATIVO DE GASTOS POR MÊS  --}}
-                        <canvas id="myChart" width="400" height="150"> </canvas>  
+                            <canvas id="myChart" width="400" height="150" class="chartjs-render-monitor"> </canvas>  
                         {{-- FIM DO GRÁFICO --}}
                     </div>
                 </div>
@@ -79,13 +79,13 @@
             <div class="col-12 col-lg-3">
                 <div class="card">
                     <div class="card-header">
-                        <h4> Ultimos gastos: </h4>
+                        <h4> Ultimos Gastos: </h4>
                     </div>
                     <div class="card-body table-responsive">
                         <table class="table table-hover">
                             <thead>
                                 <tr> 
-                                    <th> Nome despesa </th>    
+                                    <th> Descrição </th>    
                                     <th width="2%"> Valor </th>  
                                 </tr>     
                             </thead>

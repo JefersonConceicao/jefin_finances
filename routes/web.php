@@ -64,6 +64,7 @@ Route::group(['middleware' => 'auth'], function(){
         Route::get('/edit/{id}', 'LancamentosController@edit')->name('lancamentos.edit');
         Route::put('/update/{id}', 'LancamentosController@update')->name('lancamentos.update');
         Route::delete('/delete/{id}', 'LancamentosController@delete')->name('lancamentos.delete');
+        Route::get('/getGastosGraphs', 'LancamentosController@dataGastosGraficos')->name('lancamentos.dataGrafico');
     });
 });
 
