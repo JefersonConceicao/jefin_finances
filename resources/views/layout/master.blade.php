@@ -14,18 +14,19 @@
         crossorigin="anonymous"
     >
 
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ asset('css/mazer-theme/app.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/mazer-theme/bootstrap.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/mazer-theme/pages/auth.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/mazer-theme/pages/chat.css') }} ">
-    <link rel="stylesheet" href="{{ asset('css/mazer-theme/pages/dripicons.css') }} ">
-    <link rel="stylesheet" href="{{ asset('css/mazer-theme/pages/email.css') }} ">
-    <link rel="stylesheet" href="{{ asset('css/mazer-theme/pages/error.css') }} ">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="{{ asset('css/mazer-theme/app.css') }}"/>
+    <link rel="stylesheet" href="{{ asset('css/mazer-theme/bootstrap.css') }}"/>
+    <link rel="stylesheet" href="{{ asset('css/mazer-theme/pages/auth.css') }}"/>
+    <link rel="stylesheet" href="{{ asset('css/mazer-theme/pages/chat.css') }} "/>
+    <link rel="stylesheet" href="{{ asset('css/mazer-theme/pages/dripicons.css') }} "/>
+    <link rel="stylesheet" href="{{ asset('css/mazer-theme/pages/email.css') }} "/>
+    <link rel="stylesheet" href="{{ asset('css/mazer-theme/pages/error.css') }} "/>
     <link rel="stylesheet" href="{{ asset('css/mazer-theme/vendors/iconly/bold.css') }}" />
     <link rel="stylesheet" href="{{ asset('css/mazer-theme/vendors/perfect-scrollbar/perfect-scrollbar.css') }}"  />
-    <link rel="stylesheet" href="{{ asset('css/mazer-theme/vendors/bootstrap-icons/bootstrap-icons.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/mazer-theme/vendors/fontawesome/all.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/mazer-theme/vendors/bootstrap-icons/bootstrap-icons.css') }}"/>
+    <link rel="stylesheet" href="{{ asset('css/mazer-theme/vendors/fontawesome/all.min.css') }}"/>
+    <link rel="stylesheet" href="{{ asset('css/mazer-theme/vendors/chartjs/Chart.min.css')  }}"/>
     <link rel="stylesheet" href="{{ asset('css/mazer-theme/app.css') }} "/> 
     <link rel="stylesheet" href="{{ asset('vendor/jquery-datetimepicker/build/jquery.datetimepicker.min.css')}}" />
     <link rel="stylesheet" href="{{ asset('css/app.css') }} "/>   
@@ -44,6 +45,7 @@
     <script src="{{ asset('vendor/jquery-datetimepicker/build/jquery.datetimepicker.full.min.js')}}"> </script>
     <script src="{{ asset('vendor/inputmask/dist/jquery.inputmask.js') }}"> </script>
     <script src="{{ asset('vendor/jquery-mask/dist/jquery.mask.min.js')}}"> </script>
+    <script src="{{ asset('css/mazer-theme/vendors/chartjs/Chart.bundle.min.js') }}"> </script>
     <script src="{{ asset('js/app.js') }}"> </script>
 </body>
 </html>

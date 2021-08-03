@@ -45,6 +45,22 @@ class Lancamento extends Model
             ->get();
     } 
 
+    public function getUltimosLancamentos($user){
+        return $this
+            ->where('user_id', $user->id)
+            ->orderBy('id', 'DESC')
+            ->limit(5)
+            ->get();
+    }
+
+    public function getLancamentosGroupData(){
+        $data = $this 
+            ->where('user_id', 16)
+            ->orderBy('data_lancamento')
+            ->get();
+
+    }
+    
     public function saveLancamento($request = [], $user){
         try{  
             $request['user_id'] = $user->id; 

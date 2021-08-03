@@ -67,10 +67,12 @@
             <div class="col-12 col-lg-9">
                 <div class="card"> 
                     <div class="card-header">
-                        <h4> Diferença de gastos por mês </h4>
+                        <h4> Diferença de gastos dos ultimos meses </h4>
                     </div>
                     <div class="card-body">
-                        <canvas id="myChart" width="400" height="400"> </canvas>                        
+                        {{-- GRAFICO COMPARATIVO DE GASTOS POR MÊS  --}}
+                        <canvas id="myChart" width="400" height="150"> </canvas>  
+                        {{-- FIM DO GRÁFICO --}}
                     </div>
                 </div>
             </div>
@@ -78,6 +80,24 @@
                 <div class="card">
                     <div class="card-header">
                         <h4> Ultimos gastos: </h4>
+                    </div>
+                    <div class="card-body table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr> 
+                                    <th> Nome despesa </th>    
+                                    <th width="2%"> Valor </th>  
+                                </tr>     
+                            </thead>
+                            <tbody> 
+                                @foreach($dataUltimosLancamentos as $utlimosLancamentos)
+                                    <tr> 
+                                        <td> {{ $utlimosLancamentos->descricao }} </td>
+                                    <td> <h6> {{ "R$".convertValorReal($utlimosLancamentos->valor) }} </h6> </td>
+                                    </tr>
+                                @endforeach 
+                            </tbody>
+                        </table>    
                     </div>
                 </div>
             </div>

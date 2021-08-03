@@ -1,6 +1,5 @@
 //LIBS
 window.Swal = require('sweetalert2');
-window.Chart = require('chart.js');
 
 window.AppRegister = require('./Auth/AppRegister');
 window.AppAuth = require('./Auth/AppAuth');

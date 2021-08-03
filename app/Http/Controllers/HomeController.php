@@ -25,12 +25,13 @@ class HomeController extends Controller
 
         $countDespesas = $lancamentos->getLancamentos([], $user)->sum('valor');
         $countProventos = $proventos->getProventos([], $user)->sum('valor_provento');
-
-       
         $daysActive = $now->diff(Auth::user()->created_at)->d;
+        $ultimosLancamentos = $lancamentos->getUltimosLancamentos($user);
+
         return view('home.index')
             ->with('totalDespesas', $countDespesas)
             ->with('totalProventos', $countProventos)
-            ->with('diasAtividade', $daysActive);
+            ->with('diasAtividade', $daysActive)
+            ->with('dataUltimosLancamentos', $ultimosLancamentos);
     }
 }
