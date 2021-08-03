@@ -70,11 +70,9 @@
                         <h4> Diferença de gastos dos ultimos meses </h4>
                     </div>
                     <div class="card-body">
-                        <div class="row">
-                            
-                        {{-- GRAFICO COMPARATIVO DE GASTOS POR MÊS  --}}
+                            {{-- GRAFICO COMPARATIVO DE GASTOS POR MÊS  --}}
                             <canvas id="myChart" width="400" height="150" class="chartjs-render-monitor"> </canvas>  
-                        {{-- FIM DO GRÁFICO --}}
+                            {{-- FIM DO GRÁFICO --}}
                     </div>
                 </div>
             </div>
