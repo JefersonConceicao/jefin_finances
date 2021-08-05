@@ -11,7 +11,6 @@ use Auth;
 
 class LoginController extends Controller
 {
-
     /**
      * @return void
      */
@@ -40,8 +39,17 @@ class LoginController extends Controller
         }
     }
 
-    protected function authenticateJWT(){
+    protected function authenticateUserAPI(Request $request){
+        $credentials = $request->only('email', 'password');
+
+        if(!$token = auth()->attempt($credentials)){
+            return response()->json(['Credenciais Incorretas'], 401);
+        }
         
+        return response()->json([
+            'token' => $token,
+            'dataUser' => auth()->user()
+        ]);
     }
 
     protected function logout(){

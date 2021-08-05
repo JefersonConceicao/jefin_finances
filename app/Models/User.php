@@ -3,11 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Hash;
 
-class User extends Authenticatable
+class User extends Authenticatable implements JWTSubject
 {
     use Notifiable;
 
@@ -22,7 +24,15 @@ class User extends Authenticatable
     ];
   
     protected $hidden = ['password'];
-    
+
+    public function getJWTIdentifier(){
+        return $this->getKey();
+    }   
+
+    public function getJWTCustomClaims(){
+        return [];
+    }
+
     public function getUsers($request = []){
         $conditions = [];
 

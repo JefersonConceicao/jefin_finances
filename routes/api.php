@@ -1,7 +1,7 @@
 <?php
 
-use Illuminate\Http\Request;
+Route::post('/login', 'Auth\LoginController@authenticateUserAPI')->name('api.login');
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
+Route::group(['middleware' => 'verifyApi', 'prefix' => 'auth' ], function($router){
+    Route::get('/users', 'Api\UserController@index')->name('api.user.index');
 });
