@@ -40,6 +40,10 @@ class LoginController extends Controller
         }
     }
 
+    protected function authenticateJWT(){
+        
+    }
+
     protected function logout(){
         Auth::logout();
         return redirect('/');

@@ -63,7 +63,9 @@
                                         <th> E-mail </th>
                                         <th> Criado em </th>
                                         <th width="5%"> Ativo </th>
-                                        @if(Auth::user()->id == 16) <th width="2%"> Ações </th> @endif
+                                        @if(Auth::user()->id == 16) 
+                                            <th width="2%" class="float-end"> Ações </th> 
+                                        @endif
                                     </tr>
                                 </thead>
                                 <tbody> 
