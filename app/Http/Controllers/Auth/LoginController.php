@@ -11,7 +11,6 @@ use Auth;
 
 class LoginController extends Controller
 {
-
     /**
      * @return void
      */
@@ -38,6 +37,19 @@ class LoginController extends Controller
                 'msg' => 'Successful auth'
             ]);
         }
+    }
+
+    protected function authenticateUserAPI(Request $request){
+        $credentials = $request->only('email', 'password');
+
+        if(!$token = auth()->attempt($credentials)){
+            return response()->json(['Credenciais Incorretas'], 401);
+        }
+        
+        return response()->json([
+            'token' => $token,
+            'dataUser' => auth()->user()
+        ]);
     }
 
     protected function logout(){
