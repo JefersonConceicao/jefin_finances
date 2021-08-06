@@ -64,7 +64,7 @@
                                         <th> Criado em </th>
                                         <th width="5%"> Ativo </th>
                                         @if(Auth::user()->id == 16) 
-                                            <th width="2%" class="float-end"> Ações </th> 
+                                            <th width="2%"> Ações </th> 
                                         @endif
                                     </tr>
                                 </thead>

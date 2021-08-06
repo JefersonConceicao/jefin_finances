@@ -25,8 +25,8 @@ class LoginController extends Controller
 
     protected function authenticateUser(LoginRequest $request){
         $credentials = $request->only('email', 'password');
-        
-        if(!Auth::attempt($credentials)){
+
+        if(!Auth::guard('web')->attempt($credentials)){
             return [
                 'error' => true,
                 'msg' => 'Credenciais incorretas'
@@ -42,13 +42,13 @@ class LoginController extends Controller
     protected function authenticateUserAPI(Request $request){
         $credentials = $request->only('email', 'password');
 
-        if(!$token = auth()->attempt($credentials)){
+        if(!$token = auth()->guard('api')->attempt($credentials)){
             return response()->json(['Credenciais Incorretas'], 401);
         }
         
         return response()->json([
             'token' => $token,
-            'dataUser' => auth()->user()
+            'dataUser' => Auth::guard('api')->user()
         ]);
     }
 

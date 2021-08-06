@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\User;
 
 class UserController extends Controller
 {
@@ -12,12 +13,13 @@ class UserController extends Controller
      */
     public function index()
     {
-        dd("teste");
+        $user = new User;
+        
+        $data = $user->getUsersApi();
+        return response()->json($data);
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
      * @return \Illuminate\Http\Response
      */
     public function create()
@@ -57,7 +59,7 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function delete($id)
     {
         //
     }
