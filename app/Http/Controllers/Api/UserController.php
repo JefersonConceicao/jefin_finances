@@ -20,13 +20,11 @@ class UserController extends Controller
         return response()->json($data);
     }
 
-    /**
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
+    public function store(Request $request){
+        $user = new User;
+
+        $data = $user->signUpUser($request->all());
+        return response()->json($data);
     }
 
     /**
@@ -47,6 +45,8 @@ class UserController extends Controller
      */
     public function delete($id)
     {
-        //
+        $user = new User;
+        $data = $user->deleteUser($id);
+        return response()->json($data);
     }
 }
