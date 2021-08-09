@@ -6,6 +6,7 @@ use Closure;
 use JWTAuth;
 use Exception;
 use Tymon\JWTAuth\Http\Middleware\BaseMiddleware;
+use App\Models\User;
 
 class ApiVerify extends BaseMiddleware
 {
@@ -21,8 +22,10 @@ class ApiVerify extends BaseMiddleware
         }catch(\Excpetion $error){
             if($error instanceof \Tymon\JWTAuth\Exceptions\TokenInvalidException){
                 return response()->json(['error' => 'Invalid Token'], 401);
+
             }else if($error instanceof \Tymon\JWTAuth\Exceptions\TokenExpiredException){
                 return response()->json(['error' => 'Expired Token'], 401);
+            
             }else{
                 return response()->json(['error' => 'Token Not Found'], 401);
             }

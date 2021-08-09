@@ -33,7 +33,6 @@ const formLoginUser = () => {
                 .html(htmlLoading)
         },
         success: function (response) {
-
             if(response.error){
                 Swal.fire({
                     toast:true,

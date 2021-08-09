@@ -46,7 +46,7 @@ class User extends Authenticatable implements JWTSubject
 
         return $this
             ->where($conditions)
-            ->paginate(7);
+            ->get();
     }
 
     public function getUsersAPI(){
@@ -83,6 +83,24 @@ class User extends Authenticatable implements JWTSubject
                 'msg' => 'Registro alterado com sucesso!' 
             ];
         }catch(\Exception $error){
+            return [
+                'error' => true,
+                'msg' => 'Não foi possível alterar o registro, tente de novo.' 
+            ];
+        }
+    }
+
+    public function updateUserAPI($id, $request = []){
+        try{
+            $user = $this->find($id);
+            $user->fill($request)->save();
+
+            return [
+                'error' => false,
+                'msg' => 'Registro alterado com sucesso!',
+                'updated' => $user
+            ];
+        }catch(\Excpetion $error){
             return [
                 'error' => true,
                 'msg' => 'Não foi possível alterar o registro, tente de novo.' 

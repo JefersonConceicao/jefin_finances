@@ -56,4 +56,9 @@ class LoginController extends Controller
         Auth::logout();
         return redirect('/');
     }
+
+    protected function apiLogout(){
+        auth('api')->logout();
+        return response()->json(['logout' => true]);
+    }
 }

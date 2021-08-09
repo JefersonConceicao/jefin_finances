@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Requests\RegisterRequest;
 use App\Models\User;
+use Auth;
 
 class UserController extends Controller
 {
@@ -35,7 +36,7 @@ class UserController extends Controller
     public function update(Request $request, $id)
     {
         $user = new User;
-        $data = $user->updateUser($id, $request->all());
+        $data = $user->updateUserAPI($id, $request->all());
         return response()->json($data);
     }
 
@@ -48,5 +49,14 @@ class UserController extends Controller
         $user = new User;
         $data = $user->deleteUser($id);
         return response()->json($data);
+    }
+
+    public function refreshToken(){
+        $token = auth('api')->refresh();
+    
+        return response()->json([
+            'token' => $token,
+            'dataUser' => Auth::user()
+        ]);
     }
 }
