@@ -36,6 +36,7 @@ class UserController extends Controller
     public function update(Request $request, $id)
     {
         $user = new User;
+
         $data = $user->updateUserAPI($id, $request->all());
         return response()->json($data);
     }
@@ -47,6 +48,7 @@ class UserController extends Controller
     public function delete($id)
     {
         $user = new User;
+        
         $data = $user->deleteUser($id);
         return response()->json($data);
     }

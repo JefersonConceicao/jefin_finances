@@ -1,6 +1,7 @@
 //LIBS
 window.Swal = require('sweetalert2');
 
+//MODULES
 window.AppRegister = require('./Auth/AppRegister');
 window.AppAuth = require('./Auth/AppAuth');
 window.AppUsage = require('./Core/AppUsage');

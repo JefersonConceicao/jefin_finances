@@ -3,7 +3,7 @@
 Route::post('/login', 'Auth\LoginController@authenticateUserAPI')->name('api.login');
 Route::get('/logout', 'Auth\LoginController@apiLogout')->name('api.logout');
 
-Route::group(['middleware' => 'verifyApi', 'prefix' => 'auth' ], function($router){
+Route::group(['middleware' => ['verifyApi'], 'prefix' => 'auth' ], function($router){
     Route::group(['prefix' => 'users'], function(){
         Route::get('/', 'Api\UserController@index')->name('api.user.index');
         Route::post('/store', 'Api\UserController@store')->name('api.user.store');
