@@ -55,9 +55,10 @@ class User extends Authenticatable implements JWTSubject
         if(isset($request['name']) && !empty($request['name'])){
             $conditions[] = ['name', 'LIKE', "%".$request['name']."%"];
         }
-
+        
         return $this
             ->where($conditions)
+            ->orderBy('id', 'DESC')
             ->get();
     }
 
@@ -71,7 +72,8 @@ class User extends Authenticatable implements JWTSubject
 
             return [
                 'error' => false,
-                'msg' => 'Conta criada com sucesso!'
+                'msg' => 'Conta criada com sucesso!',
+                'userAdded' => $this->find($this->id)
             ];
         }catch(\Exception $error){
             return [

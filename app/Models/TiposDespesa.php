@@ -14,8 +14,13 @@ class TiposDespesa extends Model
 
     public $timestamps = false;
 
-    public function getTiposDespesas(){
-        return $this->all();
+    public function getTiposDespesas($request = []){
+        $conditions = [];
+
+        return $this
+            ->where($conditions)
+            ->orderBy('id', 'DESC')
+            ->get();
     }
 
     public function saveTiposDespesa($request = []){

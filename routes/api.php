@@ -15,4 +15,11 @@ Route::group(['middleware' => ['verifyApi'], 'prefix' => 'auth' ], function($rou
     Route::group(['prefix' => 'lancamentos'], function(){
         Route::get('/', 'Api\LancamentosController@index')->name('api.lancamento.index');
     });
+
+    Route::group(['prefix' => 'tiposDespesas'], function(){
+        Route::get('/', 'Api\TiposDespesasController@index')->name('api.tiposDespesa.index');
+        Route::post('/store', 'Api\TiposDespesasController@store')->name('api.tiposDespesa.store');
+        Route::put('/update', 'Api\TiposDespesasController@update')->name('api.tiposDespesa.update');
+        Route::delete('/delete', 'Api\TiposDespesasController@delete')->name('api.tiposDespesa.delete');
+    });
 });
