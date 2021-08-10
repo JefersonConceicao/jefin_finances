@@ -49,8 +49,16 @@ class User extends Authenticatable implements JWTSubject
             ->get();
     }
 
-    public function getUsersAPI(){
-        return $this->all();
+    public function getUsersAPI($request = []){
+        $conditions = [];
+
+        if(isset($request['name']) && !empty($request['name'])){
+            $conditions[] = ['name', 'LIKE', "%".$request['name']."%"];
+        }
+
+        return $this
+            ->where($conditions)
+            ->get();
     }
 
     public function signUpUser($request = []){
