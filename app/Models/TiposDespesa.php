@@ -16,9 +16,11 @@ class TiposDespesa extends Model
 
     public function getTiposDespesas($request = []){
         $conditions = [];
+        $conditions[] = ['ativo', '=', 1];
 
         return $this
             ->where($conditions)
+            ->orderBy('id', 'DESC')
             ->get();
     }
 
