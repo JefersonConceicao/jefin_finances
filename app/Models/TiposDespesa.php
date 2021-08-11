@@ -19,7 +19,6 @@ class TiposDespesa extends Model
 
         return $this
             ->where($conditions)
-            ->orderBy('id', 'DESC')
             ->get();
     }
 
@@ -29,7 +28,8 @@ class TiposDespesa extends Model
 
             return [
                 'error' => false,
-                'msg' => 'Registro salvo com sucesso!'   
+                'msg' => 'Registro salvo com sucesso!',
+                'dataAdded' => $this->find($this->id)   
             ];
         }catch(\Exception $error){
             return [
@@ -46,7 +46,8 @@ class TiposDespesa extends Model
 
             return [
                 'error' => false,
-                'msg' => 'Registro alterado com sucesso!'   
+                'msg' => 'Registro alterado com sucesso!',
+                'dataUpdated' => $tipoDespesa  
             ];
         }catch(\Excpetion $error){
             return [

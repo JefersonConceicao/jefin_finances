@@ -90,7 +90,8 @@ class User extends Authenticatable implements JWTSubject
 
             return [
                 'error' => false,
-                'msg' => 'Registro alterado com sucesso!' 
+                'msg' => 'Registro alterado com sucesso!',
+                'updated' => $user 
             ];
         }catch(\Exception $error){
             return [

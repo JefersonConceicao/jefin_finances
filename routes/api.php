@@ -12,6 +12,13 @@ Route::group(['middleware' => ['verifyApi'], 'prefix' => 'auth' ], function($rou
         Route::get('/refreshToken', 'Api\UserController@refreshToken')->name('api.user.refreshToken');
     });
 
+    Route::group(['prefix' => 'tiposDespesas'],function(){
+        Route::get('/', 'Api\TiposDespesasController@index')->name('api.tiposDespesas.index');
+        Route::post('/store', 'Api\TiposDespesasController@store')->name('api.tiposDespesas.store');
+        Route::put('/update/{id}', 'Api\TiposDespesasController@update')->name('api.tiposDespesas.update');
+        Route::delete('/delete/{id}', 'Api\TiposDespesasController@delete')->name('api.tiposDespesas.delete');
+    });
+
     Route::group(['prefix' => 'lancamentos'], function(){
         Route::get('/', 'Api\LancamentosController@index')->name('api.lancamento.index');
     });
