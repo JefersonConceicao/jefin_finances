@@ -2,12 +2,11 @@
 //AUTENTICAÇÃO DO USUÁRIO
 Route::get('/', 'Auth\LoginController@renderFormLogin')->name('auth.renderViewLogin');
 Route::post('/login', 'Auth\LoginController@authenticateUser')->name('auth.login');
-
 Route::get('/forgotPassword', function(){
     return view('auth.forgot_password');
 });
 
-//REGISTRO DE  USUÁRIO
+//REGISTRO DE USUÁRIO
 Route::get('/signup', 'Auth\RegisterController@renderFormSignUp')->name('auth.register');
 Route::post('/requestSignUP', 'Auth\RegisterController@registerUser')->name('auth.registerUser');
 
