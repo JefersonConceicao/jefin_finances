@@ -71,7 +71,8 @@ class User extends Authenticatable implements JWTSubject
 
             return [
                 'error' => false,
-                'msg' => 'Conta criada com sucesso!'
+                'msg' => 'Conta criada com sucesso!',
+                'userAdded' => $this->find($this->id)
             ];
         }catch(\Exception $error){
             return [
@@ -88,7 +89,8 @@ class User extends Authenticatable implements JWTSubject
 
             return [
                 'error' => false,
-                'msg' => 'Registro alterado com sucesso!' 
+                'msg' => 'Registro alterado com sucesso!',
+                'updated' => $user 
             ];
         }catch(\Exception $error){
             return [
