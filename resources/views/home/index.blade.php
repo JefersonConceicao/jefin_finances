@@ -67,7 +67,7 @@
             <div class="col-12 col-lg-9">
                 <div class="card"> 
                     <div class="card-header">
-                        <h4> Diferença de gastos dos ultimos meses </h4>
+                        <h4> Diferença de gastos dos últimos meses </h4>
                     </div>
                     <div class="card-body">
                             {{-- GRAFICO COMPARATIVO DE GASTOS POR MÊS  --}}
