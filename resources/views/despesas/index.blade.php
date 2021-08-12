@@ -9,7 +9,7 @@
             <div class="row">
                 <div class="col-md-3"> 
                     <div class="form-group">
-                        <label> Nome  </label> 
+                        <label> Nome </label> 
                         <input 
                             type="text"
                             class="form-control"
