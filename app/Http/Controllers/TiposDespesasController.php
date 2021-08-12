@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Http\Controllers;
-
 use Illuminate\Http\Request;
 
 //REQUEST 
@@ -14,11 +13,11 @@ class TiposDespesasController extends Controller
     /**
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         $tiposDespesa = new TiposDespesa;
 
-        $data = $tiposDespesa->getTiposDespesas();
+        $data = $tiposDespesa->getTiposDespesas($request->all());
 
         return view('tipo_despesa.index')
             ->with('dataTiposDespesa', $data);

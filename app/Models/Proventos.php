@@ -36,20 +36,17 @@ class Proventos extends Model
             return $this
                 ->where($conditions)
                 ->whereYear('data_provento', $request['ano']);
-             
         }
 
         if(empty($request['ano']) && isset($request['mes']) && !empty($request['mes'])){
             return $this
             ->where($conditions)
             ->whereMonth('data_provento', $request['mes']);
-           
         }
 
         if(empty($request['mes']) && empty($request['ano'])){
             return $this
                 ->where($conditions);
-               
         }
 
         return $dataWithFilter;
@@ -71,7 +68,8 @@ class Proventos extends Model
 
             return [
                 'error' => false,
-                'msg' => 'Provento adicionado!'
+                'msg' => 'Provento adicionado!',
+                'dataAdded' => $this->find($this->id)
             ];
         }catch(\Exception $error){
             return [
@@ -97,7 +95,8 @@ class Proventos extends Model
 
             return [
                 'error' => false,
-                'msg' => 'Provento alterado!'
+                'msg' => 'Provento alterado!',
+                'dataUpdated' => $provento
             ];
         }catch(\Exception $error){
             return [

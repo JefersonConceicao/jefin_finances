@@ -16,10 +16,9 @@ class TiposDespesa extends Model
 
     public function getTiposDespesas($request = []){
         $conditions = [];
-        $conditions[] = ['ativo', '=', 1];
-
+        
         if(isset($request['nome']) && !empty($request['nome'])){
-            $conditions[] = ['nome', '=', "%".$request['nome']."%"];
+            $conditions[] = ['nome', 'LIKE',"%".$request['nome']."%"];
         }
 
         return $this

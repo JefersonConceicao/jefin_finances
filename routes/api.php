@@ -3,7 +3,7 @@
 Route::post('/login', 'Auth\LoginController@authenticateUserAPI')->name('api.login');
 Route::get('/logout', 'Auth\LoginController@apiLogout')->name('api.logout');
 
-Route::group(['middleware' => ['verifyApi'], 'prefix' => 'auth' ], function($router){
+Route::group(['middleware' => ['verifyApi'], 'prefix' => 'auth' ], function(){
     Route::group(['prefix' => 'users'], function(){
         Route::get('/', 'Api\UserController@index')->name('api.user.index');
         Route::post('/store', 'Api\UserController@store')->name('api.user.store');
@@ -28,5 +28,12 @@ Route::group(['middleware' => ['verifyApi'], 'prefix' => 'auth' ], function($rou
         Route::post('/store', 'Api\TiposDespesasController@store')->name('api.tiposDespesa.store');
         Route::put('/update', 'Api\TiposDespesasController@update')->name('api.tiposDespesa.update');
         Route::delete('/delete', 'Api\TiposDespesasController@delete')->name('api.tiposDespesa.delete');
+    });
+
+    Route::group(['prefix' => 'proventos'], function(){
+        Route::get('/', 'Api\ProventosController@index')->name('api.proventos.index');
+        Route::post('/store', 'Api\ProventosController@store')->name('api.proventos.store');
+        Route::put('/update/{id}', 'Api\ProventosController@update')->name('api.proventos.update');
+        Route::delete('/delete/{id}', 'Api\ProventosController@delete')->name('api.proventos.delete');
     });
 });
