@@ -63100,7 +63100,8 @@ module.exports = {
 /***/ (function(module, exports, __webpack_require__) {
 
 //LIBS
-window.Swal = __webpack_require__(/*! sweetalert2 */ "./node_modules/sweetalert2/dist/sweetalert2.all.js");
+window.Swal = __webpack_require__(/*! sweetalert2 */ "./node_modules/sweetalert2/dist/sweetalert2.all.js"); //MODULES
+
 window.AppRegister = __webpack_require__(/*! ./Auth/AppRegister */ "./resources/js/Auth/AppRegister.js");
 window.AppAuth = __webpack_require__(/*! ./Auth/AppAuth */ "./resources/js/Auth/AppAuth.js");
 window.AppUsage = __webpack_require__(/*! ./Core/AppUsage */ "./resources/js/Core/AppUsage.js");

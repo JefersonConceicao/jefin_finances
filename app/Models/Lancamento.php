@@ -27,6 +27,14 @@ class Lancamento extends Model
             ->where('user_id', $user->id);
     }
 
+    public function getTotalLancamentosByMonth($request = [], $user){
+        return $this
+            ->where('user_id', $user->id)   
+            ->whereMonth('data_lancamento', !empty($request['mes']) ? $request['mes'] : '')
+            ->whereYear('data_lancamento', !empty($request['ano']) ? $request['ano'] : '')
+            ->sum('valor');
+    }
+
     public function getLancamentosDespesa($request = [], $user){
         return $this
             ->where('user_id', $user->id)
@@ -57,6 +65,7 @@ class Lancamento extends Model
         return $this
             ->select('*')
             ->where('user_id', $user->id)
+            ->orderBy('data_lancamento', 'ASC')
             ->get();
     }
     

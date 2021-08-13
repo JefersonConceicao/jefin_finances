@@ -71,7 +71,7 @@
                     </div>
                     <div class="card-body">
                             {{-- GRAFICO COMPARATIVO DE GASTOS POR MÊS  --}}
-                            <canvas id="myChart" width="400" height="150" class="chartjs-render-monitor"> </canvas>  
+                            <canvas id="myChart" width="400vh" height="150vh" class="chartjs-render-monitor"> </canvas>  
                             {{-- FIM DO GRÁFICO --}}
                     </div>
                 </div>
