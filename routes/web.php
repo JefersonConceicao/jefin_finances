@@ -2,10 +2,9 @@
 //AUTENTICAÇÃO DO USUÁRIO
 Route::get('/', 'Auth\LoginController@renderFormLogin')->name('auth.renderViewLogin');
 Route::post('/login', 'Auth\LoginController@authenticateUser')->name('auth.login');
-
-Route::get('/forgotPassword', function(){
-    return view('auth.forgot_password');
-});
+Route::get('/forgotPassword', 'Auth\ForgotPasswordController@renderViewForgotPassword')->name('auth.forgotPassword');
+Route::post('/sendMailForgotPassword', 'Auth\ForgotPasswordController@sendMailForgotPassword')->name('auth.sendMailForgotPassword');
+Route::get('/forgotChangePassword/{token}', 'Auth\ResetPasswordController@renderViewResetPassword')->name('auth.resetPassword');
 
 //REGISTRO DE USUÁRIO
 Route::get('/signup', 'Auth\RegisterController@renderFormSignUp')->name('auth.register');
@@ -19,12 +18,17 @@ Route::group(['middleware' => 'auth'], function(){
     Route::get('/home', 'HomeController@index')->name('home.index');
 
     Route::group(['prefix' => 'users'], function(){
+        //RENDER VIEWS
         Route::get('/', 'UsersController@index')->name('users.index');
         Route::get('/create', 'UsersController@create')->name('users.create');
-        Route::post('/store', 'UsersController@store')->name('users.store');
+        Route::get('/profile', 'UsersController@profile')->name('users.profile');
         Route::get('/edit/{id}', 'UsersController@edit')->name('users.edit');
+
+        Route::post('/store', 'UsersController@store')->name('users.store');
         Route::put('/update/{id}', 'UsersController@update')->name('users.update');
         Route::delete('/delete/{id}', 'UsersController@delete')->name('users.delete');
+        Route::put('/profileUpdate', 'UsersController@profileUpdate')->name('users.profileUpdate');
+        Route::put('/changePassword', 'UsersController@changePassword')->name('users.changePassword');
     });
 
     Route::group(['prefix' => 'proventos'], function(){

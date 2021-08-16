@@ -2,7 +2,7 @@ const { format, parseISO } = require('date-fns');
 const { pt } = require('date-fns/locale')
 
 $(() => {
-    initChart();
+   window.location.pathname == "/home" && initChart();
 });
 
 const randomColors = () => {    
@@ -27,6 +27,13 @@ const initChart = () => {
 
 const renderGraph = (data) => {
     const arrayDates = Object.keys(data)
+
+    if(arrayDates.length === 0){
+        $("#emptyRegisters").show();
+        $("#graphLancamenots").hide();
+
+        return;
+    }
 
     const months = arrayDates.map(value => (
         format(parseISO(value), 'MMMM', {

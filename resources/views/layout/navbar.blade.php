@@ -17,7 +17,7 @@
             <h6 class="dropdown-header"> Olá, {{ Auth::user()->name }} </h6>
         </li>
         <li> 
-            <a class="dropdown-item" href="#"> 
+            <a class="dropdown-item" href="/users/profile"> 
                 <i class="far fa-id-badge me-2"></i> Meu Perfil
             </a>
         </li>

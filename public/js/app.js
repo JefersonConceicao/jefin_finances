@@ -62015,6 +62015,60 @@ module.exports = {
 
 /***/ }),
 
+/***/ "./resources/js/Auth/AppForgotPassword.js":
+/*!************************************************!*\
+  !*** ./resources/js/Auth/AppForgotPassword.js ***!
+  \************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+var _require = __webpack_require__(/*! ../Core/AppUsage */ "./resources/js/Core/AppUsage.js"),
+    htmlLoading = _require.htmlLoading,
+    showMessagesValidator = _require.showMessagesValidator;
+
+$(function () {
+  habilitaEventos();
+});
+
+var habilitaEventos = function habilitaEventos() {
+  $("#forgotPassword").on("submit", function (e) {
+    e.preventDefault();
+    formForgotPassword();
+  });
+};
+
+var formForgotPassword = function formForgotPassword() {
+  var form = "#forgotPassword";
+  var type = "POST";
+  var url = "/sendMailForgotPassword";
+  $.ajax({
+    type: type,
+    url: url,
+    data: $(form).serialize(),
+    dataType: "JSON",
+    beforeSend: function beforeSend() {
+      $(form + " .btn-primary").prop("disabled", true).html(htmlLoading);
+    },
+    success: function success(response) {},
+    error: function error(jqXHR, textStatus, _error) {
+      var errors = jqXHR.responseJSON.errors;
+
+      if (!!errors) {
+        showMessagesValidator(form, errors);
+      }
+    },
+    complete: function complete() {
+      $(form + " .btn-primary").prop("disabled", false).html("Salvar");
+    }
+  });
+};
+
+module.exports = {
+  habilitaEventos: habilitaEventos
+};
+
+/***/ }),
+
 /***/ "./resources/js/Auth/AppRegister.js":
 /*!******************************************!*\
   !*** ./resources/js/Auth/AppRegister.js ***!
@@ -62290,7 +62344,7 @@ var _require2 = __webpack_require__(/*! date-fns/locale */ "./node_modules/date-
     pt = _require2.pt;
 
 $(function () {
-  initChart();
+  window.location.pathname == "/home" && initChart();
 });
 
 var randomColors = function randomColors() {
@@ -62312,6 +62366,13 @@ var initChart = function initChart() {
 
 var renderGraph = function renderGraph(data) {
   var arrayDates = Object.keys(data);
+
+  if (arrayDates.length === 0) {
+    $("#emptyRegisters").show();
+    $("#graphLancamenots").hide();
+    return;
+  }
+
   var months = arrayDates.map(function (value) {
     return format(parseISO(value), 'MMMM', {
       locale: pt
@@ -62667,6 +62728,115 @@ var optionsFormLancamento = function optionsFormLancamento() {
 module.exports = {
   habilitaEventos: habilitaEventos,
   habilitaBotoes: habilitaBotoes
+};
+
+/***/ }),
+
+/***/ "./resources/js/Logged/AppProfile.js":
+/*!*******************************************!*\
+  !*** ./resources/js/Logged/AppProfile.js ***!
+  \*******************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+var _require = __webpack_require__(/*! ../Core/AppUsage */ "./resources/js/Core/AppUsage.js"),
+    htmlLoading = _require.htmlLoading,
+    showMessagesValidator = _require.showMessagesValidator,
+    color = _require.color;
+
+$(function () {
+  habilitaEventos();
+});
+
+var habilitaEventos = function habilitaEventos() {
+  $("#profileUpdate").on("submit", function (e) {
+    e.preventDefault();
+    formProfile();
+  });
+  $("#changePassword").on("submit", function (e) {
+    e.preventDefault();
+    formChangePassword();
+  });
+};
+
+var formProfile = function formProfile() {
+  var form = "#profileUpdate";
+  var url = '/users/profileUpdate';
+  var type = 'PUT';
+  $.ajax({
+    type: type,
+    url: url,
+    data: $(form).serialize(),
+    dataType: "JSON",
+    beforeSend: function beforeSend() {
+      $(form + " .btn-primary").prop("disabled", true).html(htmlLoading);
+    },
+    success: function success(response) {
+      Swal.fire({
+        toast: true,
+        position: 'bottom-left',
+        title: "<h5 style=\"color:white\"> ".concat(response.msg, " </h5>"),
+        icon: !response.error ? 'success' : 'error',
+        showConfirmButton: false,
+        timer: 3000,
+        background: response.error ? 'red' : color()["default"]
+      });
+      $(".error_feedback").html("");
+      $('.is-invalid').removeClass("is-invalid");
+    },
+    error: function error(jqXHR, textStatus, _error) {
+      var errors = jqXHR.responseJSON.errors;
+
+      if (!!errors) {
+        showMessagesValidator(form, errors);
+      }
+    },
+    complete: function complete() {
+      $(form + " .btn-primary").prop("disabled", false).html("Salvar");
+    }
+  });
+};
+
+var formChangePassword = function formChangePassword() {
+  var form = "#changePassword";
+  var url = '/users/changePassword';
+  var type = 'PUT';
+  $.ajax({
+    type: type,
+    url: url,
+    data: $(form).serialize(),
+    dataType: "JSON",
+    beforeSend: function beforeSend() {
+      $(form + " .btn-primary").prop("disabled", true).html(htmlLoading);
+    },
+    success: function success(response) {
+      Swal.fire({
+        toast: true,
+        position: 'bottom-left',
+        title: "<h5 style=\"color:white\"> ".concat(response.msg, " </h5>"),
+        icon: !response.error ? 'success' : 'error',
+        showConfirmButton: false,
+        timer: 3000,
+        background: response.error ? 'red' : color()["default"]
+      });
+      $(".error_feedback").html("");
+      $('.is-invalid').removeClass("is-invalid");
+    },
+    error: function error(jqXHR, textStatus, _error2) {
+      var errors = jqXHR.responseJSON.errors;
+
+      if (!!errors) {
+        showMessagesValidator(form, errors);
+      }
+    },
+    complete: function complete() {
+      $(form + " .btn-primary").prop("disabled", false).html("Salvar");
+    }
+  });
+};
+
+module.exports = {
+  habilitaEventos: habilitaEventos
 };
 
 /***/ }),
@@ -63111,6 +63281,8 @@ window.AppDespesas = __webpack_require__(/*! ./Logged/AppDespesas */ "./resource
 window.AppTipoDespesas = __webpack_require__(/*! ./Logged/AppTipoDespesas */ "./resources/js/Logged/AppTipoDespesas.js");
 window.AppLancamentos = __webpack_require__(/*! ./Logged/AppLancamentos */ "./resources/js/Logged/AppLancamentos.js");
 window.AppDashboard = __webpack_require__(/*! ./Logged/AppDashboard */ "./resources/js/Logged/AppDashboard.js");
+window.AppProfile = __webpack_require__(/*! ./Logged/AppProfile */ "./resources/js/Logged/AppProfile.js");
+window.AppForgotPassword = __webpack_require__(/*! ./Auth/AppForgotPassword */ "./resources/js/Auth/AppForgotPassword.js");
 $.ajaxSetup({
   headers: {
     'X-CSRF-TOKEN': $("meta[name='csrf-token']").attr("content")

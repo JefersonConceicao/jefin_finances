@@ -1,9 +1,7 @@
 <?php
-
 namespace App\Http\Controllers;
-
 use Illuminate\Http\Request;
-
+use Auth;
 //REQUEST
 use App\Http\Requests\RegisterRequest;
 //MODEL
@@ -75,6 +73,27 @@ class UsersController extends Controller
         $user = new User;
 
         $data = $user->deleteUser($id);
+        return response()->json($data);
+    }
+
+    public function profile(){
+        $user = Auth::user();
+
+        return view('users.profile')
+            ->with('user', $user);
+    }   
+
+    public function profileUpdate(RegisterRequest $request){
+        $user = Auth::user();
+
+        $data = $user->updateProfile($request->all(), $user);
+        return response()->json($data);
+    }
+
+    public function changePassword(RegisterRequest $request){
+        $user = Auth::user();
+
+        $data = $user->updatePassword($request->all(), $user);
         return response()->json($data);
     }
 }

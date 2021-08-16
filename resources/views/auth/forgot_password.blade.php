@@ -7,17 +7,19 @@
                 <p class="auth-subtitle mb-5"> 
                     Informe seu e-mail e enivaremos um link de recuperação
                 </p>
-
-                <form> 
+                <form id="forgotPassword">  
                     <div class="form-group position-relative has-icon-left mb-4">
                         <input 
                             type="email" 
-                            class="form-control form-control-x1"
+                            name="email"
+                            class="form-control form-control-xl"
                             placeholder="Digite seu e-mail aqui"
                         />
                         <div class="form-control-icon">
                             <i class="bi bi-envelope"> </i>
                         </div>
+
+                        <div class="error_feedback"> </div>
                     </div>
                     <button class="btn btn-primary btn-block btn-lg shadow-lg mt-5">
                         Enviar
@@ -26,7 +28,7 @@
 
                 <div class="text-center mt-5 text-lg fs-4">
                     <p class="text-gray-600">
-                         Lembra da sua conta? 
+                        Lembra da sua conta? 
                         <a href="/" class="font-bold"> Fazer Login </a>
                     </p>
                 </div>  

@@ -4,6 +4,8 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Route;
+use Auth;
+use Illuminate\Support\Facades\Hash;
 
 use App\Models\User;
 
@@ -44,7 +46,7 @@ class RegisterRequest extends FormRequest
                     'password_confirmation' => 'required|min:8|same:password'
                 ];
             break;
-            case 'update'   : 
+            case 'update': 
                 $validate = [
                     'name' => 'required',
                     'last_name' => 'required',
@@ -66,6 +68,49 @@ class RegisterRequest extends FormRequest
                     ]
                 ];
             break;
+            case 'profileUpdate':
+                $validate = [
+                    'name' => 'required',
+                    'last_name' => 'required',
+                    'email' => [
+                        'required',
+                        'email',
+                        function($attribute, $value, $fail){
+                            $user = new User;
+
+                            $existsMail = $user->where([
+                                ['email', '=', $value],
+                                ['id', '!=', Auth::user()->id]
+                            ])->count();
+
+                            if($existsMail > 0){
+                                $fail('Este e-mail já existe em nossa base de dados');
+                            }   
+                        }   
+                    ]
+                ];  
+            break;
+            case 'changePassword': 
+                $validate = [
+                    'last_password' => [
+                        'required',
+                        'min:8',
+                        function($attribute, $value, $fail){
+                            if(!Hash::check($value, Auth::user()->password)){
+                                $fail('Senha atual incorreta');
+                            }
+                        }
+                    ],
+                    'new_password' => [
+                        'required',
+                        'min:8',
+                    ],
+                    'confirm_new_password' => [
+                        'required',
+                        'min:8',
+                        'same:new_password'
+                    ]
+                ];
         }
 
         return $validate;
@@ -77,7 +122,8 @@ class RegisterRequest extends FormRequest
             'min' => 'Preencha a quantidade mínima de caracteres (:min)',
             'password_confirmation.same' => 'Confirmação de senha não confere',
             'email' => 'Este campo deve conter um e-mail válido',
-            'email.unique' => 'Este e-mail já existe em nossa base de dados'
+            'email.unique' => 'Este e-mail já existe em nossa base de dados',
+            'confirm_new_password.same' => 'Confirmação de senha deve ser igual a nova senha',
         ];
     }
 }

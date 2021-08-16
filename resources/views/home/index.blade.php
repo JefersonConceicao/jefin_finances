@@ -69,10 +69,13 @@
                     <div class="card-header">
                         <h4> Diferença de gastos dos últimos meses </h4>
                     </div>
-                    <div class="card-body">
-                            {{-- GRAFICO COMPARATIVO DE GASTOS POR MÊS  --}}
-                            <canvas id="myChart" width="400vh" height="150vh" class="chartjs-render-monitor"> </canvas>  
-                            {{-- FIM DO GRÁFICO --}}
+                    <div class="card-body" id="graphLancamenots" style="display:block">
+                        {{-- GRAFICO COMPARATIVO DE GASTOS POR MÊS  --}}
+                        <canvas id="myChart" width="400vh" height="150vh" class="chartjs-render-monitor"> </canvas>  
+                        {{-- FIM DO GRÁFICO --}}
+                    </div>
+                    <div class="card-body text-center" id="emptyRegisters" style="display:none"> 
+                        Você ainda não tem lançamentos, utilize a opção "Lancamentos" e registre um gasto. 
                     </div>
                 </div>
             </div>

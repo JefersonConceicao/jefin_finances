@@ -132,4 +132,52 @@ class User extends Authenticatable implements JWTSubject
             ];
         }
     }
+
+    public function updateProfile($request = [], $authUser){
+        try{
+            $user = $this->find($authUser->id);
+            $user->fill($request)->save();
+
+            return [
+                'error' => false,
+                'msg' => 'Registro salvo com sucesso!'
+            ];
+        }catch(\Exception $error){
+            return [
+                'error' => true,
+                'msg' => 'Não foi possível salvar o registro, tente de novo',
+                'error_message' => $error->getMessage()
+            ];
+        }   
+    }
+
+    public function updatePassword($request = [], $authUser){
+        try{
+            $user = $this->find($authUser->id);
+            $user->password = Hash::make($request['new_password']);
+            $user->save();        
+
+            return [
+                'error' => false,
+                'msg' => 'Senha alterada!'
+            ];
+        }catch(\Exception $error){
+            return [
+                'error' => true,
+                'msg' => 'Não foi possível alterar a senha'
+            ];
+        }
+    }
+
+    public function saveTokenResetPassword($email){
+        try{
+            $user = $this->where('email', $email)->first();
+            $user->password_token_reset = md5(uniqid(rand(), true));
+            $user->save();
+            
+            return $user->password_token_reset;
+        }catch(\Exception $error){
+            return false;
+        }
+    }
 }
