@@ -9,6 +9,7 @@
                 </p>
                 <form id="resetPassword"> 
                     <div class="form-group position-relative has-icon-left mb-4">
+                        <input type="hidden" name="token" value="{{$token}}" />
                         <input 
                             type="password" 
                             name="new_password"

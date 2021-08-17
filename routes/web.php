@@ -4,7 +4,9 @@ Route::get('/', 'Auth\LoginController@renderFormLogin')->name('auth.renderViewLo
 Route::post('/login', 'Auth\LoginController@authenticateUser')->name('auth.login');
 Route::get('/forgotPassword', 'Auth\ForgotPasswordController@renderViewForgotPassword')->name('auth.forgotPassword');
 Route::post('/sendMailForgotPassword', 'Auth\ForgotPasswordController@sendMailForgotPassword')->name('auth.sendMailForgotPassword');
+
 Route::get('/forgotChangePassword/{token}', 'Auth\ResetPasswordController@renderViewResetPassword')->name('auth.resetPassword');
+Route::put('/resetPassword', 'Auth\ResetPasswordController@resetPassword')->name('auth.resetPassword');
 
 //REGISTRO DE USUÁRIO
 Route::get('/signup', 'Auth\RegisterController@renderFormSignUp')->name('auth.register');

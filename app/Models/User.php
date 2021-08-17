@@ -180,4 +180,22 @@ class User extends Authenticatable implements JWTSubject
             return false;
         }
     }
+
+    public function resetPassword($request = []){
+        try{
+            $user = $this->where('password_token_reset', $request['token'])->first(); 
+            $user->password = Hash::make($request['new_password']);
+            $user->save();
+
+            return [
+                'error' => false,
+                'msg' => 'Senha alterada com sucesso'
+            ];
+        }catch(\Exception $error){
+            return [
+                'error' => true,
+                'msg' => 'Ocorreu um erro inesperado, tente de novo.'
+            ];
+        }
+    }
 }

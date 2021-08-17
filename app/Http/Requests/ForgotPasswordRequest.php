@@ -38,13 +38,26 @@ class ForgotPasswordRequest extends FormRequest
                         }
                     ]
                 ];
-                break;  
+            case 'resetPassword':
+                return [
+                    'new_password' => [
+                        'required',
+                        'min:8',
+                    ],
+                    'confirm_new_password' => [
+                        'required',
+                        'min:8',
+                        'same:new_password'
+                    ]
+                ];
         }
     }
 
     public function messages(){
         return [
             'required' => 'Campo obrigatório',
+            'min' => 'Quantidade de caracteres mínima (:min)',
+            'same' => 'Senhas não conferem'
         ];
     }
 }

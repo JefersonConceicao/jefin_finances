@@ -1,4 +1,4 @@
-const { htmlLoading, showMessagesValidator } = require('../Core/AppUsage')  
+const { htmlLoading, showMessagesValidator, color } = require('../Core/AppUsage')  
 
 $(() => {
     habilitaEventos()
@@ -7,14 +7,19 @@ $(() => {
 const habilitaEventos = () => {
     $("#forgotPassword").on("submit", function(e){
         e.preventDefault();
-        formForgotPassword()
+        formForgotPassword(true)
     }); 
+
+    $("#resetPassword").on("submit", function(e){
+        e.preventDefault()
+        formForgotPassword(false)
+    });
 }
 
-const formForgotPassword = () => {
-    const form = "#forgotPassword";
-    const type = "POST";
-    const url = "/sendMailForgotPassword";
+const formForgotPassword = reset => {
+    const form = !!reset ? "#forgotPassword" : "#resetPassword";
+    const type =  !!reset ? "POST" : "PUT";
+    const url = !!reset ? "/sendMailForgotPassword" : "/resetPassword";
 
     $.ajax({
         type,
@@ -25,7 +30,18 @@ const formForgotPassword = () => {
             $(form + " .btn-primary").prop("disabled", true).html(htmlLoading);
         },
         success: function (response) {
-            
+            Swal.fire({
+                toast:true,
+                position: 'bottom-left',
+                title: `<h5 style="color:white"> ${response.msg} </h5>`,
+                icon: !response.error ? 'success' : 'error',
+                showConfirmButton: false,
+                timer:3000,
+                background: response.error ? 'red' : color().default,
+                didClose:() => {
+                    window.location.href = '/';  
+                }
+            });                 
         },
         error:function(jqXHR, textStatus, error){
             const errors = jqXHR.responseJSON.errors;
@@ -38,7 +54,6 @@ const formForgotPassword = () => {
             $(form + " .btn-primary").prop("disabled", false).html(`Salvar`);
         }
     });
-
 }
 
 module.exports = {
