@@ -52,40 +52,46 @@
             </div>
         </div>
         <div class="card-body">
-            <div class="card-content table-responsive"> 
-                <table class="table table-hover"> 
-                    <thead> 
-                        <tr> 
-                            <th width="70%"> Nome  </th>
-                            <th> Ativo </th>
-                            <th width="2%"> Ações </th>
-                        </tr>
-                    </thead>
-                    <tbody> 
-                        @foreach($dataTiposDespesa as $tipoDespesa)
+            @if(count($dataTiposDespesa) > 0)
+                <div class="card-content table-responsive"> 
+                    <table class="table table-hover"> 
+                        <thead> 
                             <tr> 
-                                <td> {{ $tipoDespesa->nome }} </td>
-                                <td> 
-                                   <label class="badge bg-{{ $tipoDespesa->ativo ? "success" : "danger"}}"> 
-                                        {{ $tipoDespesa->ativo ? "Sim" : "Não" }}
-                                    </label> 
-                                </td>
-                                <td> 
-                                    <div class="text-center" style="display:flex;"> 
-                                        <button class="btn btn-primary rounded-pill btnEditTiposDespesa" id="{{$tipoDespesa->id}}"> 
-                                            <i class="fa fa-edit"> </i>
-                                        </button>
-                                        &nbsp;
-                                        <button class="btn btn-danger rounded-pill btnDeleteTiposDespesa" id="{{$tipoDespesa->id}}"> 
-                                            <i class="fa fa-trash"> </i>
-                                        </button>
-                                    </div>
-                                </td>   
+                                <th width="70%"> Nome  </th>
+                                <th> Ativo </th>
+                                <th width="2%"> Ações </th>
                             </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
+                        </thead>
+                        <tbody> 
+                            @foreach($dataTiposDespesa as $tipoDespesa)
+                                <tr> 
+                                    <td> {{ $tipoDespesa->nome }} </td>
+                                    <td> 
+                                    <label class="badge bg-{{ $tipoDespesa->ativo ? "success" : "danger"}}"> 
+                                            {{ $tipoDespesa->ativo ? "Sim" : "Não" }}
+                                        </label> 
+                                    </td>
+                                    <td> 
+                                        <div class="text-center" style="display:flex;"> 
+                                            <button class="btn btn-primary rounded-pill btnEditTiposDespesa" id="{{$tipoDespesa->id}}"> 
+                                                <i class="fa fa-edit"> </i>
+                                            </button>
+                                            &nbsp;
+                                            <button class="btn btn-danger rounded-pill btnDeleteTiposDespesa" id="{{$tipoDespesa->id}}"> 
+                                                <i class="fa fa-trash"> </i>
+                                            </button>
+                                        </div>
+                                    </td>   
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @else 
+                <div class="text-center">
+                    <h4> Sem registros, adicione um novo tipo de despesa. </h4>
+                </div>
+            @endif
         </div>
     </div>
 @endsection

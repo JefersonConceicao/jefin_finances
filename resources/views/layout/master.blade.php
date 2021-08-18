@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="google-signin-client_id" content="23951275285-j7sp1aucu6lhegsvjfd1fni74bct3uip.apps.googleusercontent.com" /> 
 
     <title> Jefin Finances </title>
     <link 
@@ -32,6 +33,7 @@
     <link rel="stylesheet" href="{{ asset('css/app.css') }} "/>   
 </head>
 <body style="background-color:#e7e7e7">
+
     @yield('content')
     <script 
         src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" 
@@ -46,6 +48,16 @@
     <script src="{{ asset('vendor/inputmask/dist/jquery.inputmask.js') }}"> </script>
     <script src="{{ asset('vendor/jquery-mask/dist/jquery.mask.min.js')}}"> </script>
     <script src="{{ asset('css/mazer-theme/vendors/chartjs/Chart.bundle.min.js') }}"> </script>
+    <script src="https://apis.google.com/js/platform.js"> </script>
     <script src="{{ asset('js/app.js') }}"> </script>
+    <script> 
+        function onSuccess(googleUser){
+            AppAuth.authWithGoogle(googleUser);
+        }
+        function onFailure(error){
+            console.log(error)
+        }
+    </script>
+
 </body>
 </html>

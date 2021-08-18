@@ -9,14 +9,16 @@ class TiposDespesa extends Model
     protected $table = 'despesas_tipos';
     protected $fillable = [
         'nome',
-        'ativo'
+        'ativo',
+        'user_id',
     ];
 
     public $timestamps = false;
 
-    public function getTiposDespesas($request = []){
+    public function getTiposDespesas($request = [], $user){
         $conditions = [];
-        
+        $conditions[] = ['user_id', '=', $user->id];
+                
         if(isset($request['nome']) && !empty($request['nome'])){
             $conditions[] = ['nome', 'LIKE',"%".$request['nome']."%"];
         }
@@ -27,8 +29,10 @@ class TiposDespesa extends Model
             ->get();
     }
 
-    public function saveTiposDespesa($request = []){
+    public function saveTiposDespesa($request = [], $user){
         try{
+            $request['user_id'] = $user->id;
+
             $this->fill($request)->save();
 
             return [

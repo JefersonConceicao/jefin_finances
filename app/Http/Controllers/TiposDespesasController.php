@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 use Illuminate\Http\Request;
+use Auth;
 
 //REQUEST 
 use App\Http\Requests\TipoDespesasRequest;
+
 //MODEL
 use App\Models\TiposDespesa;
 
@@ -15,9 +17,10 @@ class TiposDespesasController extends Controller
      */
     public function index(Request $request)
     {
+        $user = Auth::user();
         $tiposDespesa = new TiposDespesa;
 
-        $data = $tiposDespesa->getTiposDespesas($request->all());
+        $data = $tiposDespesa->getTiposDespesas($request->all(), $user);
 
         return view('tipo_despesa.index')
             ->with('dataTiposDespesa', $data);
@@ -37,9 +40,10 @@ class TiposDespesasController extends Controller
      */
     public function store(TipoDespesasRequest $request)
     {
+        $user = Auth::user();
         $tiposDespesa = new TiposDespesa;
 
-        $data = $tiposDespesa->saveTiposDespesa($request->all());
+        $data = $tiposDespesa->saveTiposDespesa($request->all(), $user);
         return response()->json($data);
     }
 

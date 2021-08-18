@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Auth;
 use App\Models\TiposDespesa;
 
 class TiposDespesasController extends Controller
@@ -12,10 +13,11 @@ class TiposDespesasController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index(Request $request)
-    {
+    {   
+        $user = Auth::user();
         $tiposDespesa = new TiposDespesa;
 
-        $data = $tiposDespesa->getTiposDespesas($request->all());
+        $data = $tiposDespesa->getTiposDespesas($request->all(), $user);
         return response()->json($data);
     }
 
@@ -25,6 +27,7 @@ class TiposDespesasController extends Controller
      */
     public function store(Request $request)
     {
+        $user = Auth::user();
         $tiposDespesa = new TiposDespesa;
 
         $data = $tiposDespesa->saveTiposDespesa($request->all());

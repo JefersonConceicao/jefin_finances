@@ -25,7 +25,7 @@ class DespesasController extends Controller
         $totalValor = $despesa->getDespesas($request->all(), $user)->sum('valor_total');
         $totalFixa  = $despesa->getDespesas($request->all(), $user)->where('despesa_tipo_id' ,1)->sum('valor_total');
         $totalVariavel = $despesa->getDespesas($request->all(), $user)->where('despesa_tipo_id' ,3)->sum('valor_total');
-        $optionsTipoDesesa = $tipoDespesa->pluck('nome', 'id');
+        $optionsTipoDesesa = $tipoDespesa->where('user_id', $user->id)->pluck('nome', 'id');
         
         return view('despesas.index')
             ->with('dataDespesas', $data)
@@ -40,10 +40,11 @@ class DespesasController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function create()
-    {       
+    {   
+        $user = Auth::user();    
         $tipoDespesa = new TiposDespesa;
 
-        $optionsTipoDespesa = $tipoDespesa->pluck('nome', 'id');
+        $optionsTipoDespesa = $tipoDespesa->where('user_id', $user->id)->pluck('nome', 'id');
         return view('despesas.create')
             ->with('optionsTipoDespesa', $optionsTipoDespesa);
     }
@@ -66,16 +67,17 @@ class DespesasController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function edit($id)
-    {
+    {   
+        $user = Auth::user();
         $tipoDespesa = new TiposDespesa;
         $despesa = new Despesa; 
 
         $data = $despesa->find($id);
-        $optionsTipoDesesa = $tipoDespesa->pluck('nome', 'id');
+        $optionsTipoDespesa = $tipoDespesa->where('user_id', $user->id)->pluck('nome', 'id');
 
         return view('despesas.edit')
             ->with('despesa', $data)
-            ->with('optionsTipoDespesa', $optionsTipoDesesa);
+            ->with('optionsTipoDespesa', $optionsTipoDespesa);
     }
 
     /**

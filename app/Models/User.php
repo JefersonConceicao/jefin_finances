@@ -20,7 +20,8 @@ class User extends Authenticatable implements JWTSubject
         'mail_token_confirm',
         'password_token_reset',
         'password',
-        'ativo'
+        'ativo',
+        'temp_user',
     ];
   
     protected $hidden = ['password'];
@@ -197,5 +198,24 @@ class User extends Authenticatable implements JWTSubject
                 'msg' => 'Ocorreu um erro inesperado, tente de novo.'
             ];
         }
+    }
+
+    public function verifyUserTempByMail($userMail){
+        return $this
+          ->where([
+                ['temp_user', '=', 1],
+                ['email', '=', $userMail]
+          ]);   
+    }
+
+    public function saveTempUser($request = []){
+        $request['temp_user'] = 1;
+        $request['password'] = Hash::make('googleauth');
+        
+        if($this->fill($request)->save()){  
+            return true; 
+        }
+
+        return false;
     }
 }

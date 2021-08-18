@@ -25,6 +25,10 @@
                             <div class="error_feedback"> </div>
                         </div>
                         <button class="btn btn-primary btn-block btn-lg shadow-lg mt-5">Log in</button>
+                        
+                        <div style="margin-top:2%;">
+                            <div data-width="380" data-height="50" class="g-signin2" data-onfailure="onFailure" data-onsuccess="onSuccess">  </div>
+                        </div>
                     </form>
                     <div class="text-center mt-5 text-lg fs-4">
                         <p class="text-gray-600"> 

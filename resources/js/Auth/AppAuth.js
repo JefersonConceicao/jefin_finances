@@ -61,7 +61,30 @@ const formLoginUser = () => {
     });
 }
 
+const authWithGoogle = googleUser => {
+    if(Object.keys(googleUser).length == 0) return; 
+
+    const profile = googleUser.getBasicProfile();
+    const user = {
+        name: profile.getName(),
+        last_name: profile.getFamilyName(),
+        email: profile.getEmail(),
+    }
+
+    if(!!user){
+        $.post("/loginWithGoogle", user,
+            function (response, textStatus, jqXHR) {
+               if(response.error == false && response.msg === "Autenticado com sucesso"){
+                   window.location.href = '/home';
+               }
+            },
+            "JSON"
+        );
+    }   
+}
+
 module.exports = {
     habilitaBotoes,
-    habilitaEventos
+    habilitaEventos,
+    authWithGoogle,
 }

@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use App\Http\Requests\LoginRequest;
 use Auth;
+use App\Models\User;
 
 class LoginController extends Controller
 {
@@ -50,6 +51,61 @@ class LoginController extends Controller
             'token' => $token,
             'dataUser' => Auth::guard('api')->user()
         ]);
+    }
+
+    protected function userWithGoogle(Request $request){
+        $user = new User;
+
+        try{
+            $credentials = ['email' => $request->email, 'password' => 'googleauth', 'temp_user' => 1];
+
+            if($user->verifyUserTempByMail($request->email)->exists()){
+                if($this->authenticateTempUser($credentials)){
+                    $response = [
+                        'error' => false,
+                        'msg' => 'Autenticado com sucesso'
+                    ];
+                }else{
+                    $response = [
+                        'error' => true,
+                        'msg' => 'Não foi possível autenticar'
+                    ];
+                }
+
+                return response()->json($response);
+            }
+
+            if($user->saveTempUser($request->all())){
+                if($this->authenticateTempUser($credentials)){
+                    $response = [
+                        'error' => false,
+                        'msg' => 'Autenticado com sucesso'
+                    ];
+                }else{
+                    $response = [
+                        'error' => true,
+                        'msg' => 'Não foi possível autenticar'
+                    ];
+                }
+
+                return response()->json($response);
+            }
+
+        }catch(\Exception $error){
+            return response()->json([
+                'error' => true,
+                'msg' => 'Não foi possível efetuar a autenticação',
+                'error_feedback' => $error->getMessage()
+            ]);
+        }
+    }
+
+    protected function authenticateTempUser($credentials){
+        if(Auth::guard('web')->attempt($credentials)){
+            return true;
+        }else{
+            return false;
+        }
     }
 
     protected function logout(){

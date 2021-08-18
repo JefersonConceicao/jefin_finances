@@ -2,6 +2,8 @@
 //AUTENTICAÇÃO DO USUÁRIO
 Route::get('/', 'Auth\LoginController@renderFormLogin')->name('auth.renderViewLogin');
 Route::post('/login', 'Auth\LoginController@authenticateUser')->name('auth.login');
+Route::post('/loginWithGoogle', 'Auth\LoginController@userWithGoogle')->name('auth.authWithGoogle');
+
 Route::get('/forgotPassword', 'Auth\ForgotPasswordController@renderViewForgotPassword')->name('auth.forgotPassword');
 Route::post('/sendMailForgotPassword', 'Auth\ForgotPasswordController@sendMailForgotPassword')->name('auth.sendMailForgotPassword');
 
@@ -25,7 +27,6 @@ Route::group(['middleware' => 'auth'], function(){
         Route::get('/create', 'UsersController@create')->name('users.create');
         Route::get('/profile', 'UsersController@profile')->name('users.profile');
         Route::get('/edit/{id}', 'UsersController@edit')->name('users.edit');
-
         Route::post('/store', 'UsersController@store')->name('users.store');
         Route::put('/update/{id}', 'UsersController@update')->name('users.update');
         Route::delete('/delete/{id}', 'UsersController@delete')->name('users.delete');

@@ -21,7 +21,7 @@
         <div class="col-md-6">
             <div class="form-group">
                 <label> Ativo <span class="required"> * </span> </label>
-                <select class="form-control" name="ativo"> 
+                <select class="form-select" name="ativo"> 
                     <option value="1"> Sim  </option>
                     <option value="0"> Não </option>
                 </select>   
