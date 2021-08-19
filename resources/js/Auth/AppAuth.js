@@ -1,3 +1,4 @@
+const { default: Swal } = require('sweetalert2');
 const { 
     htmlLoading, 
     showMessagesValidator, 
@@ -5,6 +6,7 @@ const {
 } = require('../Core/AppUsage');
 
 $(function(){
+    initiAuth2();
     habilitaEventos()
     habilitaBotoes()
 });
@@ -16,6 +18,30 @@ const habilitaEventos = () => {
         e.preventDefault()
         formLoginUser()
     });
+
+    $("#logout").on("click", function(e){
+        e.preventDefault()
+        
+        Swal.fire({
+            icon: 'warning',
+            title: 'Tem certeza que deseja sair?',
+            showConfirmButton: true,
+            showCancelButton: true,
+            confirmButtonText: 'Sim, quero sair do sistema.',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: color().danger
+        }).then(result => {
+            if(result.isConfirmed){
+                $.get($(this).attr("href"), function (response, textStatus, jqXHR) {
+                    if(jqXHR.status == 200 && response.logout){
+                        logoutUserGoogle()
+                    }           
+                },
+                "JSON"
+            );
+            }
+        })
+    })  
 }
 
 const formLoginUser = () => {
@@ -81,6 +107,21 @@ const authWithGoogle = googleUser => {
             "JSON"
         );
     }   
+}
+
+const initiAuth2 = () => {
+    gapi.load('auth2', function(){
+        gapi.auth2.init()
+    })
+}
+
+const logoutUserGoogle = () => {
+    const authInstance = gapi.auth2.getAuthInstance();
+    authInstance.signOut().then(() => {
+        console.log("logout");
+    })
+
+    window.location.href = '/';
 }
 
 module.exports = {

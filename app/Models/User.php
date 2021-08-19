@@ -218,4 +218,17 @@ class User extends Authenticatable implements JWTSubject
 
         return false;
     }
+    
+    public function deleteTempUser($user){
+        try{
+            $this->where([
+                ['id', '=', $user->id],
+                ['temp_user', '=', 1]
+            ])->delete();
+
+            return true;   
+        }catch(\Exception $error){
+            return false;
+        }
+    }
 }

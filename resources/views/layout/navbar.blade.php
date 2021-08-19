@@ -22,7 +22,7 @@
             </a>
         </li>
         <li> 
-            <a class="dropdown-item" href="/logout"> 
+            <a class="dropdown-item" href="/logout" id="logout"> 
                 <i style="color:red;" class="fas fa-sign-out-alt me-2"></i> Sair
             </a>
         </li> 

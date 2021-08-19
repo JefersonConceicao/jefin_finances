@@ -109,8 +109,12 @@ class LoginController extends Controller
     }
 
     protected function logout(){
+        $objUser = new User;
+        $sessionUser = Auth::user();
+        
+        $objUser->deleteTempUser($sessionUser);
         Auth::logout();
-        return redirect('/');
+        return response()->json(['logout' => true]);
     }
 
     protected function apiLogout(){
