@@ -23,6 +23,7 @@ const habilitaEventos = () => {
         e.preventDefault()
         
         Swal.fire({
+    
             icon: 'warning',
             title: 'Tem certeza que deseja sair?',
             showConfirmButton: true,
