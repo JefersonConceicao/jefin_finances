@@ -49,6 +49,7 @@
     <script src="{{ asset('vendor/jquery-mask/dist/jquery.mask.min.js')}}"> </script>
     <script src="{{ asset('css/mazer-theme/vendors/chartjs/Chart.bundle.min.js') }}"> </script>
     <script src="https://apis.google.com/js/platform.js"> </script>
+    <script src="https://apis.google.com/js/api:client.js"></script>
     <script src="{{ asset('js/app.js') }}"> </script>
     <script> 
         function onSuccess(googleUser){
@@ -58,6 +59,5 @@
             console.log(error)
         }
     </script>
-
 </body>
 </html>

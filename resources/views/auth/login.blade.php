@@ -24,12 +24,24 @@
 
                             <div class="error_feedback"> </div>
                         </div>
-                        <button class="btn btn-primary btn-block btn-lg shadow-lg mt-5">Log in</button>
-                        
-                        <div style="margin-top:2%;">
-                            <div data-width="380" data-height="50" class="g-signin2" data-onfailure="onFailure" data-onsuccess="onSuccess">  </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <button class="btn btn-primary btn-block btn-lg shadow-lg mt-5">Log in</button>
+                            </div>
                         </div>
                     </form>
+                    <hr/>
+                    <div class="row">
+                        <p class="text-center"> Outras formas de acesso: </p>
+                    
+                        <div class="col-md-6">
+                            <button class="btn btn-default btn-block btn-lg shadow-lg customGPlusSignIn" id="loginWithGoogle">
+                                <i class="fab fa-google"> </i> <b> Google </b>
+                            </button>
+                        </div>
+                    </div>
+                
                     <div class="text-center mt-5 text-lg fs-4">
                         <p class="text-gray-600"> 
                             Não tem uma conta? 

@@ -6,13 +6,12 @@ const {
 } = require('../Core/AppUsage');
 
 $(function(){
-    initiAuth2();
+    initAuth2();
     habilitaEventos()
     habilitaBotoes()
 });
 
 const habilitaBotoes = () => {}
-
 const habilitaEventos = () => {
     $("#formLoginUser").on("submit", function(e){
         e.preventDefault()
@@ -23,7 +22,6 @@ const habilitaEventos = () => {
         e.preventDefault()
         
         Swal.fire({
-    
             icon: 'warning',
             title: 'Tem certeza que deseja sair?',
             showConfirmButton: true,
@@ -88,6 +86,20 @@ const formLoginUser = () => {
     });
 }
 
+const initAuth2 = () => {
+    gapi.load('auth2', function(){
+            auth2 = gapi.auth2.init({
+            client_id: "23951275285-j7sp1aucu6lhegsvjfd1fni74bct3uip.apps.googleusercontent.com",
+            cookiepolicy: 'localhost'
+        })
+        .then((result) => {
+            result.attachClickHandler(document.getElementById('loginWithGoogle'), {}, function(googleUser){
+                authWithGoogle(googleUser);   
+            })
+        })
+    })
+}
+
 const authWithGoogle = googleUser => {
     if(Object.keys(googleUser).length == 0) return; 
 
@@ -110,14 +122,10 @@ const authWithGoogle = googleUser => {
     }   
 }
 
-const initiAuth2 = () => {
-    gapi.load('auth2', function(){
-        gapi.auth2.init()
-    })
-}
 
 const logoutUserGoogle = () => {
     const authInstance = gapi.auth2.getAuthInstance();
+    
     authInstance.signOut().then(() => {
         console.log("logout");
     })
