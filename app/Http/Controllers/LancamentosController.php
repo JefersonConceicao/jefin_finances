@@ -45,8 +45,9 @@ class LancamentosController extends Controller
     public function create()
     {   
         $despesa = new Despesa;
+        $user = Auth::user();
 
-        $optionsDespesas = $despesa->optionsDespesasMesAtual();
+        $optionsDespesas = $despesa->optionsDespesasMesAtual($user);
         return view('lancamentos.create')
             ->with('optionsDespesas', $optionsDespesas);
     }

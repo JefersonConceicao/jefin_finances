@@ -101,11 +101,7 @@
                                     <td> {{ $despesa->nome_despesa }} </td>
                                     <td> {{ convertValorReal($despesa->valor_total) }} </td>
                                     <td> 
-                                        <label 
-                                            class="badge bg-{{ $despesa->despesa_tipo_id == 1 ? 'primary' : 'secondary'}}"
-                                        > 
-                                            {{ $despesa->despesaTipo->nome }} 
-                                        </label>
+                                        {{ $despesa->despesaTipo->nome }} 
                                     </td>
                                     <td> 
                                         <div class="text-center" style="display:flex;"> 

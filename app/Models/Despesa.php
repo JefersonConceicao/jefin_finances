@@ -201,11 +201,15 @@ class Despesa extends Model
         }
     }
 
-    public function optionsDespesasMesAtual(){
+    public function optionsDespesasMesAtual($user){
        return $this
         ->whereMonth('created_at', date('m'))
         ->whereYear('created_at', date('Y'))
-        ->where('pago', 0)
+        ->where([
+            ['pago', '=', 0],
+            ['user_id', '=', $user->id]
+            
+        ])
         ->pluck('nome_despesa', 'id')
         ->toArray();
     }
