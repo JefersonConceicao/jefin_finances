@@ -22,8 +22,10 @@ class User extends Authenticatable implements JWTSubject
         'password',
         'ativo',
         'temp_user',
+        'last_login',
     ];
-  
+    
+    protected $primaryKey = 'id';
     protected $hidden = ['password'];
 
     public function getJWTIdentifier(){

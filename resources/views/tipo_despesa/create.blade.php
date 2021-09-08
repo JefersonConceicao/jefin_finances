@@ -14,7 +14,6 @@
                     class="form-control"
                     required
                 />
-
                 <div class="error_feedback"> </div>
             </div>  
         </div>

@@ -21,7 +21,6 @@ class TiposDespesasController extends Controller
         $tiposDespesa = new TiposDespesa;
 
         $data = $tiposDespesa->getTiposDespesas($request->all(), $user);
-
         return view('tipo_despesa.index')
             ->with('dataTiposDespesa', $data);
     }

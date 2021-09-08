@@ -25,6 +25,7 @@ class LoginController extends Controller
     }
 
     protected function authenticateUser(LoginRequest $request){
+        $userModel = new User;
         $credentials = $request->only('email', 'password');
 
         if(!Auth::guard('web')->attempt($credentials)){
@@ -33,6 +34,8 @@ class LoginController extends Controller
                 'msg' => 'Credenciais incorretas'
             ];
         }else{
+            $this->setLastLogin(Auth::user());
+
             return response()->json([
                 'error' => false,
                 'msg' => 'Successful auth'
@@ -58,7 +61,7 @@ class LoginController extends Controller
 
         try{
             $credentials = ['email' => $request->email, 'password' => 'googleauth', 'temp_user' => 1];
-
+            
             if($user->verifyUserTempByMail($request->email)->exists()){
                 if($this->authenticateTempUser($credentials)){
                     $response = [
@@ -90,7 +93,6 @@ class LoginController extends Controller
 
                 return response()->json($response);
             }
-
         }catch(\Exception $error){
             return response()->json([
                 'error' => true,
@@ -102,10 +104,20 @@ class LoginController extends Controller
 
     protected function authenticateTempUser($credentials){
         if(Auth::guard('web')->attempt($credentials)){
+            $this->setLastLogin(Auth::user());
             return true;
         }else{
             return false;
         }
+    }
+
+    protected function setLastLogin($user){
+        $modelUser = new User;
+
+        $user = $modelUser->find($user->id);
+
+        $user->last_login = date('Y-m-d H:i:s');
+        $user->save();
     }
 
     protected function logout(){

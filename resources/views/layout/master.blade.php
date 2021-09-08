@@ -14,7 +14,6 @@
         integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" 
         crossorigin="anonymous"
     >
-
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet"/>
     <link rel="stylesheet" href="{{ asset('css/mazer-theme/app.css') }}"/>
     <link rel="stylesheet" href="{{ asset('css/mazer-theme/bootstrap.css') }}"/>
@@ -33,7 +32,6 @@
     <link rel="stylesheet" href="{{ asset('css/app.css') }} "/>   
 </head>
 <body style="background-color:#e7e7e7">
-
     @yield('content')
     <script 
         src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" 

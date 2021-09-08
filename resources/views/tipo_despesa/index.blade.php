@@ -73,7 +73,7 @@
                                     </td>
                                     <td> 
                                         <div class="text-center" style="display:flex;"> 
-                                            <button class="btn btn-primary rounded-pill btnEditTiposDespesa" id="{{$tipoDespesa->id}}"> 
+                                            <button class="btn btn-secondary rounded-pill btnEditTiposDespesa" id="{{$tipoDespesa->id}}"> 
                                                 <i class="fa fa-edit"> </i>
                                             </button>
                                             &nbsp;
