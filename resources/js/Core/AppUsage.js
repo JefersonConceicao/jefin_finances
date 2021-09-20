@@ -30,15 +30,15 @@ const optionsSwalDelete = {
 const showMessagesValidator = (form, errors) => {
     $(form).find('.is-invalid').removeClass("is-invalid");
     $(".error_feedback").html("");
-    
-    if($(form).length == 0 || !errors){
+
+    if ($(form).length == 0 || !errors) {
         return;
     }
 
     const nameInputs = Object.keys(errors);
     for (let i = 0; i < nameInputs.length; i++) {
-        const fieldError = $(form +` [name="${nameInputs[i]}"]`);
- 
+        const fieldError = $(form + ` [name="${nameInputs[i]}"]`);
+
         errors[nameInputs[i]].forEach(value => {
             fieldError.addClass('is-invalid');
             fieldError.parent().find('.error_feedback').html(`
@@ -49,26 +49,26 @@ const showMessagesValidator = (form, errors) => {
 }
 
 const setActive = () => {
-   const sidebarLink = $(".sidebar-link");
+    const sidebarLink = $(".sidebar-link");
 
-    sidebarLink.map((element, value )=> {
-       if($(value).attr("href") == window.location.pathname){
-           $(value).parent().addClass("active");
-       }
+    sidebarLink.map((element, value) => {
+        if ($(value).attr("href") == window.location.pathname) {
+            $(value).parent().addClass("active");
+        }
 
-       //VERIFICA SE EXISTE SUB-MENU
-       if($(value).parent().hasClass('has-sub')){
-           const sidebarItem = $(value).parent();
-           const subItens = sidebarItem.find('.submenu > .submenu-item > a');
-           
+        //VERIFICA SE EXISTE SUB-MENU
+        if ($(value).parent().hasClass('has-sub')) {
+            const sidebarItem = $(value).parent();
+            const subItens = sidebarItem.find('.submenu > .submenu-item > a');
+
             Array.from(subItens).forEach(element => {
-                if($(element).attr("href") == window.location.pathname){
+                if ($(element).attr("href") == window.location.pathname) {
                     sidebarItem.addClass("active")
                     sidebarItem.find('.submenu').css('display', 'block');
                     $(element).parent().addClass("active");
                 }
             })
-       }
+        }
     })
 }
 
@@ -79,11 +79,11 @@ const eventsHelper = () => {
         let tableOffsetHeight = $table.offset().top + $table.height()
         let menuOffsetHeight = $menu.offset().top + $menu.outerHeight(true);
 
-        if (menuOffsetHeight > tableOffsetHeight){
+        if (menuOffsetHeight > tableOffsetHeight) {
             $table.css("padding-bottom", menuOffsetHeight - tableOffsetHeight);
         }
     });
-    
+
     $('.table-responsive').on('hide.bs.dropdown', function () {
         $(this).css("padding-bottom", "");
         $(this).css("overflow", "auto")
@@ -113,9 +113,9 @@ const loadModal = (url, callback = null) => {
     const modalElement = $("#nivel1");
 
     modalElement.modal('show');
-    modalElement.find(".modal-content").load(`${url} >`, function(){
+    modalElement.find(".modal-content").load(`${url} >`, function () {
 
-        if(!!callback){
+        if (!!callback) {
             callback();
         }
 
@@ -124,7 +124,7 @@ const loadModal = (url, callback = null) => {
 }
 
 const loadingContent = element => {
-    if(!!element){
+    if (!!element) {
         $(element).closest(element).html(`
             <div class="alert alert-primary text-center">  
                 <div class="spinner-border text-light"> </div>
@@ -140,33 +140,33 @@ const deleteRowForGrid = (url, onSuccess = null, onError = null) => {
         dataType: "JSON",
         success: function (response) {
             Swal.fire({
-                toast:true,
+                toast: true,
                 position: 'bottom-left',
                 title: `<h5 style="color:white"> ${response.msg} </h5>`,
                 icon: !response.error ? 'success' : 'error',
                 showConfirmButton: false,
-                timer:3500,
+                timer: 3500,
                 background: response.error ? color().danger : color().default,
-            }); 
+            });
 
-            if(!!onSuccess){
+            if (!!onSuccess) {
                 onSuccess();
             }
         },
-        error:function(jqXHR, textStatus, error){
+        error: function (jqXHR, textStatus, error) {
             Swal.fire({
-                toast:true,
+                toast: true,
                 position: 'bottom-left',
                 title: `<h5 style="color:white"> 
                            Não foi possível excluir, pois o registro já está sendo utilizado.
                         </h5>`,
                 icon: 'error',
                 showConfirmButton: false,
-                timer:3500,
+                timer: 3500,
                 background: color().danger,
-            }); 
+            });
 
-            if(!!onError){
+            if (!!onError) {
                 onError();
             }
         },
