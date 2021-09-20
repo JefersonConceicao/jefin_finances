@@ -56,9 +56,7 @@
             <div class="row">
                 <div class="col-md-6">
                     <h3 class="card-title"> Total de registros: {{ count($dataDespesas) }} </h3>
-                    <p> Total despesas fixas: {{ "R$ " . convertValorReal($totalFixa) }} </p>
-                    <p> Total despesas variáveis: {{ "R$ " . convertValorReal($totalVariavel) }} </p>
-                    <h4> Total despesas: {{ "R$ " . convertValorReal($totalValor) }} </h4>
+                    <h6> Total despesas: {{ "R$ " . convertValorReal($totalValor) }} </h6>
                 </div>
                 <div class="col-md-6">
                     <button class="float-end btn btn-primary rounded-pill" id="addDespesa">

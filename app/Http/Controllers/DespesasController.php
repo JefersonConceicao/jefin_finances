@@ -23,17 +23,13 @@ class DespesasController extends Controller
         $data = $despesa->getDespesas($request->all(), $user)->orderBy('id','DESC')->get();
 
         $totalValor = $despesa->getDespesas($request->all(), $user)->sum('valor_total');
-        $totalFixa  = $despesa->getDespesas($request->all(), $user)->where('despesa_tipo_id' ,1)->sum('valor_total');
-        $totalVariavel = $despesa->getDespesas($request->all(), $user)->where('despesa_tipo_id' ,3)->sum('valor_total');
         $optionsTipoDesesa = $tipoDespesa->where('user_id', $user->id)->pluck('nome', 'id');
         
         return view('despesas.index')
             ->with('dataDespesas', $data)
             ->with('optionsMeses', $this->optionsMeses)
             ->with('optionsTipoDespesa', $optionsTipoDesesa)
-            ->with('totalValor', $totalValor)
-            ->with('totalFixa', $totalFixa)
-            ->with('totalVariavel', $totalVariavel);
+            ->with('totalValor', $totalValor);
     }
 
     /**
