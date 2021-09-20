@@ -16,6 +16,14 @@
         </a>
     </li>
 
+    <li class="sidebar-item">
+        <a href="/dividas/" class="sidebar-link"> 
+            <i class="fab fa-amazon-pay"></i>
+            &nbsp;
+            <span> Dívidas </span>
+        </a>
+    </li>
+
     <li class="sidebar-item has-sub">
         <a href="#" class="sidebar-link">
             <i class="fas fa-hand-holding-usd"></i>

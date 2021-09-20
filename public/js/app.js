@@ -62690,6 +62690,164 @@ module.exports = {
 
 /***/ }),
 
+/***/ "./resources/js/Logged/AppDividas.js":
+/*!*******************************************!*\
+  !*** ./resources/js/Logged/AppDividas.js ***!
+  \*******************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+var _require = __webpack_require__(/*! ../Core/AppUsage */ "./resources/js/Core/AppUsage.js"),
+    loadingContent = _require.loadingContent,
+    htmlLoading = _require.htmlLoading,
+    loadModal = _require.loadModal,
+    showMessagesValidator = _require.showMessagesValidator,
+    color = _require.color,
+    optionsSwalDelete = _require.optionsSwalDelete,
+    deleteRowForGrid = _require.deleteRowForGrid;
+
+$(function () {
+  habilitaBotoes();
+  habilitaEventos();
+});
+var modalOjbect = "#nivel1";
+var grid = "#gridDebts";
+
+var habilitaEventos = function habilitaEventos() {
+  $("#formFilterDividas").on("submit", function (e) {
+    e.preventDefault();
+    getFilter();
+  });
+};
+
+var habilitaBotoes = function habilitaBotoes() {
+  $("#addDebt").on("click", function () {
+    var url = '/dividas/create';
+    loadModal(url, function () {
+      $("#formAddDebt").on("submit", function (e) {
+        e.preventDefault();
+        formDebts();
+      });
+    });
+  });
+  $("#gridDebts  table > tbody > tr").on("click", function (e) {
+    e.preventDefault();
+    if (e.target.tagName != "TD") return;
+    var id = $(this).attr("key");
+    var url = "/dividas/show/".concat(id);
+    loadModal(url);
+  });
+  $(".payDebt").on("click", function () {
+    var id = $(this).attr("id");
+    payDebts(id, $(this));
+  });
+  $(".deleteDebt").on("click", function () {
+    var url = "/dividas/delete/".concat($(this).attr("id"));
+    Swal.fire(optionsSwalDelete).then(function (result) {
+      return !!result.isConfirmed && deleteRowForGrid(url, getFilter());
+    });
+  });
+};
+
+var getFilter = function getFilter() {
+  var form = "#formFilterDividas";
+  var url = '/dividas';
+  $.ajax({
+    type: "GET",
+    url: url,
+    data: $(form).serialize(),
+    dataType: "HTML",
+    beforeSend: function beforeSend() {
+      loadingContent(grid);
+    },
+    success: function success(response) {
+      $(grid).html($(response).find(grid + " >"));
+      habilitaBotoes();
+    }
+  });
+};
+
+var formDebts = function formDebts(id) {
+  var url = typeof id === "undefined" ? '/dividas/store' : "/dividas/update/".concat(id);
+  var form = typeof id === "undefined" ? '#formAddDebt' : '#formUpdateDebt';
+  var type = typeof id === "undefined" ? 'POST' : 'PUT';
+  $.ajax({
+    type: type,
+    url: url,
+    data: $(form).serialize(),
+    dataType: "JSON",
+    beforeSend: function beforeSend() {
+      $(form + " .btn-primary").prop('disabled', true).html(htmlLoading);
+    },
+    success: function success(response) {
+      Swal.fire({
+        toast: true,
+        position: 'bottom-left',
+        title: "<h5 style=\"color:white\"> ".concat(response.msg, " </h5>"),
+        icon: !response.error ? 'success' : 'error',
+        showConfirmButton: false,
+        timer: 3000,
+        background: response.error ? 'red' : color()["default"],
+        onclose: function onclose() {
+          $(modalOjbect).modal('hide');
+        }
+      });
+    },
+    error: function error(jqXHR, textStatus, _error) {
+      if (jqXHR.responseJSON.errors) {
+        showMessagesValidator(form, jqXHR.responseJSON.errors);
+      }
+    },
+    complete: function complete() {
+      $(form + " .btn-primary").prop('disabled', false).html("Salvar");
+    }
+  });
+};
+
+var payDebts = function payDebts(id, element) {
+  var url = "/dividas/payDebt/".concat(id);
+  $.ajax({
+    type: "PUT",
+    url: url,
+    dataType: "JSON",
+    beforeSend: function beforeSend() {
+      element.prop('disabled', true).html("<i class=\"fa fa-spinner fa-spin\"> </i>");
+    },
+    success: function success(response) {
+      Swal.fire({
+        toast: true,
+        position: 'bottom-left',
+        title: "<h5 style=\"color:white\"> ".concat(response.msg, " </h5>"),
+        icon: !response.error ? 'success' : 'error',
+        showConfirmButton: false,
+        timer: 3000,
+        background: response.error ? 'red' : color()["default"]
+      });
+    },
+    error: function error() {
+      Swal.fire({
+        toast: true,
+        position: 'bottom-left',
+        title: "<h5 style=\"color:white\"> Ocorreu um erro interno, tente de novo </h5>",
+        icon: 'error',
+        showConfirmButton: false,
+        timer: 3000,
+        background: response.error ? 'red' : color()["default"]
+      });
+    },
+    complete: function complete() {
+      getFilter();
+    }
+  });
+};
+
+module.exports = {
+  habilitaBotoes: habilitaBotoes,
+  habilitaEventos: habilitaEventos
+};
+
+/***/ }),
+
 /***/ "./resources/js/Logged/AppLancamentos.js":
 /*!***********************************************!*\
   !*** ./resources/js/Logged/AppLancamentos.js ***!
@@ -63367,6 +63525,7 @@ window.AppLancamentos = __webpack_require__(/*! ./Logged/AppLancamentos */ "./re
 window.AppDashboard = __webpack_require__(/*! ./Logged/AppDashboard */ "./resources/js/Logged/AppDashboard.js");
 window.AppProfile = __webpack_require__(/*! ./Logged/AppProfile */ "./resources/js/Logged/AppProfile.js");
 window.AppForgotPassword = __webpack_require__(/*! ./Auth/AppForgotPassword */ "./resources/js/Auth/AppForgotPassword.js");
+window.AppDividas = __webpack_require__(/*! ./Logged/AppDividas */ "./resources/js/Logged/AppDividas.js");
 $.ajaxSetup({
   headers: {
     'X-CSRF-TOKEN': $("meta[name='csrf-token']").attr("content")

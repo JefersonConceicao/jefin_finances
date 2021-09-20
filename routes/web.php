@@ -73,6 +73,15 @@ Route::group(['middleware' => 'auth'], function(){
         Route::delete('/delete/{id}', 'LancamentosController@delete')->name('lancamentos.delete');
         Route::get('/getGastosGraphs', 'LancamentosController@dataGastosGraficos')->name('lancamentos.dataGrafico');
     });
+
+    Route::group(['prefix' => 'dividas'], function(){
+        Route::get('/', 'DividasController@index')->name('dividas.index');
+        Route::get('/create', 'DividasController@create')->name('dividas.create');
+        Route::post('/store', 'DividasController@store')->name('dividas.store');
+        Route::get('/show/{id}', 'DividasController@show')->name('dividas.show');
+        Route::delete('/delete/{id}', 'DividasController@delete')->name('dividas.destroy');
+        Route::put('/payDebt/{id}', 'DividasController@declarePayment')->name('dividas.declarePayment');
+    });
 });
 
 

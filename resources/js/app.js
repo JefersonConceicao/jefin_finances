@@ -13,6 +13,7 @@ window.AppLancamentos = require('./Logged/AppLancamentos');
 window.AppDashboard = require('./Logged/AppDashboard');
 window.AppProfile = require('./Logged/AppProfile');
 window.AppForgotPassword = require('./Auth/AppForgotPassword');
+window.AppDividas = require('./Logged/AppDividas');
 
 $.ajaxSetup({
     headers: {
