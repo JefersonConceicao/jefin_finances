@@ -94,11 +94,11 @@ const formDebts = id => {
                 icon: !response.error ? 'success' : 'error',
                 showConfirmButton: false,
                 timer:3000,
-                background: response.error ? 'red' : color().default,
-                onclose:() => {
-                    $(modalOjbect).modal('hide');
-                }
+                background: response.error ? 'red' : color().default, 
             });    
+
+            $(modalOjbect).modal('hide');
+            getFilter();
         },
         error:function(jqXHR, textStatus, error){
             if(jqXHR.responseJSON.errors){
