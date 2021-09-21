@@ -41,7 +41,7 @@
         </div>
         <div class="col-md-4">
             <div class="form-group">
-                <label> Valor p/ parcela </label>
+                <label> Valor p/ parcela <span class="required"> * </span> </label>
                 <input name="valor_parcela" type="text" class="form-control decimalValue" />
                 
                 <div class="error_feedback"> </div>
