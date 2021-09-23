@@ -60,7 +60,7 @@
                                     <th> Valor total </th>
                                     <th> Parcelas restantes </th>
                                     <th> Total pago </th>
-                                    <th> Valor a ser pago </th>
+                                    <th> Total restante </th>
                                     <th width="2%"> Ações </th>
                                 </tr>
                             </thead>
