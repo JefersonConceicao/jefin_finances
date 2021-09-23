@@ -62820,7 +62820,7 @@ var payDebts = function payDebts(id, element) {
         icon: !response.error ? 'success' : 'error',
         showConfirmButton: false,
         timer: 3000,
-        background: response.error ? 'red' : color()["default"]
+        background: !!response.error ? 'red' : color()["default"]
       });
     },
     error: function error() {
