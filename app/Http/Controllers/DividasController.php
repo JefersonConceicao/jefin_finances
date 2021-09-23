@@ -19,7 +19,7 @@ class DividasController extends Controller
         $user = Auth::user();
 
         $data = $dividas->getDividas($request->all(), $user);
-        $sumDividas = $dividas->getTotalValorDivida($user);
+        $sumDividas = $dividas->getTotalValorDivida($user,  $request->all());
 
         return view('dividas.index')
             ->with('dataDividas', $data)

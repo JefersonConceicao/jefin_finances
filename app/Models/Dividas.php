@@ -109,7 +109,6 @@ class Dividas extends Model
     public function payDebt($id){
         try{
             $debt = $this->find($id);
-
             $debt->qtd_parcela_parcial = $debt->qtd_parcela_parcial + 1;
             $debt->valor_parcial = $debt->valor_parcial + $debt->valor_parcela; 
             
@@ -131,10 +130,17 @@ class Dividas extends Model
         }
     }
 
-    public function getTotalValorDivida($user){
+    public function getTotalValorDivida($user, $request = []){
+        $conditions = [];
+        $conditions[] = ['user_id', '=', $user->id];
+        
+        if(isset($request['pago']) && !empty($request['pago'])){
+            $conditions[] = ['pago','=',$request['pago']];
+        }
+
         return $this
             ->select(DB::raw('SUM(valor_total) - SUM(valor_parcial) as valor_total_pagar'))
-            ->where('user_id','=',$user->id)
+            ->where($conditions)
             ->first()
             ->valor_total_pagar;
     }
