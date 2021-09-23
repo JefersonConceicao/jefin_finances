@@ -39,14 +39,6 @@
                 <div class="error_feedback"> </div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="form-group">
-                <label> Valor p/ parcela </label>
-                <input name="valor_parcela" type="text" class="form-control decimalValue" />
-                
-                <div class="error_feedback"> </div>
-            </div>  
-        </div>
     </div>
 @endsection
 @section('btn_fechar')

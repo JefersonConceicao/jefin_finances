@@ -18,7 +18,8 @@ class Dividas extends Model
         'created_at',
         'updated_at',
         'data_fim_divida',
-        'data_inicial_divida'
+        'data_inicial_divida',
+        'pago'
     ];
 
     public function getDividas($request = []){
@@ -59,7 +60,7 @@ class Dividas extends Model
                 'data_inicial_divida' => $dataInicialDivida,
                 'valor_total' => setToDecimal($request['valor_total']),
                 'qtd_parcela_total' => $request['qtd_parcela_total'],
-                'valor_parcela'=> setToDecimal($request['valor_parcela']),
+                'valor_parcela'=> setToDecimal($request['valor_total']) / setToDecimal($request['qtd_parcela_total']), 
                 'qtd_parcela_parcial' => 0,
                 'valor_parcial' => 0,
                 'data_fim_divida' => $carbon->addMonth($request['qtd_parcela_total'])->toDateString(),
@@ -104,7 +105,7 @@ class Dividas extends Model
             $debt->qtd_parcela_parcial = $debt->qtd_parcela_parcial + 1;
             $debt->valor_parcial = $debt->valor_parcial + $debt->valor_parcela; 
             $debt->save();
-            
+
             return [
                 'error' => false,
                 'msg' => 'Pagamento efetuado, dívida atualizada'
@@ -116,4 +117,6 @@ class Dividas extends Model
             ];
         }
     }
+
+    public function getTotalValorDivida(){}
 }

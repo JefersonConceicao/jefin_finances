@@ -32,7 +32,6 @@ class DividasRequest extends FormRequest
                     ],
                     'valor_total' => 'required',
                     'qtd_parcela_total' => 'required|numeric',
-                    'valor_parcela' => 'required'
                 ];
         }
     }
