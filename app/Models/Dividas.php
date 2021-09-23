@@ -20,12 +20,14 @@ class Dividas extends Model
         'updated_at',
         'data_fim_divida',
         'data_inicial_divida',
-        'pago'
+        'pago',
+        'user_id'
     ];
 
-    public function getDividas($request = []){
+    public function getDividas($request = [], $user){
         $conditions = [];
 
+        $conditions[] = ['user_id', '=', $user->id];
         if(isset($request['descricao_divida']) && !empty($request['descricao_divida'])){
             $conditions[] = ['descricao_divida', 'LIKE', "%".$request['descricao_divida']."%"];
         }
@@ -51,7 +53,7 @@ class Dividas extends Model
         ->get();
     }
 
-    public function saveDivida($request = []){
+    public function saveDivida($request = [], $user){
         $dataInicialDivida = converteData(str_replace('/','-',$request['data_inicial_divida']), 'Y-m-d');
         $carbon = new Carbon($dataInicialDivida);
 
@@ -65,6 +67,7 @@ class Dividas extends Model
                 'qtd_parcela_parcial' => 0,
                 'valor_parcial' => 0,
                 'data_fim_divida' => $carbon->addMonth($request['qtd_parcela_total'])->toDateString(),
+                'user_id' => $user->id,
             ])->save();
 
             return [
@@ -124,9 +127,10 @@ class Dividas extends Model
         }
     }
 
-    public function getTotalValorDivida(){
+    public function getTotalValorDivida($user){
         return $this
             ->select(DB::raw('SUM(valor_total) - SUM(valor_parcial) as valor_total_pagar'))
+            ->where('user_id','=',$user->id)
             ->first()
             ->valor_total_pagar;
     }

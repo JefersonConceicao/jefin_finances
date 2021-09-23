@@ -7,7 +7,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="google-signin-client_id" content="23951275285-j7sp1aucu6lhegsvjfd1fni74bct3uip.apps.googleusercontent.com" /> 
 
-    <title> Jefin Finances </title>
+    <title> Jefin Finances GESTÃO FINANCEIRA SIMPLES </title>
     <link 
         href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" 
         rel="stylesheet" 

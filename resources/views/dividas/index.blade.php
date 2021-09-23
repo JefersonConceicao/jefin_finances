@@ -56,7 +56,7 @@
                             <thead> 
                                 <tr> 
                                     <th> Descrição </th>
-                                    <th> Qtd parcelas </th>
+                                    <th> Parcelas </th>
                                     <th> Valor total </th>
                                     <th> Parcelas restantes </th>
                                     <th> Total pago </th>
@@ -68,7 +68,7 @@
                                 @foreach($dataDividas as $dividas)
                                     <tr key="{{$dividas->id}}" style="cursor:pointer;">  
                                         <td> {{ $dividas->descricao_divida }} </td>
-                                        <td> {{ $dividas->qtd_parcela_total }} </td>
+                                        <td> {{ $dividas->qtd_parcela_total."x (R$ ". convertValorReal($dividas->valor_parcela).")"    }} </td>
                                         <td> {{ "R$ ".convertValorReal($dividas->valor_total) }} </td>
                                         <td>  
                                             <label class="badge bg-primary">

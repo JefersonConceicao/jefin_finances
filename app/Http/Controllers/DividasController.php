@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Dividas;
 //REQUESTS
 use App\Http\Requests\DividasRequest;
+use Auth;
 
 class DividasController extends Controller
 {
@@ -15,9 +16,10 @@ class DividasController extends Controller
     public function index(Request $request)
     {   
         $dividas = new Dividas;
+        $user = Auth::user();
 
-        $data = $dividas->getDividas($request->all());
-        $sumDividas = $dividas->getTotalValorDivida();
+        $data = $dividas->getDividas($request->all(), $user);
+        $sumDividas = $dividas->getTotalValorDivida($user);
 
         return view('dividas.index')
             ->with('dataDividas', $data)
@@ -37,10 +39,11 @@ class DividasController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(DividasRequest $request)
-    {
+    {   
+        $user = Auth::user();
         $dividas = new Dividas;
 
-        $data = $dividas->saveDivida($request->all());
+        $data = $dividas->saveDivida($request->all(), $user);
         return response()->json($data);
     }
 
