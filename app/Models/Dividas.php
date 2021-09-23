@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
+use DB;
 
 class Dividas extends Model
 {
@@ -104,19 +105,29 @@ class Dividas extends Model
 
             $debt->qtd_parcela_parcial = $debt->qtd_parcela_parcial + 1;
             $debt->valor_parcial = $debt->valor_parcial + $debt->valor_parcela; 
-            $debt->save();
+            
+            //VERIFICA SE É DECLARAÇÃO DA ULTIMA PARCELA
+            if($debt->qtd_parcela_total == $debt->qtd_parcela_parcial){
+                $debt->pago = 1;
+            }
 
+            $debt->save();
             return [
                 'error' => false,
                 'msg' => 'Pagamento efetuado, dívida atualizada'
             ];
         }catch(\Exception $error){
             return [
-                'error' => false,
-                'msg' => 'Ocorreu um erro, tente de novo'
+                'error' => true,
+                'msg' => 'Ocorreu um erro ao declarar pagamento, tente de novo.'
             ];
         }
     }
 
-    public function getTotalValorDivida(){}
+    public function getTotalValorDivida(){
+        return $this
+            ->select(DB::raw('SUM(valor_total) - SUM(valor_parcial) as valor_total_pagar'))
+            ->first()
+            ->valor_total_pagar;
+    }
 }

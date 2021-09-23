@@ -1,7 +1,7 @@
 @extends('layout.page')
 @section('content_header')
     <h3> Dívidas </h3>
-    <p> Acompanhe o prazo e o valor parcial das dívidas</p>
+    <p> Acompanhe o prazo e o valor parcial das dívidas </p>
 @endsection
 @section('content-page')
     @component('components.filtro')
@@ -40,6 +40,7 @@
                 <div class="row">
                     <div class="col-md-6">
                         <h4> Total de dívidas: {{ count($dataDividas) }} </h4>
+                        <p>  Valor total a pagar de dívdas: {{ "R$ ".convertValorReal($countDividas) }} </p>
                     </div>
                     <div class="col-md-6">
                         <div class="btn btn-primary float-end rounded-pill" id="addDebt"> 
@@ -86,7 +87,7 @@
                                         </td>
                                         <td> 
                                             <div style="display:flex; justify-content:space-between"> 
-                                                @if($dividas->qtd_parcela_parcial == $dividas->qtd_parcela_total)
+                                                @if($dividas->pago === 1)
                                                     <button class="btn btn-sm btn-success rounded-pill" title="Remover parcela" id="{{$dividas->id}}">  
                                                         <small> Quitado </small>
                                                     </button>   

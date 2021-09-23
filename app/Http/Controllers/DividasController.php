@@ -2,10 +2,8 @@
 
 namespace App\Http\Controllers;
 use Illuminate\Http\Request;
-
 //MODELS
 use App\Models\Dividas;
-
 //REQUESTS
 use App\Http\Requests\DividasRequest;
 
@@ -19,8 +17,11 @@ class DividasController extends Controller
         $dividas = new Dividas;
 
         $data = $dividas->getDividas($request->all());
+        $sumDividas = $dividas->getTotalValorDivida();
+
         return view('dividas.index')
-            ->with('dataDividas', $data);
+            ->with('dataDividas', $data)
+            ->with('countDividas', $sumDividas);
     }
 
     /**

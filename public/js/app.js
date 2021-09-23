@@ -62787,11 +62787,10 @@ var formDebts = function formDebts(id) {
         icon: !response.error ? 'success' : 'error',
         showConfirmButton: false,
         timer: 3000,
-        background: response.error ? 'red' : color()["default"],
-        onclose: function onclose() {
-          $(modalOjbect).modal('hide');
-        }
+        background: response.error ? 'red' : color()["default"]
       });
+      $(modalOjbect).modal('hide');
+      getFilter();
     },
     error: function error(jqXHR, textStatus, _error) {
       if (jqXHR.responseJSON.errors) {
@@ -62821,7 +62820,7 @@ var payDebts = function payDebts(id, element) {
         icon: !response.error ? 'success' : 'error',
         showConfirmButton: false,
         timer: 3000,
-        background: response.error ? 'red' : color()["default"]
+        background: !!response.error ? 'red' : color()["default"]
       });
     },
     error: function error() {
