@@ -40,7 +40,7 @@
                 <div class="row">
                     <div class="col-md-6">
                         <h4> Total de dívidas: {{ count($dataDividas) }} </h4>
-                        <p>  Valor total a pagar de dívdas: {{ "R$ ".convertValorReal($countDividas) }} </p>
+                        <h6>  Valor total a pagar de dívdas:  {{ "R$ ".convertValorReal($countDividas)}} </h6>
                     </div>
                     <div class="col-md-6">
                         <div class="btn btn-primary float-end rounded-pill" id="addDebt"> 
