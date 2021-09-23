@@ -7,26 +7,38 @@
     @component('components.filtro')
         <form id="formFilterDividas">
             <div class="row">
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <div class="form-group">
                         <label for=""> Descrição </label>
                         <input id="descricaoDivida" class="form-control" name="descricao_divida" type="text" />
                     </div>
+                </div>  
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="dividaPaga"> Pago </label>
+                        <select id="dividaPaga" class="form-select" name="pago"> 
+                            <option value="" selected> Selecione </option>
+                            <option value="1"> Sim </option>
+                            <option value="0"> Não </option>
+                        </select>
+                    </div>
                 </div>
-                <div class="col-md-2">
+                <div class="col-md-3">
                     <div class="form-group">
                         <label for="dataInicialDivida"> Data inicial </label>
                         <input id="dataInicialDivida" class="form-control datepicker" name="data_inicial_divida" autocomplete="off"/>
                     </div>
                 </div>
-                <div class="col-md-2">
+                <div class="col-md-3">
                     <div class="form-group">
                         <label for="dataInicial"> Data final </label>
                         <input id="dataFinalDivida" class="form-control datepicker" name="data_final_divida" autocomplete="off"/>
                     </div>
                 </div>
-                <div class="col-md-4">
-                    <button style="margin-top:3%;" type="submit" class="btn btn-sm btn-primary rounded-pill float-end">
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <button style="margin-top:3%;" type="submit" class="btn btn-sm btn-primary rounded-pill float-start">
                         <i class="fa fa-search"> </i>
                         Pesquisar
                     </button>

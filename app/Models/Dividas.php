@@ -26,8 +26,8 @@ class Dividas extends Model
 
     public function getDividas($request = [], $user){
         $conditions = [];
-
         $conditions[] = ['user_id', '=', $user->id];
+        
         if(isset($request['descricao_divida']) && !empty($request['descricao_divida'])){
             $conditions[] = ['descricao_divida', 'LIKE', "%".$request['descricao_divida']."%"];
         }
@@ -48,6 +48,10 @@ class Dividas extends Model
             ];
         }
 
+        if(isset($request['pago']) && !empty($request['pago'])){
+            $conditions[] = ['pago','=', $request['pago']];
+        }
+        
        return $this
         ->where($conditions)
         ->get();
