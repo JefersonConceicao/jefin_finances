@@ -52,7 +52,7 @@
                 <div class="row">
                     <div class="col-md-6">
                         <h4> Total de dívidas: {{ count($dataDividas) }} </h4>
-                        <h6>  Valor total a pagar de dívdas:  {{ "R$ ".convertValorReal($countDividas)}} </h6>
+                        <h6>  Valor total a pagar de dívdas:  {{ "R$ ".convertValorReal(round($countDividas))}} </h6>
                     </div>
                     <div class="col-md-6">
                         <div class="btn btn-primary float-end rounded-pill" id="addDebt"> 
@@ -94,7 +94,11 @@
                                         </td>
                                         <td> 
                                             <label class="badge bg-primary">
-                                                {{ "R$ ".convertValorReal($dividas->valor_total - ($dividas->valor_parcela * $dividas->qtd_parcela_parcial)) }}
+                                                @if($dividas->pago === 0)
+                                                    {{ "R$ ".convertValorReal(round($dividas->valor_total - ($dividas->valor_parcela * $dividas->qtd_parcela_parcial))) }}
+                                                @else 
+                                                    {{ "R$ ".convertValorReal(0.0)}}
+                                                @endif
                                             </label>
                                         </td>
                                         <td> 

@@ -18,7 +18,7 @@ const grid = "#gridDespesas"
 
 const habilitaEventos = () => {
     getFilterDespesas()
-
+    
     $("#searchFormDespesas").on("submit", function(e){
         e.preventDefault()
         getFilterDespesas()
@@ -34,6 +34,8 @@ const habilitaBotoes = () => {
                 e.preventDefault()
                 formDespesas()
             });
+
+            settingsInModal();
         });
     }); 
 
@@ -195,6 +197,46 @@ const getFilterDespesas = () => {
     });
 }
 
+const settingsInModal = () => {
+    const url = '/tiposDespesas/store';
+    const form = "#addTiposDespesas";
+
+    $(form + " .btn-success").on("click", function(){   
+        $.ajax({
+            type: "POST",
+            url,
+            data: $(form).serialize(),
+            dataType: "JSON",
+            beforeSend:function(){
+                $(form + " .btn-success")
+                    .prop("disabled", true)
+                    .html(`<i class="fa fa-spinner fa-spin"> </i>`)
+            },
+            success: function (response) {
+                Swal.fire({
+                    toast:true,
+                    position: 'bottom-left',
+                    title: `<h5 style="color:white"> ${response.msg} </h5>`,
+                    icon: !response.error ? 'success' : 'error',
+                    showConfirmButton: false,
+                    timer:3000,
+                    background: response.error ? 'red' : color().default
+                });
+            },  
+            error:function(jqXHR, textStatus, error){
+                const errors = jqXHR.responseJSON.errors;
+                if(!!errors){
+                    AppUsage.showMessagesValidator(form, errors);
+                }
+            },
+            complete:function(){
+                $(form + " .btn-success").prop("disabled", false).html(`Salvar`)
+            },
+        });
+    });
+}
+
+const optionsTiposDespesasJSON = () => {}
 
 module.exports = {
     habilitaBotoes,

@@ -79,8 +79,8 @@ Route::group(['middleware' => 'auth'], function(){
         Route::get('/create', 'DividasController@create')->name('dividas.create');
         Route::post('/store', 'DividasController@store')->name('dividas.store');
         Route::get('/show/{id}', 'DividasController@show')->name('dividas.show');
-        Route::delete('/delete/{id}', 'DividasController@delete')->name('dividas.destroy');
         Route::put('/payDebt/{id}', 'DividasController@declarePayment')->name('dividas.declarePayment');
+        Route::delete('/delete/{id}', 'DividasController@delete')->name('dividas.destroy');
     });
 });
 

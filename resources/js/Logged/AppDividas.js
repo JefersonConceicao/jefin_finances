@@ -30,16 +30,17 @@ const habilitaBotoes = () => {
                 e.preventDefault()
                 formDebts();
             });
+
+            configInModal();
         });
     });
 
     $("#gridDebts  table > tbody > tr").on("click", function(e){
-        e.preventDefault()
         if(e.target.tagName != "TD") return;
-        
+        e.preventDefault();
+
         const id = $(this).attr("key");
         const url = `/dividas/show/${id}`
-
         loadModal(url)
     })  
 
@@ -148,6 +149,7 @@ const payDebts = (id, element) => {
         }
     });
 }
+
 
 module.exports = {
     habilitaBotoes,

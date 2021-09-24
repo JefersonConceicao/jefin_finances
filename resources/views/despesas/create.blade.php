@@ -13,7 +13,6 @@
                     type="text"
                     class="form-control"
                 />
-
                 <div class="error_feedback"> </div>
             </div>
         </div>
@@ -39,11 +38,67 @@
                         <option value="{{ $k }}"> {{ $v }} </option>
                     @endforeach
                 </select>
-
+                <div> 
+                    <label class="float-end"> 
+                        <a 
+                            role="button"
+                            href="#formAddTipoDespesa" 
+                            id="newTipoDespesa" 
+                            data-bs-toggle="collapse"
+                            aria-expanded="true"
+                            aria-controls="formAddTipoDespesa"
+                        > 
+                            Adicionar tipo de despesa
+                        </a> 
+                    </label>
+                </div>
                 <div class="error_feedback"> </div>
             </div>
         </div>
     </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="collapse" id="formAddTipoDespesa" style="border: 1px solid black; margin:10px;">   
+                <div class="card">
+                    <h5 class="card-header">
+                        Adicionar tipo de despesa 
+                    </h5>
+                    <div class="card-body">
+                        <div class="row">
+                            <form id="addTiposDespesas">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label> Tipo despesa </label>
+                                        <input 
+                                            name="nome"
+                                            class="form-control"
+                                        />
+
+                                        <div class="error_feedback"> </div> 
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label> Ativo </label>
+                                        <select class="form-select" name="ativo">  
+                                            <option value="1"> Sim </option>
+                                            <option value="0"> Não </option>     
+                                        </select>
+                                        <div class="error_feedback"> </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2" style="margin-top:3%;">
+                                    <button class="btn btn-success" type="button"> Salvar </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>  
+            </div>
+        </div>
+    </div>
+
     <div class="row">
         <div class="col-md-6"> 
             <div class="form-group">

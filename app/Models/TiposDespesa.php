@@ -32,7 +32,6 @@ class TiposDespesa extends Model
     public function saveTiposDespesa($request = [], $user){
         try{
             $request['user_id'] = $user->id;
-
             $this->fill($request)->save();
 
             return [

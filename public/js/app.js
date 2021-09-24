@@ -62539,6 +62539,7 @@ var habilitaBotoes = function habilitaBotoes() {
         e.preventDefault();
         formDespesas();
       });
+      settingsInModal();
     });
   });
   $(".rowSettingsDespesa").on("click", function (e) {
@@ -62683,6 +62684,45 @@ var getFilterDespesas = function getFilterDespesas() {
   });
 };
 
+var settingsInModal = function settingsInModal() {
+  var url = '/tiposDespesas/store';
+  var form = "#addTiposDespesas";
+  $(form + " .btn-success").on("click", function () {
+    $.ajax({
+      type: "POST",
+      url: url,
+      data: $(form).serialize(),
+      dataType: "JSON",
+      beforeSend: function beforeSend() {
+        $(form + " .btn-success").prop("disabled", true).html("<i class=\"fa fa-spinner fa-spin\"> </i>");
+      },
+      success: function success(response) {
+        Swal.fire({
+          toast: true,
+          position: 'bottom-left',
+          title: "<h5 style=\"color:white\"> ".concat(response.msg, " </h5>"),
+          icon: !response.error ? 'success' : 'error',
+          showConfirmButton: false,
+          timer: 3000,
+          background: response.error ? 'red' : color()["default"]
+        });
+      },
+      error: function error(jqXHR, textStatus, _error2) {
+        var errors = jqXHR.responseJSON.errors;
+
+        if (!!errors) {
+          AppUsage.showMessagesValidator(form, errors);
+        }
+      },
+      complete: function complete() {
+        $(form + " .btn-success").prop("disabled", false).html("Salvar");
+      }
+    });
+  });
+};
+
+var optionsTiposDespesasJSON = function optionsTiposDespesasJSON() {};
+
 module.exports = {
   habilitaBotoes: habilitaBotoes,
   habilitaEventos: habilitaEventos
@@ -62728,11 +62768,12 @@ var habilitaBotoes = function habilitaBotoes() {
         e.preventDefault();
         formDebts();
       });
+      configInModal();
     });
   });
   $("#gridDebts  table > tbody > tr").on("click", function (e) {
-    e.preventDefault();
     if (e.target.tagName != "TD") return;
+    e.preventDefault();
     var id = $(this).attr("key");
     var url = "/dividas/show/".concat(id);
     loadModal(url);
