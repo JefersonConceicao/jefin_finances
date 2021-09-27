@@ -84,4 +84,11 @@ class TiposDespesasController extends Controller
         $data = $tiposDespesa->deleteTipoDespesa($id);
         return response()->json($data);
     }
+
+    public function optionsDespesasJSON(){
+        $tiposDespesa = new TiposDespesa;
+
+        $data = $tiposDespesa->get(['nome','id']);
+        return response()->json($data);
+    }
 }

@@ -102,9 +102,10 @@ class DespesasController extends Controller
     }
 
     public function delcararPagamentoDespesa($id){
+        $user = Auth::user();
         $despesa = new Despesa;
 
-        $data = $despesa->pagamentoDespesa($id);
+        $data = $despesa->pagamentoDespesa($id, $user);
         return response()->json($data);
     }
 

@@ -133,6 +133,29 @@ const loadingContent = element => {
     }
 }
 
+const updateOptionsField = (element, urlRoute, formData = {}) => {
+    $.ajax({
+        type: "GET",
+        url: urlRoute,
+        data: formData,
+        dataType: "JSON",
+        beforeSend:function(){
+            element.
+                html(`<option value="" disabled selected> Carregando.... </option>`)
+        },
+        success: function (response) {
+            element.html(`<option value="" selected> Selecione </option>`)
+
+            response.forEach(value => {
+                element.append(`<option value="${value.id}"> ${value.nome} </option>`)
+            })
+        },
+        error:function(){
+            alert("Ocorreu um erro ao carregar os dados do campo de seleção, tente de novo");
+        }
+    });
+}
+
 const deleteRowForGrid = (url, onSuccess = null, onError = null) => {
     $.ajax({
         type: "DELETE",
@@ -183,4 +206,5 @@ module.exports = {
     optionsSwalDelete,
     deleteRowForGrid,
     loadLibs,
+    updateOptionsField,
 }

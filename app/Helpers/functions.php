@@ -10,9 +10,12 @@ function clearSpecialCaracters($string){
 }
 
 function setToDecimal($value){
+    if(gettype($value) != "string"){
+        return $value;
+    }
+
     //remove pontos de milhas
     $value = str_replace('.','',$value);
-
     //altera virgulas decimais por ponto e converte em float
     return floatVal(str_replace(',','.', $value));
 } 

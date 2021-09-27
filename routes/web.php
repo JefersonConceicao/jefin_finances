@@ -51,6 +51,8 @@ Route::group(['middleware' => 'auth'], function(){
         Route::get('/edit/{id}', 'TiposDespesasController@edit')->name('tiposDespesas.edit');
         Route::put('/update/{id}', 'TiposDespesasController@update')->name('tiposDespesas.update');
         Route::delete('/delete/{id}', 'TiposDespesasController@delete')->name('tiposDespesas.delete');
+        Route::get('/optionsDespesasJSON', 'TiposDespesasController@optionsDespesasJSON') ->name('tiposDespesas.optionsDespesas');
+           
     }); 
 
     Route::group(['prefix' => 'despesas'], function(){

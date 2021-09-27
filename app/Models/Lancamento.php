@@ -21,7 +21,6 @@ class Lancamento extends Model
         return $this->hasOne(Despesa::class, 'id', 'despesa_id');
     }
 
-
     public function getLancamentos($request = [], $user){
         return $this
             ->where('user_id', $user->id);
@@ -82,11 +81,9 @@ class Lancamento extends Model
             }
 
             $this->fill($request)->save();
-
+            
             if(isset($request['despesa_id']) && !empty($request['despesa_id'])){
-                $this->despesa()->update([
-                    'pago' => 1
-                ]);
+                $this->despesa()->update(['pago' => 1]);
             }   
             
             return [
