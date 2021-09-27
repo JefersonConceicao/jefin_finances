@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use DB;
+use App\Models\Lancamento;
 
 class Despesa extends Model
 {
@@ -134,13 +135,27 @@ class Despesa extends Model
         }
     }
 
-    public function pagamentoDespesa($id){
+    public function pagamentoDespesa($id, $user){
         try{
-            $despesa = $this->find($id);
+            $lancamento = new Lancamento;
 
+            $despesa = $this->find($id);
             $despesa->pago = $despesa->pago == 1 ? 0 : 1;
             $despesa->save();
 
+            if($despesa->pago == 1){
+                $formDataLancamento = [
+                    'data_lancamento' => date('Y-m-d H:i:s'),
+                    'despesa_id' => $id,
+                    'valor' => floatVal($despesa->valor_total),
+                    'descricao' => $despesa->nome_despesa,
+                ];
+
+                $lancamento->saveLancamento($formDataLancamento, $user);
+            }else{
+                $lancamento->where('despesa_id', $id)->delete();
+            }
+            
             return [
                 'error' => false,
                 'msg' => $despesa->pago == 1 ? "Pagamento registrado!" : "Remoção de Pagamento efetuado com sucesso!" 

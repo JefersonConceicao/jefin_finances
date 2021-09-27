@@ -23,6 +23,10 @@ class TiposDespesa extends Model
             $conditions[] = ['nome', 'LIKE',"%".$request['nome']."%"];
         }
 
+        if(isset($request['ativo']) && $request['ativo'] != ""){
+            $conditions[] = ['ativo', '=' ,$request['ativo']];
+        }
+    
         return $this
             ->where($conditions)
             ->orderBy('id', 'DESC')
@@ -32,7 +36,6 @@ class TiposDespesa extends Model
     public function saveTiposDespesa($request = [], $user){
         try{
             $request['user_id'] = $user->id;
-
             $this->fill($request)->save();
 
             return [

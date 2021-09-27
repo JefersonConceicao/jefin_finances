@@ -14,3 +14,12 @@ body{
     display:flex;
     justify-content: space-between;
 }
+
+@media(max-width: 1024px){
+    #auth-right{
+        visibility: hidden;
+    }
+    #auth-left{
+        width:100%;
+    }
+}

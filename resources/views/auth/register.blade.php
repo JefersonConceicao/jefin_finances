@@ -2,7 +2,7 @@
 @section('content')
     <div id="auth">
         <div class="row h-100">
-            <div class="col-lg-5 col-12">
+            <div class="col-xl-5 col-md-12 col-sm-12">
                 <div id="auth-left">
                     <h1 class="auth-title"> Cadastre-se </h1>
                     <p class="auth-subtitle mb-5">

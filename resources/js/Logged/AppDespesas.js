@@ -18,7 +18,7 @@ const grid = "#gridDespesas"
 
 const habilitaEventos = () => {
     getFilterDespesas()
-
+    
     $("#searchFormDespesas").on("submit", function(e){
         e.preventDefault()
         getFilterDespesas()
@@ -34,6 +34,8 @@ const habilitaBotoes = () => {
                 e.preventDefault()
                 formDespesas()
             });
+
+            settingsInModal();
         });
     }); 
 
@@ -50,6 +52,8 @@ const habilitaBotoes = () => {
                 e.preventDefault()
                 formDespesas(id)
             });
+
+            settingsInModal();
         });
     });
 
@@ -195,6 +199,58 @@ const getFilterDespesas = () => {
     });
 }
 
+const settingsInModal = () => {
+    const url = '/tiposDespesas/store';
+
+    $("#btnAddTipoDespesa").on("click", function(){   
+        const button = $(this);
+        const formData = {
+            nome: $(`input[name="nome"]`).val(),
+            ativo: $(`select[name="ativo"]`).val()
+        }
+
+        $.ajax({
+            type: "POST",
+            url,
+            data: formData,
+            dataType: "JSON",
+            beforeSend:function(){
+                button
+                .prop("disabled", true)
+                .html(`<i class="fa fa-spinner fa-spin"> </i>`)
+            },
+            success: function (response) {
+                Swal.fire({
+                    toast:true,
+                    position: 'bottom-left',
+                    title: `<h5 style="color:white"> ${response.msg} </h5>`,
+                    icon: !response.error ? 'success' : 'error',
+                    showConfirmButton: false,
+                    timer:3000,
+                    background: response.error ? 'red' : color().default
+                });
+
+                new bootstrap.Collapse($("#formAddTipoDespesa"), {
+                    hide:true,
+                });
+
+                $(`input[name="nome"]`).val("");
+                AppUsage.updateOptionsField($(`select[name='despesa_tipo_id']`), '/tiposDespesas/optionsDespesasJSON');
+            },  
+            error:function(jqXHR, textStatus, error){
+                const errors = jqXHR.responseJSON.errors;
+
+                if(!!errors){          
+                    AppUsage.showMessagesValidator("#formAddTipoDespesa", errors);
+                }
+            },
+            complete:function(){
+                button
+                    .prop("disabled", false).html(`Salvar`)
+            },
+        });
+    });
+}
 
 module.exports = {
     habilitaBotoes,

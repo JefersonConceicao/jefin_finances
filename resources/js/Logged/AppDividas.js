@@ -27,19 +27,30 @@ const habilitaBotoes = () => {
         const url = '/dividas/create';
         loadModal(url, function(){
             $("#formAddDebt").on("submit", function(e){
-                e.preventDefault()
+                e.preventDefault();
                 formDebts();
             });
         });
     });
 
+    $(".editDebt").on("click", function(){
+        const id = $(this).attr("id");
+        const url = `/dividas/edit/${id}`;
+
+        loadModal(url, function(){
+            $("#formUpdateDebt").on("submit", function(e){
+                e.preventDefault();
+                formDebts(id);
+            });
+        });
+    });
+
     $("#gridDebts  table > tbody > tr").on("click", function(e){
-        e.preventDefault()
         if(e.target.tagName != "TD") return;
-        
+        e.preventDefault();
+
         const id = $(this).attr("key");
         const url = `/dividas/show/${id}`
-
         loadModal(url)
     })  
 

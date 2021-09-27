@@ -62360,6 +62360,28 @@ var loadingContent = function loadingContent(element) {
   }
 };
 
+var updateOptionsField = function updateOptionsField(element, urlRoute) {
+  var formData = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+  $.ajax({
+    type: "GET",
+    url: urlRoute,
+    data: formData,
+    dataType: "JSON",
+    beforeSend: function beforeSend() {
+      element.html("<option value=\"\" disabled selected> Carregando.... </option>");
+    },
+    success: function success(response) {
+      element.html("<option value=\"\" selected> Selecione </option>");
+      response.forEach(function (value) {
+        element.append("<option value=\"".concat(value.id, "\"> ").concat(value.nome, " </option>"));
+      });
+    },
+    error: function error() {
+      alert("Ocorreu um erro ao carregar os dados do campo de seleção, tente de novo");
+    }
+  });
+};
+
 var deleteRowForGrid = function deleteRowForGrid(url) {
   var onSuccess = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
   var onError = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
@@ -62408,7 +62430,8 @@ module.exports = {
   loadModal: loadModal,
   optionsSwalDelete: optionsSwalDelete,
   deleteRowForGrid: deleteRowForGrid,
-  loadLibs: loadLibs
+  loadLibs: loadLibs,
+  updateOptionsField: updateOptionsField
 };
 
 /***/ }),
@@ -62539,6 +62562,7 @@ var habilitaBotoes = function habilitaBotoes() {
         e.preventDefault();
         formDespesas();
       });
+      settingsInModal();
     });
   });
   $(".rowSettingsDespesa").on("click", function (e) {
@@ -62553,6 +62577,7 @@ var habilitaBotoes = function habilitaBotoes() {
         e.preventDefault();
         formDespesas(id);
       });
+      settingsInModal();
     });
   });
   $(".btnDeleteDespesa").on("click", function () {
@@ -62683,6 +62708,52 @@ var getFilterDespesas = function getFilterDespesas() {
   });
 };
 
+var settingsInModal = function settingsInModal() {
+  var url = '/tiposDespesas/store';
+  $("#btnAddTipoDespesa").on("click", function () {
+    var button = $(this);
+    var formData = {
+      nome: $("input[name=\"nome\"]").val(),
+      ativo: $("select[name=\"ativo\"]").val()
+    };
+    $.ajax({
+      type: "POST",
+      url: url,
+      data: formData,
+      dataType: "JSON",
+      beforeSend: function beforeSend() {
+        button.prop("disabled", true).html("<i class=\"fa fa-spinner fa-spin\"> </i>");
+      },
+      success: function success(response) {
+        Swal.fire({
+          toast: true,
+          position: 'bottom-left',
+          title: "<h5 style=\"color:white\"> ".concat(response.msg, " </h5>"),
+          icon: !response.error ? 'success' : 'error',
+          showConfirmButton: false,
+          timer: 3000,
+          background: response.error ? 'red' : color()["default"]
+        });
+        new bootstrap.Collapse($("#formAddTipoDespesa"), {
+          hide: true
+        });
+        $("input[name=\"nome\"]").val("");
+        AppUsage.updateOptionsField($("select[name='despesa_tipo_id']"), '/tiposDespesas/optionsDespesasJSON');
+      },
+      error: function error(jqXHR, textStatus, _error2) {
+        var errors = jqXHR.responseJSON.errors;
+
+        if (!!errors) {
+          AppUsage.showMessagesValidator("#formAddTipoDespesa", errors);
+        }
+      },
+      complete: function complete() {
+        button.prop("disabled", false).html("Salvar");
+      }
+    });
+  });
+};
+
 module.exports = {
   habilitaBotoes: habilitaBotoes,
   habilitaEventos: habilitaEventos
@@ -62730,9 +62801,19 @@ var habilitaBotoes = function habilitaBotoes() {
       });
     });
   });
+  $(".editDebt").on("click", function () {
+    var id = $(this).attr("id");
+    var url = "/dividas/edit/".concat(id);
+    loadModal(url, function () {
+      $("#formUpdateDebt").on("submit", function (e) {
+        e.preventDefault();
+        formDebts(id);
+      });
+    });
+  });
   $("#gridDebts  table > tbody > tr").on("click", function (e) {
-    e.preventDefault();
     if (e.target.tagName != "TD") return;
+    e.preventDefault();
     var id = $(this).attr("key");
     var url = "/dividas/show/".concat(id);
     loadModal(url);

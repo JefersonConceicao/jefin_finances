@@ -53,7 +53,7 @@
                 <div class="row">
                     <div class="col-md-6">
                         <h4> Total de dívidas: {{ count($dataDividas) }} </h4>
-                        <h6>  Valor total a pagar de dívdas:  {{ "R$ ".convertValorReal($countDividas)}} </h6>
+                        <h6>  Valor total a pagar de dívdas:  {{ "R$ ".convertValorReal(round($countDividas))}} </h6>
                     </div>
                     <div class="col-md-6">
                         <div class="btn btn-primary float-end rounded-pill" id="addDebt"> 
@@ -79,7 +79,7 @@
                             </thead>
                             <tbody> 
                                 @foreach($dataDividas as $dividas)
-                                    <tr key="{{$dividas->id}}" style="cursor:pointer;">  
+                                    <tr key="{{$dividas->id}}" style="cursor:pointer;" title="visualizar">  
                                         <td> {{ $dividas->descricao_divida }} </td>
                                         <td> {{ $dividas->qtd_parcela_total."x (R$ ". convertValorReal($dividas->valor_parcela).")"    }} </td>
                                         <td> {{ "R$ ".convertValorReal($dividas->valor_total) }} </td>
@@ -95,7 +95,11 @@
                                         </td>
                                         <td> 
                                             <label class="badge bg-primary">
-                                                {{ "R$ ".convertValorReal($dividas->valor_total - ($dividas->valor_parcela * $dividas->qtd_parcela_parcial)) }}
+                                                @if($dividas->pago === 0)
+                                                    {{ "R$ ".convertValorReal(round($dividas->valor_total - ($dividas->valor_parcela * $dividas->qtd_parcela_parcial))) }}
+                                                @else 
+                                                    {{ "R$ ".convertValorReal(0.0)}}
+                                                @endif
                                             </label>
                                         </td>
                                         <td> 
@@ -110,6 +114,15 @@
                                                     </button>         
                                                 @endif
                                                 &nbsp;  
+                                                <button 
+                                                    type="button" 
+                                                    class="btn btn-sm btn-secondary rounded-pill editDebt" 
+                                                    title="Editar"
+                                                    id="{{ $dividas->id }}"
+                                                > 
+                                                    <i class="fa fa-edit"> </i>
+                                                </button>
+                                                &nbsp;
                                                 <button 
                                                     type="button" 
                                                     class="btn btn-sm btn-danger rounded-pill deleteDebt" 

@@ -51,6 +51,8 @@ Route::group(['middleware' => 'auth'], function(){
         Route::get('/edit/{id}', 'TiposDespesasController@edit')->name('tiposDespesas.edit');
         Route::put('/update/{id}', 'TiposDespesasController@update')->name('tiposDespesas.update');
         Route::delete('/delete/{id}', 'TiposDespesasController@delete')->name('tiposDespesas.delete');
+        Route::get('/optionsDespesasJSON', 'TiposDespesasController@optionsDespesasJSON') ->name('tiposDespesas.optionsDespesas');
+           
     }); 
 
     Route::group(['prefix' => 'despesas'], function(){
@@ -78,9 +80,11 @@ Route::group(['middleware' => 'auth'], function(){
         Route::get('/', 'DividasController@index')->name('dividas.index');
         Route::get('/create', 'DividasController@create')->name('dividas.create');
         Route::post('/store', 'DividasController@store')->name('dividas.store');
+        Route::get('/edit/{id}', 'DividasController@edit')->name('dividas.edit');
+        Route::put('/update/{id}', 'DividasController@update')->name('dividas.update');
         Route::get('/show/{id}', 'DividasController@show')->name('dividas.show');
-        Route::delete('/delete/{id}', 'DividasController@delete')->name('dividas.destroy');
         Route::put('/payDebt/{id}', 'DividasController@declarePayment')->name('dividas.declarePayment');
+        Route::delete('/delete/{id}', 'DividasController@delete')->name('dividas.destroy');
     });
 });
 

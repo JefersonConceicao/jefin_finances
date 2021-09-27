@@ -33,6 +33,12 @@ class DividasRequest extends FormRequest
                     'valor_total' => 'required',
                     'qtd_parcela_total' => 'required|numeric',
                 ];
+            case 'update':
+                return [
+                    'descricao_divida' => 'required',
+                    'valor_total' => 'required',
+                    'qtd_parcela_total' => 'required|numeric'
+                ];
         }
     }
 
