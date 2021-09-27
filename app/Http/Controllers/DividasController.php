@@ -47,6 +47,19 @@ class DividasController extends Controller
         return response()->json($data);
     }
 
+    public function edit($id){
+        $dividas = new Dividas;
+        return view('dividas.edit')->with('divida', $dividas->find($id));
+    }
+
+    public function update(DividasRequest $request, $id){
+        $user = Auth::user();
+        $dividas = new Dividas;
+
+        $data = $dividas->updateDividas($request->all(), $user, $id);
+        return response()->json($data);
+    }
+
     /**
      * @param  int  $id
      * @return \Illuminate\Http\Response

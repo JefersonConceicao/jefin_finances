@@ -81,7 +81,29 @@ class Dividas extends Model
         }catch(\Exception $error){
             return [
                 'error' => true,
-                'msg' => 'Não foi possível excluír o registro, tente de novo'
+                'msg' => 'Não foi possível adicionar o registro, tente de novo'
+            ];
+        }
+    }
+
+    public function updateDividas($request = [], $user, $id){
+        try{
+            $divida = $this->find($id);
+            $divida->fill([
+                'descricao_divida' => $request['descricao_divida'],
+                'valor_total' => setToDecimal($request['valor_total']),
+                'qtd_parcela_total' => $request['qtd_parcela_total'],
+                'valor_parcela' => setToDecimal($request['valor_total'])/setToDecimal($request['qtd_parcela_total']) 
+            ])->save();
+
+            return [
+                'error' => false,
+                'msg' => 'Registro atualizado com sucesso!'
+            ];
+        }catch(\Exception $error){
+            return [
+                'error' => true,
+                'msg' => 'Não foi possível atualizar o registro, tente de novo'
             ];
         }
     }

@@ -62799,7 +62799,16 @@ var habilitaBotoes = function habilitaBotoes() {
         e.preventDefault();
         formDebts();
       });
-      configInModal();
+    });
+  });
+  $(".editDebt").on("click", function () {
+    var id = $(this).attr("id");
+    var url = "/dividas/edit/".concat(id);
+    loadModal(url, function () {
+      $("#formUpdateDebt").on("submit", function (e) {
+        e.preventDefault();
+        formDebts(id);
+      });
     });
   });
   $("#gridDebts  table > tbody > tr").on("click", function (e) {

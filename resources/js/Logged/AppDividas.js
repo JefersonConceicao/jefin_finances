@@ -27,11 +27,21 @@ const habilitaBotoes = () => {
         const url = '/dividas/create';
         loadModal(url, function(){
             $("#formAddDebt").on("submit", function(e){
-                e.preventDefault()
+                e.preventDefault();
                 formDebts();
             });
+        });
+    });
 
-            configInModal();
+    $(".editDebt").on("click", function(){
+        const id = $(this).attr("id");
+        const url = `/dividas/edit/${id}`;
+
+        loadModal(url, function(){
+            $("#formUpdateDebt").on("submit", function(e){
+                e.preventDefault();
+                formDebts(id);
+            });
         });
     });
 
@@ -149,7 +159,6 @@ const payDebts = (id, element) => {
         }
     });
 }
-
 
 module.exports = {
     habilitaBotoes,
