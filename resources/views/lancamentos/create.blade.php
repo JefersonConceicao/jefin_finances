@@ -5,7 +5,7 @@
 @endsection 
 @section('modal-content')
     <div class="row">
-        <div class="col-md-8">
+        <div class="col-md-12">
             <div class="form-group"> 
                 <label> Descrição <span class="required"> * </span> </label>
                 <input 
@@ -14,30 +14,7 @@
                     class="form-control"
                 />
                 
-                <div class="error_feedback"> </div>
-            </div>
-        </div>
-        
-        <div class="col-md-4">
-            <div class="form-group">
-                <label> Despesa  </label>
-                <select name="despesa" class="form-select">
-                    <option value="N" selected> Não </option>
-                    <option value="S"> Sim </option>
-                </select>
-            </div>
-        </div>
-    </div>
-    <div class="row" id="inputDespesa" style="display:none">
-        <div class="col-md-12"> 
-            <div class="form-group">
-                <label> Selecione a Despesa </label> 
-                <select class="form-select" name="despesa_id"> 
-                    <option value=""> Selecione </option>
-                    @foreach($optionsDespesas as $k => $v)
-                        <option value="{{ $k }}"> {{ $v }} </option>
-                    @endforeach
-                </select>
+                <div class="error_feedback"> </div> 
             </div>
         </div>
     </div>
@@ -63,6 +40,8 @@
                     class="form-control datePicker"
                     value={{ date('d/m/Y')}}
                 />
+
+                <div class="error_feedback"> </div>
             </div>
         </div>
     </div>

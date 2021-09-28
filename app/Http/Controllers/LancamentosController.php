@@ -47,16 +47,14 @@ class LancamentosController extends Controller
         $despesa = new Despesa;
         $user = Auth::user();
 
-        $optionsDespesas = $despesa->optionsDespesasMesAtual($user);
-        return view('lancamentos.create')
-            ->with('optionsDespesas', $optionsDespesas);
+        return view('lancamentos.create');
     }
 
     /**
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(LancamentosRequest $request)
     {
         $lancamento = new Lancamento;
         $user = Auth::user();
