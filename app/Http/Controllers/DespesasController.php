@@ -41,10 +41,10 @@ class DespesasController extends Controller
         $tipoDespesa = new TiposDespesa;
 
         $optionsTipoDespesa = $tipoDespesa->where('user_id', $user->id)->pluck('nome', 'id');
+
         return view('despesas.create')
             ->with('optionsTipoDespesa', $optionsTipoDespesa);
     }
-
     /**
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response

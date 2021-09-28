@@ -20,7 +20,6 @@ Route::get('/logout', 'Auth\LoginController@logout')->name('auth.logout');
 //ROTAS COM AUTENTICAÇÃO
 Route::group(['middleware' => 'auth'], function(){
     Route::get('/home', 'HomeController@index')->name('home.index');
-
     Route::group(['prefix' => 'users'], function(){
         //RENDER VIEWS
         Route::get('/', 'UsersController@index')->name('users.index');
@@ -52,7 +51,6 @@ Route::group(['middleware' => 'auth'], function(){
         Route::put('/update/{id}', 'TiposDespesasController@update')->name('tiposDespesas.update');
         Route::delete('/delete/{id}', 'TiposDespesasController@delete')->name('tiposDespesas.delete');
         Route::get('/optionsDespesasJSON', 'TiposDespesasController@optionsDespesasJSON') ->name('tiposDespesas.optionsDespesas');
-           
     }); 
 
     Route::group(['prefix' => 'despesas'], function(){

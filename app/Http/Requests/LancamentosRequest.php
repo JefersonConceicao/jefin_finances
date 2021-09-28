@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Route;
 
 class LancamentosRequest extends FormRequest
 {
@@ -13,7 +14,7 @@ class LancamentosRequest extends FormRequest
      */
     public function authorize()
     {
-        return false;
+        return true;
     }
 
     /**
@@ -23,8 +24,24 @@ class LancamentosRequest extends FormRequest
      */
     public function rules()
     {
+        $currentRoute = explode('.', Route::currentRouteName());
+        switch(end($currentRoute)){
+            case 'store':
+                return [
+                    'descricao' => 'required',
+                    'valor' => 'required',
+                    'data_lancamento' => [
+                        'required',
+                        'date_format:d/m/Y'
+                    ],
+                ];
+        }
+    }
+
+    public function messages(){
         return [
-            //
+            'required' => 'Campo obrigatório',
+            'date_format' => 'Formato de data inválido'
         ];
     }
 }
