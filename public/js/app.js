@@ -62496,8 +62496,7 @@ var renderGraph = function renderGraph(data) {
   var colors = arrayDates.map(function () {
     return randomColors();
   });
-  var myGraph = $("#myChart");
-  var chart = new Chart(myGraph, {
+  new Chart($("#myChart"), {
     type: 'bar',
     data: {
       labels: months,

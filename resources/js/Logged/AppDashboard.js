@@ -47,9 +47,7 @@ const renderGraph = (data) => {
     });
 
     const colors = arrayDates.map(() => randomColors());
-
-    const myGraph = $("#myChart");
-    const chart = new Chart(myGraph, {
+    new Chart($("#myChart"),{
         type: 'bar',
         data: {
             labels: months,

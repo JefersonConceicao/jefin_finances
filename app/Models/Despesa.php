@@ -223,7 +223,6 @@ class Despesa extends Model
         ->where([
             ['pago', '=', 0],
             ['user_id', '=', $user->id]
-            
         ])
         ->pluck('nome_despesa', 'id')
         ->toArray();

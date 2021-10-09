@@ -65,6 +65,7 @@ class Lancamento extends Model
             ->select('*')
             ->where('user_id', $user->id)
             ->orderBy('data_lancamento', 'ASC')
+            ->take(3)
             ->get();
     }
     
