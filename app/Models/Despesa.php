@@ -158,7 +158,7 @@ class Despesa extends Model
             
             return [
                 'error' => false,
-                'msg' => $despesa->pago == 1 ? "Pagamento registrado!" : "Remoção de Pagamento efetuado com sucesso!" 
+                'msg' => $despesa->pago == 1 ? "Pagamento registrado" : "Remoção de Pagamento efetuado com sucesso!" 
             ];
         }catch(\Exception $error){
             return [
@@ -214,17 +214,5 @@ class Despesa extends Model
                 'msg' => 'Algo deu errado, tente de novo.',
             ];
         }
-    }
-
-    public function optionsDespesasMesAtual($user){
-       return $this
-        ->whereMonth('created_at', date('m'))
-        ->whereYear('created_at', date('Y'))
-        ->where([
-            ['pago', '=', 0],
-            ['user_id', '=', $user->id]
-        ])
-        ->pluck('nome_despesa', 'id')
-        ->toArray();
     }
 }
