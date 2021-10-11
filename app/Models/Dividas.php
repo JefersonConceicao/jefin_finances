@@ -161,7 +161,9 @@ class Dividas extends Model
         }
 
         return $this
-            ->select(DB::raw('SUM(valor_total) - SUM(valor_parcial) as valor_total_pagar'))
+            ->select(
+                DB::raw('SUM(valor_total) - SUM(valor_parcial) as valor_total_pagar')
+            )
             ->where($conditions)
             ->first()
             ->valor_total_pagar;
