@@ -45,15 +45,6 @@
                         </div>
                     </form>
                     <hr/>
-                    <div class="row">
-                        <p class="text-center"> Outras formas de acesso: </p>
-                        <div class="col-md-6">
-                            <button class="btn btn-default btn-block btn-lg shadow-lg customGPlusSignIn" id="loginWithGoogle">
-                                <i class="fab fa-google"> </i> <b> Google </b>
-                            </button>
-                        </div>
-                    </div>
-                
                     <div class="text-center mt-5 text-lg fs-4">
                         <p class="text-gray-600"> 
                             Não tem uma conta? 

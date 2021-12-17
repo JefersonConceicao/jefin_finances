@@ -7,7 +7,6 @@ const {
 } = require('../Core/AppUsage');
 
 $(function(){
-    initAuth2();
     habilitaEventos()
     habilitaBotoes()
 });
@@ -87,43 +86,6 @@ const formLoginUser = () => {
     });
 }
 
-const initAuth2 = () => {
-    gapi.load('auth2', function(){
-            auth2 = gapi.auth2.init({
-            client_id: "23951275285-j7sp1aucu6lhegsvjfd1fni74bct3uip.apps.googleusercontent.com",
-            cookiepolicy: 'localhost'
-        })
-        .then((result) => {
-            result.attachClickHandler(document.getElementById('loginWithGoogle'), {}, function(googleUser){
-                authWithGoogle(googleUser);   
-            })
-        })
-    })
-}
-
-const authWithGoogle = googleUser => {
-    if(Object.keys(googleUser).length == 0) return; 
-
-    const profile = googleUser.getBasicProfile();
-    const user = {
-        name: profile.getName(),
-        last_name: profile.getFamilyName(),
-        email: profile.getEmail(),
-    }
-
-    if(!!user){
-        $.post("/loginWithGoogle", user,
-            function (response, textStatus, jqXHR) {
-               if(response.error == false && response.msg === "Autenticado com sucesso"){
-                   window.location.href = '/home';
-               }
-            },
-            "JSON"
-        );
-    }   
-}
-
-
 const logoutUserGoogle = () => {
     const authInstance = gapi.auth2.getAuthInstance();
     
@@ -137,5 +99,4 @@ const logoutUserGoogle = () => {
 module.exports = {
     habilitaBotoes,
     habilitaEventos,
-    authWithGoogle,
 }

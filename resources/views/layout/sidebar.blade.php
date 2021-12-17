@@ -7,15 +7,6 @@
             <span> Home </span>
         </a>
     </li>
-
-    <li class="sidebar-item">
-        <a href="/lancamentos" class="sidebar-link"> 
-            <i class="fa fa-exchange-alt"></i>
-            &nbsp;
-            <span> Lançamentos </span>
-        </a>
-    </li>
-
     <li class="sidebar-item">
         <a href="/dividas" class="sidebar-link"> 
             <i class="fab fa-amazon-pay"></i>
