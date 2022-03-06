@@ -25,7 +25,7 @@
     <link rel="stylesheet" href="{{ asset('css/mazer-theme/vendors/iconly/bold.css') }}" />
     <link rel="stylesheet" href="{{ asset('css/mazer-theme/vendors/perfect-scrollbar/perfect-scrollbar.css') }}"  />
     <link rel="stylesheet" href="{{ asset('css/mazer-theme/vendors/bootstrap-icons/bootstrap-icons.css') }}"/>
-    <link rel="stylesheet" href="{{ asset('css/mazer-theme/vendors/fontawesome/all.min.css') }}"/>
+    {{-- <link rel="stylesheet" href="{{ asset('css/mazer-theme/vendors/fontawesome/all.min.css') }}"/> --}}
     <link rel="stylesheet" href="{{ asset('css/mazer-theme/vendors/chartjs/Chart.min.css')  }}"/>
     <link rel="stylesheet" href="{{ asset('css/mazer-theme/app.css') }} "/> 
     <link rel="stylesheet" href="{{ asset('vendor/jquery-datetimepicker/build/jquery.datetimepicker.min.css')}}" />
@@ -50,13 +50,5 @@
     >
     </script>
     <script src="{{ asset('js/app.js') }}"> </script>
-    <script> 
-        function onSuccess(googleUser){
-            AppAuth.authWithGoogle(googleUser);
-        }
-        function onFailure(error){
-            console.log(error)
-        }
-    </script>
 </body>
 </html>

@@ -61960,7 +61960,6 @@ var _require2 = __webpack_require__(/*! ../Core/AppUsage */ "./resources/js/Core
     color = _require2.color;
 
 $(function () {
-  initAuth2();
   habilitaEventos();
   habilitaBotoes();
 });
@@ -62034,37 +62033,6 @@ var formLoginUser = function formLoginUser() {
   });
 };
 
-var initAuth2 = function initAuth2() {
-  gapi.load('auth2', function () {
-    auth2 = gapi.auth2.init({
-      client_id: "23951275285-j7sp1aucu6lhegsvjfd1fni74bct3uip.apps.googleusercontent.com",
-      cookiepolicy: 'localhost'
-    }).then(function (result) {
-      result.attachClickHandler(document.getElementById('loginWithGoogle'), {}, function (googleUser) {
-        authWithGoogle(googleUser);
-      });
-    });
-  });
-};
-
-var authWithGoogle = function authWithGoogle(googleUser) {
-  if (Object.keys(googleUser).length == 0) return;
-  var profile = googleUser.getBasicProfile();
-  var user = {
-    name: profile.getName(),
-    last_name: profile.getFamilyName(),
-    email: profile.getEmail()
-  };
-
-  if (!!user) {
-    $.post("/loginWithGoogle", user, function (response, textStatus, jqXHR) {
-      if (response.error == false && response.msg === "Autenticado com sucesso") {
-        window.location.href = '/home';
-      }
-    }, "JSON");
-  }
-};
-
 var logoutUserGoogle = function logoutUserGoogle() {
   var authInstance = gapi.auth2.getAuthInstance();
   authInstance.signOut().then(function () {
@@ -62075,8 +62043,7 @@ var logoutUserGoogle = function logoutUserGoogle() {
 
 module.exports = {
   habilitaBotoes: habilitaBotoes,
-  habilitaEventos: habilitaEventos,
-  authWithGoogle: authWithGoogle
+  habilitaEventos: habilitaEventos
 };
 
 /***/ }),
