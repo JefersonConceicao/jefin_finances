@@ -1,9 +1,9 @@
 const { default: Swal } = require('sweetalert2');
 
-const { 
-    htmlLoading, 
-    showMessagesValidator, 
-    color 
+const {
+    htmlLoading,
+    showMessagesValidator,
+    color
 } = require('../Core/AppUsage');
 
 $(function(){
@@ -21,7 +21,7 @@ const habilitaEventos = () => {
 
     $("#logout").on("click", function(e){
         e.preventDefault()
-        
+
         Swal.fire({
             icon: 'warning',
             title: 'Tem certeza que deseja sair?',
@@ -35,13 +35,13 @@ const habilitaEventos = () => {
                 $.get($(this).attr("href"), function (response, textStatus, jqXHR) {
                     if(jqXHR.status == 200 && response.logout){
                         logoutUserGoogle()
-                    }           
+                    }
                 },
                 "JSON"
             );
             }
         })
-    })  
+    })
 }
 
 const formLoginUser = () => {
@@ -68,7 +68,7 @@ const formLoginUser = () => {
                     showConfirmButton: false,
                     timer:3000,
                     background: response.error ? 'red' : color().default,
-                });  
+                });
             }else{
                 window.location.href = '/home';
             }
@@ -78,7 +78,7 @@ const formLoginUser = () => {
                 const errors = jqXHR.responseJSON.errors;
                 showMessagesValidator(form, errors);
             }
-        },  
+        },
         complete:function(){
             $(form + " .btn-primary")
                 .prop("disabled", false)
@@ -95,14 +95,14 @@ const initAuth2 = () => {
         })
         .then((result) => {
             result.attachClickHandler(document.getElementById('loginWithGoogle'), {}, function(googleUser){
-                authWithGoogle(googleUser);   
+                authWithGoogle(googleUser);
             })
         })
     })
 }
 
 const authWithGoogle = googleUser => {
-    if(Object.keys(googleUser).length == 0) return; 
+    if(Object.keys(googleUser).length == 0) return;
 
     const profile = googleUser.getBasicProfile();
     const user = {
@@ -120,13 +120,13 @@ const authWithGoogle = googleUser => {
             },
             "JSON"
         );
-    }   
+    }
 }
 
 
 const logoutUserGoogle = () => {
     const authInstance = gapi.auth2.getAuthInstance();
-    
+
     authInstance.signOut().then(() => {
         console.log("logout");
     })

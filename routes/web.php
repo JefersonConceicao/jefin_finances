@@ -20,6 +20,7 @@ Route::get('/logout', 'Auth\LoginController@logout')->name('auth.logout');
 //ROTAS COM AUTENTICAÇÃO
 Route::group(['middleware' => 'auth'], function(){
     Route::get('/home', 'HomeController@index')->name('home.index');
+
     Route::group(['prefix' => 'users'], function(){
         //RENDER VIEWS
         Route::get('/', 'UsersController@index')->name('users.index');
@@ -51,7 +52,7 @@ Route::group(['middleware' => 'auth'], function(){
         Route::put('/update/{id}', 'TiposDespesasController@update')->name('tiposDespesas.update');
         Route::delete('/delete/{id}', 'TiposDespesasController@delete')->name('tiposDespesas.delete');
         Route::get('/optionsDespesasJSON', 'TiposDespesasController@optionsDespesasJSON') ->name('tiposDespesas.optionsDespesas');
-    }); 
+    });
 
     Route::group(['prefix' => 'despesas'], function(){
         Route::get('/', 'DespesasController@index')->name('despesas.index');
@@ -62,7 +63,7 @@ Route::group(['middleware' => 'auth'], function(){
         Route::delete('/delete/{id}', 'DespesasController@delete')->name('despesas.delete');
         Route::put('/payDespesa/{id}', 'DespesasController@delcararPagamentoDespesa')->name('despesa.pay');
         Route::post('/copyDespesas', 'DespesasController@copyDespesas')->name('despesas.copyDespesas');
-    }); 
+    });
 
     Route::group(['prefix' => 'lancamentos'], function(){
         Route::get('/', 'LancamentosController@index')->name('lancamentos.index');
@@ -84,7 +85,9 @@ Route::group(['middleware' => 'auth'], function(){
         Route::put('/payDebt/{id}', 'DividasController@declarePayment')->name('dividas.declarePayment');
         Route::delete('/delete/{id}', 'DividasController@delete')->name('dividas.destroy');
     });
+
+    Route::group(['prefix' => 'orcamentario'], function(){
+        Route::get('/', 'OrcamentarioController@index')->name('orcamentario.index');
+    });
 });
-
-
 
