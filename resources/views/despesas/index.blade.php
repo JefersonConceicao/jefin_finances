@@ -57,7 +57,7 @@
                 <div class="col-md-6">
                     <h3 class="card-title"> Total de registros: {{ count($dataDespesas) }} </h3>
                     <h6> Total despesas: {{ "R$ " .convertValorReal($totalValor) }} </h6>
-                    <h6 class="text-warning"> Valor a pagar: {{ "R$ " .convertValorReal(round($totalDividasAtivas)) }} </h6>
+                    <h6 class="text-warning"> Valor a pagar: {{ "R$ " .convertValorReal($totalDividasAtivas) }} </h6>
                     <h6 class="text-success"> Valor Pago: {{ "R$ " .convertValorReal($totalValor - $totalDividasAtivas) }} </h6>
                 </div>
                 <div class="col-md-6">
