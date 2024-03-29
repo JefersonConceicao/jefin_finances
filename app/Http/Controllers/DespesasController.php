@@ -3,16 +3,19 @@
 namespace App\Http\Controllers;
 use Auth;
 use Illuminate\Http\Request;
-//REQUEST 
+
+//REQUEST
 use App\Http\Requests\DespesasRequest;
+
 //MODELS
 use App\Models\Despesa;
-use App\Models\TiposDespesa; 
+use App\Models\TiposDespesa;
+use Illuminate\View\View;
 
 class DespesasController extends Controller
 {
     /**
-     * @return \Illuminate\Http\Response
+     * @return View
      */
     public function index(Request $request)
     {
@@ -22,22 +25,33 @@ class DespesasController extends Controller
 
         $data = $despesa->getDespesas($request->all(), $user)->orderBy('id','DESC')->get();
 
-        $totalValor = $despesa->getDespesas($request->all(), $user)->sum('valor_total');
-        $optionsTipoDesesa = $tipoDespesa->where('user_id', $user->id)->pluck('nome', 'id');
-        
+        $totalValor = $despesa
+            ->getDespesas($request->all(), $user)
+            ->sum('valor_total');
+
+        $totalValorDividasAtivas = $despesa
+            ->getDespesas($request->all(), $user)
+            ->where('pago', '=', 0)
+            ->sum('valor_total');
+
+        $optionsTipoDesesa = $tipoDespesa
+            ->where('user_id', $user->id)
+            ->pluck('nome', 'id');
+
         return view('despesas.index')
             ->with('dataDespesas', $data)
             ->with('optionsMeses', $this->optionsMeses)
             ->with('optionsTipoDespesa', $optionsTipoDesesa)
-            ->with('totalValor', $totalValor);
+            ->with('totalValor', $totalValor)
+            ->with('totalDividasAtivas', $totalValorDividasAtivas);
     }
 
     /**
      * @return \Illuminate\Http\Response
      */
     public function create()
-    {   
-        $user = Auth::user();    
+    {
+        $user = Auth::user();
         $tipoDespesa = new TiposDespesa;
 
         $optionsTipoDespesa = $tipoDespesa->where('user_id', $user->id)->pluck('nome', 'id');
@@ -63,10 +77,10 @@ class DespesasController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function edit($id)
-    {   
+    {
         $user = Auth::user();
         $tipoDespesa = new TiposDespesa;
-        $despesa = new Despesa; 
+        $despesa = new Despesa;
 
         $data = $despesa->find($id);
         $optionsTipoDespesa = $tipoDespesa->where('user_id', $user->id)->pluck('nome', 'id');
@@ -84,7 +98,7 @@ class DespesasController extends Controller
     public function update(DespesasRequest $request, $id)
     {
         $despesa = new Despesa;
-        
+
         $data = $despesa->updateDespesa($id, $request->all());
         return response()->json($data);
     }
@@ -112,7 +126,7 @@ class DespesasController extends Controller
     public function copyDespesas(Request $request){
         $despesa = new Despesa;
         $user = Auth::user();
-        
+
         $data = $despesa->copyDespesas($request->all(), $user);
         return response()->json($data);
     }

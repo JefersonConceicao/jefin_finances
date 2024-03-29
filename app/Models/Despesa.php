@@ -45,7 +45,6 @@ class Despesa extends Model
                 ->where($conditions)
                 ->whereYear('created_at', $request['ano'])
                 ->with('despesaTipo');
-        
         }
 
         if(empty($request['ano']) && !empty($request['mes'])){
@@ -53,7 +52,7 @@ class Despesa extends Model
             ->where($conditions)
             ->whereMonth('created_at', $request['mes'])
             ->with('despesaTipo');
-    
+
         }
 
         if(!empty($request['mes']) && !empty($request['ano'])){
@@ -62,7 +61,7 @@ class Despesa extends Model
             ->whereMonth('created_at', $request['mes'])
             ->whereYear('created_at', $request['ano'])
             ->with('despesaTipo');
-        
+
         }
 
         return $dataWithFilter;
@@ -80,14 +79,14 @@ class Despesa extends Model
             if(isset($request['created_at']) && !empty($request['created_at'])){
                 $request['created_at'] = converteData(str_replace('/', '-', $request['created_at']), 'Y-m-d H:i:s');
             }
-            
-            $this->fill($request)->save(); 
-            return [ 
+
+            $this->fill($request)->save();
+            return [
                 'error' => false,
                 'msg' => 'Despesa adicionada!'
             ];
         }catch(\Exception $error){
-            return [ 
+            return [
                 'error' => true,
                 'msg' => 'Não foi possível salvar o registro, tente de novo',
                 'error_message' => $error->getMessage()
@@ -155,10 +154,10 @@ class Despesa extends Model
             }else{
                 $lancamento->where('despesa_id', $id)->delete();
             }
-            
+
             return [
                 'error' => false,
-                'msg' => $despesa->pago == 1 ? "Pagamento registrado" : "Remoção de Pagamento efetuado com sucesso!" 
+                'msg' => $despesa->pago == 1 ? "Pagamento registrado" : "Remoção de Pagamento efetuado com sucesso!"
             ];
         }catch(\Exception $error){
             return [
@@ -172,7 +171,7 @@ class Despesa extends Model
         try{
             $this->timestamps = false;
             $anteriorDate = $request['mes'] - 1;
-            
+
             $despMesAnterior = $this
             ->whereMonth('created_at', $anteriorDate)
             ->whereYear('created_at', $request['ano'])

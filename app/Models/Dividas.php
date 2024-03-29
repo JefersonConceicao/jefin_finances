@@ -27,23 +27,23 @@ class Dividas extends Model
     public function getDividas($request = [], $user){
         $conditions = [];
         $conditions[] = ['user_id', '=', $user->id];
-        
+
         if(isset($request['descricao_divida']) && !empty($request['descricao_divida'])){
             $conditions[] = ['descricao_divida', 'LIKE', "%".$request['descricao_divida']."%"];
         }
 
         if(isset($request['data_inicial_divida']) && !empty($request['data_inicial_divida'])){
             $conditions[] = [
-                'data_inicial_divida', 
-                '>=', 
+                'data_inicial_divida',
+                '>=',
                 converteData(str_replace('/', '-', $request['data_inicial_divida']), 'Y-m-d')
             ];
         }
 
         if(isset($request['data_final_divida']) && !empty($request['data_final_divida'])){
             $conditions[] = [
-                'data_fim_divida', 
-                '<=', 
+                'data_fim_divida',
+                '<=',
                 converteData(str_replace('/','-',$request['data_final_divida']), 'Y-m-d')
             ];
         }
@@ -51,7 +51,7 @@ class Dividas extends Model
         if(isset($request['pago']) && !empty($request['pago'])){
             $conditions[] = ['pago','=', $request['pago']];
         }
-        
+
        return $this
         ->where($conditions)
         ->get();
@@ -67,7 +67,7 @@ class Dividas extends Model
                 'data_inicial_divida' => $dataInicialDivida,
                 'valor_total' => setToDecimal($request['valor_total']),
                 'qtd_parcela_total' => $request['qtd_parcela_total'],
-                'valor_parcela'=> setToDecimal($request['valor_total']) / setToDecimal($request['qtd_parcela_total']), 
+                'valor_parcela'=> setToDecimal($request['valor_total']) / setToDecimal($request['qtd_parcela_total']),
                 'qtd_parcela_parcial' => 0,
                 'valor_parcial' => 0,
                 'data_fim_divida' => $carbon->addMonth($request['qtd_parcela_total'])->toDateString(),
@@ -93,7 +93,7 @@ class Dividas extends Model
                 'descricao_divida' => $request['descricao_divida'],
                 'valor_total' => setToDecimal($request['valor_total']),
                 'qtd_parcela_total' => $request['qtd_parcela_total'],
-                'valor_parcela' => setToDecimal($request['valor_total'])/setToDecimal($request['qtd_parcela_total']) 
+                'valor_parcela' => setToDecimal($request['valor_total'])/setToDecimal($request['qtd_parcela_total'])
             ])->save();
 
             return [
@@ -132,8 +132,8 @@ class Dividas extends Model
         try{
             $debt = $this->find($id);
             $debt->qtd_parcela_parcial = $debt->qtd_parcela_parcial + 1;
-            $debt->valor_parcial = $debt->valor_parcial + $debt->valor_parcela; 
-            
+            $debt->valor_parcial = $debt->valor_parcial + $debt->valor_parcela;
+
             //VERIFICA SE É DECLARAÇÃO DA ULTIMA PARCELA
             if($debt->qtd_parcela_total == $debt->qtd_parcela_parcial){
                 $debt->pago = 1;
@@ -155,7 +155,7 @@ class Dividas extends Model
     public function getTotalValorDivida($user, $request = []){
         $conditions = [];
         $conditions[] = ['user_id', '=', $user->id];
-        
+
         if(isset($request['pago']) && !empty($request['pago'])){
             $conditions[] = ['pago','=',$request['pago']];
         }

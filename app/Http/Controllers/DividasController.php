@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 use Illuminate\Http\Request;
+
 //MODELS
 use App\Models\Dividas;
+
 //REQUESTS
 use App\Http\Requests\DividasRequest;
 use Auth;
@@ -14,7 +16,7 @@ class DividasController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index(Request $request)
-    {   
+    {
         $dividas = new Dividas;
         $user = Auth::user();
 
@@ -39,7 +41,7 @@ class DividasController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(DividasRequest $request)
-    {   
+    {
         $user = Auth::user();
         $dividas = new Dividas;
 
@@ -65,9 +67,9 @@ class DividasController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function show($id)
-    {   
+    {
         $dividas = new Dividas;
-        
+
         $data = $dividas->getDividasByID($id);
         return view('dividas.view')->with('divida', $data);
     }
