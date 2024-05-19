@@ -18,7 +18,7 @@ class LancamentosController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index(Request $request)
-    {       
+    {
         $user = Auth::user();
         $proventos = new Proventos;
         $lancamento = new Lancamento;
@@ -30,7 +30,7 @@ class LancamentosController extends Controller
         $totalLancamentos = $lancamento->getTotalLancamentosByMonth($request->all(), $user);
         $dataLancamentosDespesa = $lancamento->getLancamentosDespesa($request->all(), $user);
         $dataOutrosLancamentos = $lancamento->getOutrosLancamentos($request->all(), $user);
-        
+
         return view('lancamentos.index')
             ->with('optionsMeses', $this->optionsMeses)
             ->with('totalProventos', $totalProventos)
@@ -43,7 +43,7 @@ class LancamentosController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function create()
-    {   
+    {
         $despesa = new Despesa;
         $user = Auth::user();
 
@@ -76,6 +76,7 @@ class LancamentosController extends Controller
     }
 
     public function dataGastosGraficos(){
+
         $user = Auth::user();
         $lancamento = new Lancamento;
 
@@ -83,9 +84,9 @@ class LancamentosController extends Controller
             ->getLancamentosGroupData($user)
             ->groupBy(function($item){
                 return converteData($item->data_lancamento, 'Y-m');
-            });
+            })
+            ->take(6);
 
-            
         return response()->json($data);
     }
 }

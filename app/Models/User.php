@@ -14,8 +14,8 @@ class User extends Authenticatable implements JWTSubject
     use Notifiable;
 
     protected $fillable = [
-        'email', 
-        'name', 
+        'email',
+        'name',
         'last_name',
         'mail_token_confirm',
         'password_token_reset',
@@ -24,13 +24,13 @@ class User extends Authenticatable implements JWTSubject
         'temp_user',
         'last_login',
     ];
-    
+
     protected $primaryKey = 'id';
     protected $hidden = ['password'];
 
     public function getJWTIdentifier(){
         return $this->getKey();
-    }   
+    }
 
     public function getJWTCustomClaims(){
         return [];
@@ -58,7 +58,7 @@ class User extends Authenticatable implements JWTSubject
         if(isset($request['name']) && !empty($request['name'])){
             $conditions[] = ['name', 'LIKE', "%".$request['name']."%"];
         }
-        
+
         return $this
             ->where($conditions)
             ->orderBy('id', 'DESC')
@@ -94,12 +94,12 @@ class User extends Authenticatable implements JWTSubject
             return [
                 'error' => false,
                 'msg' => 'Registro alterado com sucesso!',
-                'updated' => $user 
+                'updated' => $user
             ];
         }catch(\Exception $error){
             return [
                 'error' => true,
-                'msg' => 'Não foi possível alterar o registro, tente de novo.' 
+                'msg' => 'Não foi possível alterar o registro, tente de novo.'
             ];
         }
     }
@@ -117,7 +117,7 @@ class User extends Authenticatable implements JWTSubject
         }catch(\Excpetion $error){
             return [
                 'error' => true,
-                'msg' => 'Não foi possível alterar o registro, tente de novo.' 
+                'msg' => 'Não foi possível alterar o registro, tente de novo.'
             ];
         }
     }
@@ -151,14 +151,14 @@ class User extends Authenticatable implements JWTSubject
                 'msg' => 'Não foi possível salvar o registro, tente de novo',
                 'error_message' => $error->getMessage()
             ];
-        }   
+        }
     }
 
     public function updatePassword($request = [], $authUser){
         try{
             $user = $this->find($authUser->id);
             $user->password = Hash::make($request['new_password']);
-            $user->save();        
+            $user->save();
 
             return [
                 'error' => false,
@@ -174,10 +174,11 @@ class User extends Authenticatable implements JWTSubject
 
     public function saveTokenResetPassword($email){
         try{
+
             $user = $this->where('email', $email)->first();
             $user->password_token_reset = md5(uniqid(rand(), true));
             $user->save();
-            
+
             return $user->password_token_reset;
         }catch(\Exception $error){
             return false;
@@ -186,7 +187,7 @@ class User extends Authenticatable implements JWTSubject
 
     public function resetPassword($request = []){
         try{
-            $user = $this->where('password_token_reset', $request['token'])->first(); 
+            $user = $this->where('password_token_reset', $request['token'])->first();
             $user->password = Hash::make($request['new_password']);
             $user->save();
 
@@ -207,20 +208,20 @@ class User extends Authenticatable implements JWTSubject
           ->where([
                 ['temp_user', '=', 1],
                 ['email', '=', $userMail]
-          ]);   
+          ]);
     }
 
     public function saveTempUser($request = []){
         $request['temp_user'] = 1;
         $request['password'] = Hash::make('googleauth');
-        
-        if($this->fill($request)->save()){  
-            return true; 
+
+        if($this->fill($request)->save()){
+            return true;
         }
 
         return false;
     }
-    
+
     public function deleteTempUser($user){
         try{
             $this->where([
@@ -228,7 +229,7 @@ class User extends Authenticatable implements JWTSubject
                 ['temp_user', '=', 1]
             ])->delete();
 
-            return true;   
+            return true;
         }catch(\Exception $error){
             return false;
         }

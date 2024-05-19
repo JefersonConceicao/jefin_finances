@@ -1,9 +1,9 @@
-const { 
-    loadingContent, 
-    htmlLoading, 
-    loadModal, 
-    showMessagesValidator, 
-    color, 
+const {
+    loadingContent,
+    htmlLoading,
+    loadModal,
+    showMessagesValidator,
+    color,
     optionsSwalDelete,
     deleteRowForGrid,
 } = require('../Core/AppUsage');
@@ -47,12 +47,14 @@ const habilitaBotoes = () => {
 
     $("#gridDebts  table > tbody > tr").on("click", function(e){
         if(e.target.tagName != "TD") return;
+        if(e.target.parentElement.id == "totalLine") return;
+
         e.preventDefault();
 
         const id = $(this).attr("key");
         const url = `/dividas/show/${id}`
         loadModal(url)
-    })  
+    })
 
     $(".payDebt").on("click", function(){
         const id = $(this).attr("id");
@@ -63,7 +65,7 @@ const habilitaBotoes = () => {
         const url = `/dividas/delete/${$(this).attr("id")}`;
         Swal.fire(optionsSwalDelete).then(result => !!result.isConfirmed && deleteRowForGrid(url, getFilter()))
     })
-}   
+}
 
 const getFilter = () => {
     const form = "#formFilterDividas";
@@ -76,10 +78,10 @@ const getFilter = () => {
         dataType: "HTML",
         beforeSend:function(){
             loadingContent(grid);
-        },  
+        },
         success: function (response) {
-            $(grid).html($(response).find(grid + " >")); 
-            habilitaBotoes(); 
+            $(grid).html($(response).find(grid + " >"));
+            habilitaBotoes();
         },
     });
 }
@@ -105,8 +107,8 @@ const formDebts = id => {
                 icon: !response.error ? 'success' : 'error',
                 showConfirmButton: false,
                 timer:3000,
-                background: response.error ? 'red' : color().default, 
-            });    
+                background: response.error ? 'red' : color().default,
+            });
 
             $(modalOjbect).modal('hide');
             getFilter();
@@ -131,7 +133,7 @@ const payDebts = (id, element) => {
         dataType: "JSON",
         beforeSend:function(){
             element.prop('disabled', true).html(`<i class="fa fa-spinner fa-spin"> </i>`);
-        },              
+        },
         success: function (response) {
             Swal.fire({
                 toast:true,
@@ -141,7 +143,7 @@ const payDebts = (id, element) => {
                 showConfirmButton: false,
                 timer:3000,
                 background: !!response.error ? 'red' : color().default,
-            });   
+            });
         },
         error:function(){
            Swal.fire({
@@ -153,7 +155,7 @@ const payDebts = (id, element) => {
                 timer:3000,
                 background: response.error ? 'red' : color().default,
            });
-        },          
+        },
         complete:function(){
             getFilter();
         }

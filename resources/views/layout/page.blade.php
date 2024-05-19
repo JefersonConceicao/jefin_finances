@@ -1,8 +1,8 @@
 @extends('layout.master')
-    <div 
-    id="nivel1" 
-    class="modal fade text-left show" 
-    tabindex="-1" 
+    <div
+    id="nivel1"
+    class="modal fade text-left show"
+    tabindex="-1"
     aria-labelledby="myModalLabel160"
     style="display:none; padding-right:17px"
     aria-modal="true"
@@ -10,14 +10,14 @@
     aria-hidden="true"
     data-bs-backdrop="static"
     >
-        <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document"> 
+        <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
             <div class="modal-content">
                 @include('layout.modal')
             </div>
         </div>
     </div>
+
 @section('content')
-   
     <div id="app">
         <div id="sidebar" class="active">
             <div class="sidebar-wrapper active">
@@ -27,8 +27,8 @@
                             <h4> Jefin Finances </h4>
                         </div>
                         <div class="toggler">
-                            <a href="#" class="sidebar-hide d-xl-none d-block"> 
-                                <i class="bi bi-x bi-middle"> </i> 
+                            <a href="#" class="sidebar-hide d-xl-none d-block">
+                                <i class="bi bi-x bi-middle"> </i>
                             </a>
                         </div>
                     </div>
@@ -39,8 +39,9 @@
                 <button class="sidebar-toggler btn x"><i data-feather="x"></i></button>
             </div>
         </div>
+
         <div id="main" class="layout-navbar">
-            <header class="mb-3"> 
+            <header class="mb-3">
                 <nav class="navbar navbar-expand navbar-light">
                     <div class="container-fluid">
                         <a href="#" class="burger-btn d-block">
@@ -57,6 +58,7 @@
                     </div>
                 </nav>
             </header>
+
             <div id="main-content">
                 <div class="page-heading">
                     <div class="page-title">

@@ -42,7 +42,7 @@ const showMessagesValidator = (form, errors) => {
         errors[nameInputs[i]].forEach(value => {
             fieldError.addClass('is-invalid');
             fieldError.parent().find('.error_feedback').html(`
-                <p class="required"> ${value} </p> 
+                <p class="required"> ${value} </p>
             `)
         })
     }
@@ -126,7 +126,7 @@ const loadModal = (url, callback = null) => {
 const loadingContent = element => {
     if (!!element) {
         $(element).closest(element).html(`
-            <div class="alert alert-primary text-center">  
+            <div class="alert alert-primary text-center">
                 <div class="spinner-border text-light"> </div>
             </div>
         `)
@@ -180,7 +180,7 @@ const deleteRowForGrid = (url, onSuccess = null, onError = null) => {
             Swal.fire({
                 toast: true,
                 position: 'bottom-left',
-                title: `<h5 style="color:white"> 
+                title: `<h5 style="color:white">
                            Não foi possível excluir, pois o registro já está sendo utilizado.
                         </h5>`,
                 icon: 'error',

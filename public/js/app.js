@@ -61960,7 +61960,6 @@ var _require2 = __webpack_require__(/*! ../Core/AppUsage */ "./resources/js/Core
     color = _require2.color;
 
 $(function () {
-  initAuth2();
   habilitaEventos();
   habilitaBotoes();
 });
@@ -62034,49 +62033,9 @@ var formLoginUser = function formLoginUser() {
   });
 };
 
-var initAuth2 = function initAuth2() {
-  gapi.load('auth2', function () {
-    auth2 = gapi.auth2.init({
-      client_id: "23951275285-j7sp1aucu6lhegsvjfd1fni74bct3uip.apps.googleusercontent.com",
-      cookiepolicy: 'localhost'
-    }).then(function (result) {
-      result.attachClickHandler(document.getElementById('loginWithGoogle'), {}, function (googleUser) {
-        authWithGoogle(googleUser);
-      });
-    });
-  });
-};
-
-var authWithGoogle = function authWithGoogle(googleUser) {
-  if (Object.keys(googleUser).length == 0) return;
-  var profile = googleUser.getBasicProfile();
-  var user = {
-    name: profile.getName(),
-    last_name: profile.getFamilyName(),
-    email: profile.getEmail()
-  };
-
-  if (!!user) {
-    $.post("/loginWithGoogle", user, function (response, textStatus, jqXHR) {
-      if (response.error == false && response.msg === "Autenticado com sucesso") {
-        window.location.href = '/home';
-      }
-    }, "JSON");
-  }
-};
-
-var logoutUserGoogle = function logoutUserGoogle() {
-  var authInstance = gapi.auth2.getAuthInstance();
-  authInstance.signOut().then(function () {
-    console.log("logout");
-  });
-  window.location.href = '/';
-};
-
 module.exports = {
   habilitaBotoes: habilitaBotoes,
-  habilitaEventos: habilitaEventos,
-  authWithGoogle: authWithGoogle
+  habilitaEventos: habilitaEventos
 };
 
 /***/ }),
@@ -62274,7 +62233,7 @@ var showMessagesValidator = function showMessagesValidator(form, errors) {
     var fieldError = $(form + " [name=\"".concat(nameInputs[i], "\"]"));
     errors[nameInputs[i]].forEach(function (value) {
       fieldError.addClass('is-invalid');
-      fieldError.parent().find('.error_feedback').html("\n                <p class=\"required\"> ".concat(value, " </p> \n            "));
+      fieldError.parent().find('.error_feedback').html("\n                <p class=\"required\"> ".concat(value, " </p>\n            "));
     });
   };
 
@@ -62356,7 +62315,7 @@ var loadModal = function loadModal(url) {
 
 var loadingContent = function loadingContent(element) {
   if (!!element) {
-    $(element).closest(element).html("\n            <div class=\"alert alert-primary text-center\">  \n                <div class=\"spinner-border text-light\"> </div>\n            </div>\n        ");
+    $(element).closest(element).html("\n            <div class=\"alert alert-primary text-center\">\n                <div class=\"spinner-border text-light\"> </div>\n            </div>\n        ");
   }
 };
 
@@ -62408,7 +62367,7 @@ var deleteRowForGrid = function deleteRowForGrid(url) {
       Swal.fire({
         toast: true,
         position: 'bottom-left',
-        title: "<h5 style=\"color:white\"> \n                           N\xE3o foi poss\xEDvel excluir, pois o registro j\xE1 est\xE1 sendo utilizado.\n                        </h5>",
+        title: "<h5 style=\"color:white\">\n                           N\xE3o foi poss\xEDvel excluir, pois o registro j\xE1 est\xE1 sendo utilizado.\n                        </h5>",
         icon: 'error',
         showConfirmButton: false,
         timer: 3500,
@@ -62502,7 +62461,9 @@ var renderGraph = function renderGraph(data) {
       labels: months,
       datasets: [{
         label: '',
-        data: gastos,
+        data: gastos.map(function (gasto) {
+          return Number(gasto.toFixed(1));
+        }),
         backgroundColor: colors
       }]
     },
@@ -62812,6 +62773,7 @@ var habilitaBotoes = function habilitaBotoes() {
   });
   $("#gridDebts  table > tbody > tr").on("click", function (e) {
     if (e.target.tagName != "TD") return;
+    if (e.target.parentElement.id == "totalLine") return;
     e.preventDefault();
     var id = $(this).attr("key");
     var url = "/dividas/show/".concat(id);
@@ -63631,8 +63593,8 @@ $.ajaxSetup({
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! C:\laragon\www\jefin_finances\resources\js\app.js */"./resources/js/app.js");
-module.exports = __webpack_require__(/*! C:\laragon\www\jefin_finances\resources\sass\app.scss */"./resources/sass/app.scss");
+__webpack_require__(/*! /home/mallone/Área de Trabalho/jefin_finances/resources/js/app.js */"./resources/js/app.js");
+module.exports = __webpack_require__(/*! /home/mallone/Área de Trabalho/jefin_finances/resources/sass/app.scss */"./resources/sass/app.scss");
 
 
 /***/ })

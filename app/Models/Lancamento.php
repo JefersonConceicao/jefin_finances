@@ -14,7 +14,7 @@ class Lancamento extends Model
         'descricao',
         'user_id'
     ];
-    
+
     public $timestamps = false;
 
     public function despesa(){
@@ -28,7 +28,7 @@ class Lancamento extends Model
 
     public function getTotalLancamentosByMonth($request = [], $user){
         return $this
-            ->where('user_id', $user->id)   
+            ->where('user_id', $user->id)
             ->whereMonth('data_lancamento', !empty($request['mes']) ? $request['mes'] : '')
             ->whereYear('data_lancamento', !empty($request['ano']) ? $request['ano'] : '')
             ->sum('valor');
@@ -50,7 +50,7 @@ class Lancamento extends Model
             ->whereYear('data_lancamento', !empty($request['ano']) ? $request['ano'] : '')
             ->doesntHave('despesa')
             ->get();
-    } 
+    }
 
     public function getUltimosLancamentos($user){
         return $this
@@ -64,14 +64,13 @@ class Lancamento extends Model
         return $this
             ->select('*')
             ->where('user_id', $user->id)
-            ->orderBy('data_lancamento', 'ASC')
-            ->take(3)
+            ->orderBy('data_lancamento', 'DESC')
             ->get();
     }
-    
+
     public function saveLancamento($request = [], $user){
-        try{  
-            $request['user_id'] = $user->id; 
+        try{
+            $request['user_id'] = $user->id;
 
             if(isset($request['data_lancamento']) && !empty($request['data_lancamento'])){
                 $request['data_lancamento'] = converteData(str_replace('/', '-',$request['data_lancamento']), 'Y-m-d');
@@ -82,11 +81,11 @@ class Lancamento extends Model
             }
 
             $this->fill($request)->save();
-            
+
             if(isset($request['despesa_id']) && !empty($request['despesa_id'])){
                 $this->despesa()->update(['pago' => 1]);
-            }   
-            
+            }
+
             return [
                 'error' => false,
                 'msg' => 'Novo lançamento efetuado',
@@ -97,7 +96,7 @@ class Lancamento extends Model
                 'msg' => 'Não foi possível efetuar o lançamento, tente de novo',
                 'error_message' => $error->getMessage()
             ];
-        }   
+        }
     }
 
     public function deleteLancamento($id){
@@ -108,12 +107,12 @@ class Lancamento extends Model
         if($this->find($id)->delete()){
             return [
                 'error' => false,
-                'msg' => 'Registro excluído com sucesso!'      
-            ];  
+                'msg' => 'Registro excluído com sucesso!'
+            ];
         }else{
             return [
                 'error' => true,
-                'msg' => 'Não foi possível salvar o registro, tente de novo'    
+                'msg' => 'Não foi possível salvar o registro, tente de novo'
             ];
         }
     }

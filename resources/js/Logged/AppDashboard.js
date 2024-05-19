@@ -5,7 +5,7 @@ $(() => {
    window.location.pathname == "/home" && initChart();
 });
 
-const randomColors = () => {    
+const randomColors = () => {
     const lettersHexaDecimal = "0123456789ABCDEF";
     let color = '#';
 
@@ -14,9 +14,9 @@ const randomColors = () => {
     }
 
     return color;
-} 
+}
 
-const initChart = () => {   
+const initChart = () => {
     $.get("/lancamentos/getGastosGraphs",
         function (response, textStatus, jqXHR) {
             renderGraph(response);
@@ -45,16 +45,16 @@ const renderGraph = (data) => {
         const array = data[month].map(gastos => (parseFloat(gastos.valor)))
         return array.reduce((total, next) => (total + next))
     });
-
     const colors = arrayDates.map(() => randomColors());
+
     new Chart($("#myChart"),{
         type: 'bar',
         data: {
             labels: months,
             datasets:[
-                {  
+                {
                     label: '',
-                    data: gastos,
+                    data: gastos.map(gasto => Number((gasto.toFixed(1)))),
                     backgroundColor:colors,
                 },
             ]
@@ -62,7 +62,7 @@ const renderGraph = (data) => {
         options:{
             scales:{
                 yAxes:[
-                    {   
+                    {
                         ticks:{
                             beginAtZero: true,
                         }

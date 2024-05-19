@@ -53,7 +53,7 @@
                 <div class="row">
                     <div class="col-md-6">
                         <h4> Total de dívidas: {{ count($dataDividas) }} </h4>
-                        <h6>  Valor total a pagar de dívdas:  {{ "R$ ".convertValorReal(round($countDividas))}} </h6>
+                        <h6>  Valor total a pagar de dívdas:  {{ "R$ ".convertValorReal($countDividas)}} </h6>
                     </div>
                     <div class="col-md-6">
                         <div class="btn btn-primary float-end rounded-pill" id="addDebt">
@@ -142,7 +142,7 @@
                                         </td>
                                     </tr>
                                 @endforeach
-                                <tr>
+                                <tr id="totalLine">
                                     <td colspan="4"> <b>TOTAL: </b> </td>
                                     <td>
                                         <label class="badge bg-success">

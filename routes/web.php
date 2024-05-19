@@ -5,6 +5,7 @@ Route::post('/login', 'Auth\LoginController@authenticateUser')->name('auth.login
 Route::post('/loginWithGoogle', 'Auth\LoginController@userWithGoogle')->name('auth.authWithGoogle');
 
 Route::get('/forgotPassword', 'Auth\ForgotPasswordController@renderViewForgotPassword')->name('auth.forgotPassword');
+
 Route::post('/sendMailForgotPassword', 'Auth\ForgotPasswordController@sendMailForgotPassword')->name('auth.sendMailForgotPassword');
 
 Route::get('/forgotChangePassword/{token}', 'Auth\ResetPasswordController@renderViewResetPassword')->name('auth.resetPassword');

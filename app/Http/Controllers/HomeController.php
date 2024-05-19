@@ -12,11 +12,8 @@ use App\Models\Lancamento;
 
 class HomeController extends Controller
 {
-    /**
-     * @return \Illuminate\Http\Response
-     */
     public function index()
-    {   
+    {
         $user = Auth::user();
         $despesa = new Despesa;
         $proventos = new Proventos;
@@ -26,6 +23,7 @@ class HomeController extends Controller
         $countDespesas = $lancamentos->getLancamentos([], $user)->sum('valor');
         $countProventos = $proventos->getProventos([], $user)->sum('valor_provento');
         $daysActive = $now->diff(Auth::user()->created_at)->d;
+
         $ultimosLancamentos = $lancamentos->getUltimosLancamentos($user);
 
         return view('home.index')
