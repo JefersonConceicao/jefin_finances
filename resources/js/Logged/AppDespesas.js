@@ -1,10 +1,10 @@
 const { default: Swal } = require('sweetalert2');
-const { 
-    loadingContent, 
-    loadModal, 
-    htmlLoading, 
+const {
+    loadingContent,
+    loadModal,
+    htmlLoading,
     color,
-    optionsSwalDelete, 
+    optionsSwalDelete,
     deleteRowForGrid
 } = require('../Core/AppUsage');
 
@@ -18,7 +18,7 @@ const grid = "#gridDespesas"
 
 const habilitaEventos = () => {
     getFilterDespesas()
-    
+
     $("#searchFormDespesas").on("submit", function(e){
         e.preventDefault()
         getFilterDespesas()
@@ -37,7 +37,7 @@ const habilitaBotoes = () => {
 
             settingsInModal();
         });
-    }); 
+    });
 
     $(".rowSettingsDespesa").on("click", function(e){
         if(e.target.tagName != "TD"){
@@ -91,7 +91,7 @@ const habilitaBotoes = () => {
                     showConfirmButton: false,
                     timer:3000,
                     background: response.error ? 'red' : color().default,
-                }); 
+                });
 
                getFilterDespesas();
             },
@@ -123,8 +123,8 @@ const habilitaBotoes = () => {
                     showConfirmButton: false,
                     timer:3000,
                     background: response.error ? 'red' : color().default,
-                }); 
-                
+                });
+
                 getFilterDespesas();
             },
             complete:function(){
@@ -132,7 +132,7 @@ const habilitaBotoes = () => {
             }
         });
     });
-}   
+}
 
 const formDespesas = id => {
     const url =  typeof id  === "undefined" ? '/despesas/store' : '/despesas/update/' + id;
@@ -161,8 +161,8 @@ const formDespesas = id => {
                 didOpen:() => {
                    $(modalObject).modal('hide');
                 }
-            }); 
-            
+            });
+
             getFilterDespesas();
         },
         error:function(jqXHR, textStatus, error){
@@ -193,7 +193,7 @@ const getFilterDespesas = () => {
             loadingContent(grid);
         },
         success: function (response) {
-            $(grid).html($(response).find(grid + " >"));    
+            $(grid).html($(response).find(grid + " >"));
             habilitaBotoes()
         }
     });
@@ -202,7 +202,7 @@ const getFilterDespesas = () => {
 const settingsInModal = () => {
     const url = '/tiposDespesas/store';
 
-    $("#btnAddTipoDespesa").on("click", function(){   
+    $("#btnAddTipoDespesa").on("click", function(){
         const button = $(this);
         const formData = {
             nome: $(`input[name="nome"]`).val(),
@@ -236,11 +236,11 @@ const settingsInModal = () => {
 
                 $(`input[name="nome"]`).val("");
                 AppUsage.updateOptionsField($(`select[name='despesa_tipo_id']`), '/tiposDespesas/optionsDespesasJSON');
-            },  
+            },
             error:function(jqXHR, textStatus, error){
                 const errors = jqXHR.responseJSON.errors;
 
-                if(!!errors){          
+                if(!!errors){
                     AppUsage.showMessagesValidator("#formAddTipoDespesa", errors);
                 }
             },

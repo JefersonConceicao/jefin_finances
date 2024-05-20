@@ -28,7 +28,7 @@ class UsersController extends Controller
     }
 
     /**
-     * @param   App\Http\Requests\RegisterRequest;  $request
+     * @param   \App\Http\Requests\RegisterRequest;  $request
      * @return \Illuminate\Http\Response
      */
     public function store(RegisterRequest $request)
@@ -46,13 +46,13 @@ class UsersController extends Controller
     public function edit($id)
     {
         $user = new User;
-        
+
         $data = $user->find($id);
         return view('users.edit')->with('user', $data);
     }
 
     /**
-     * @param  App\Http\Requests\RegisterRequest;
+     * @param  \App\Http\Requests\RegisterRequest;
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
@@ -81,7 +81,7 @@ class UsersController extends Controller
 
         return view('users.profile')
             ->with('user', $user);
-    }   
+    }
 
     public function profileUpdate(RegisterRequest $request){
         $user = Auth::user();
