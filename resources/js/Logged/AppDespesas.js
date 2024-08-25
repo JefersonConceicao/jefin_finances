@@ -30,6 +30,15 @@ const habilitaBotoes = () => {
         const url = '/despesas/create';
 
         loadModal(url, function(){
+            //SETA O MES DO FILTRO PARA A DATA DE CRIAÇÃO DA DESPESA
+            let mesFiltrado = $("select[name='mes'] option:selected").val();
+            let anoFiltrado = $("input[name='ano']").val();
+
+            if(!mesFiltrado || !anoFiltrado) return;
+
+            let stringDate = `01/${mesFiltrado}/${anoFiltrado}`
+            $("input[name='created_at']").val(stringDate);
+
             $("#formAddDespesas").on("submit", function(e){
                 e.preventDefault()
                 formDespesas()

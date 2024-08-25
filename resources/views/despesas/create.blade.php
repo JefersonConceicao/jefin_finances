@@ -99,7 +99,12 @@
         <div class="col-md-6">
             <div class="form-group">
                 <label> Data Criação <span class="required"> * </span> </label>
-                <input name="created_at" type="text" class="form-control datepicker" value="{{ date('d/m/Y') }}" />
+
+                <input
+                    name="created_at"
+                    type="text"
+                    class="form-control datepicker"
+                    value="{{ date('d/m/Y') }}" />
 
                 <div class="error_feedback"> </div>
             </div>
