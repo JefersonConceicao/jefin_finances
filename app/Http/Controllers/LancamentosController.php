@@ -85,7 +85,7 @@ class LancamentosController extends Controller
             ->groupBy(function($item){
                 return converteData($item->data_lancamento, 'Y-m');
             })
-            ->take(6);
+            ->take(12);
 
         return response()->json($data);
     }
