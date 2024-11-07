@@ -64,7 +64,8 @@ class Lancamento extends Model
         return $this
             ->select('*')
             ->where('user_id', $user->id)
-            ->orderBy('data_lancamento', 'DESC')
+            ->whereYear('data_lancamento', '=', date('Y'))
+            ->orderBy('data_lancamento', 'ASC')
             ->get();
     }
 

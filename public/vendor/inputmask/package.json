@@ -56,5 +56,8 @@
     "qunit": "^2.15.0",
     "webpack": "^5.38.1",
     "webpack-cli": "^4.7.0"
+  },
+  "dependencies": {
+    "inputmask": "file:"
   }
 }
