@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use DB;
+use Carbon\Carbon;
 
 class Proventos extends Model
 {
@@ -17,10 +18,10 @@ class Proventos extends Model
         'descricao_provento'
     ];
 
-    public $timestamps = true; 
+    public $timestamps = true;
 
     public function getProventos($request = [], $user){
-        $conditions = [];   
+        $conditions = [];
         $conditions[] = ['user_id', '=', $user->id];
 
         if(isset($request['descricao_provento']) && !empty($request['descricao_provento'])){
@@ -31,7 +32,7 @@ class Proventos extends Model
             ->where($conditions)
             ->whereMonth('data_provento', !empty($request['mes']) ? $request['mes'] : null)
             ->whereYear('data_provento',  !empty($request['ano']) ? $request['ano'] : null);
-           
+
         if(empty($request['mes']) && isset($request['ano']) && !empty($request['ano'])){
             return $this
                 ->where($conditions)
@@ -53,7 +54,7 @@ class Proventos extends Model
     }
 
     public function saveProvento($request = [], $user){
-        try{ 
+        try{
             $request['user_id'] = $user->id;
 
             if(isset($request['valor_provento']) && !empty($request['valor_provento'])){
@@ -64,6 +65,59 @@ class Proventos extends Model
                 $request['data_provento'] = converteData(str_replace('/','-', $request['data_provento']), 'Y-m-d');
             }
 
+            if(isset($request['period_type']) && $request['period_type'] === 'anual'){
+                $year = !empty($request['data_provento']) ? Carbon::createFromFormat('Y-m-d', $request['data_provento'])->year : date('Y');
+
+                DB::beginTransaction();
+                $lastCreated = null;
+                for($month = 1; $month <= 12; $month++){
+                    $item = self::create([
+                        'user_id' => $user->id,
+                        'descricao_provento' => $request['descricao_provento'],
+                        'valor_provento' => $request['valor_provento'],
+                        'data_provento' => sprintf('%04d-%02d-01', $year, $month)
+                    ]);
+                    $lastCreated = $item;
+                }
+                DB::commit();
+
+                return [
+                    'error' => false,
+                    'msg' => 'Provento anual adicionado!',
+                    'dataAdded' => $lastCreated
+                ];
+            }
+
+            if(isset($request['period_type']) && $request['period_type'] === 'especifico'){
+                $start = Carbon::createFromFormat('d/m/Y', $request['periodo_inicio']);
+                $end = Carbon::createFromFormat('d/m/Y', $request['periodo_fim']);
+
+                if($start->gt($end)){
+                    $temp = $start; $start = $end; $end = $temp;
+                }
+
+                DB::beginTransaction();
+                $lastCreated = null;
+                $next = $start->copy();
+                while($next->lte($end)){
+                    $item = self::create([
+                        'user_id' => $user->id,
+                        'descricao_provento' => $request['descricao_provento'],
+                        'valor_provento' => $request['valor_provento'],
+                        'data_provento' => $next->format('Y-m-d')
+                    ]);
+                    $lastCreated = $item;
+                    $next->addMonth();
+                }
+                DB::commit();
+
+                return [
+                    'error' => false,
+                    'msg' => 'Proventos do período adicionado!',
+                    'dataAdded' => $lastCreated
+                ];
+            }
+
             $this->fill($request)->save();
 
             return [
@@ -72,6 +126,7 @@ class Proventos extends Model
                 'dataAdded' => $this->find($this->id)
             ];
         }catch(\Exception $error){
+            DB::rollback();
             return [
                 'error' => true,
                 'msg' => 'Não foi possível salvar o registro.',
@@ -84,7 +139,7 @@ class Proventos extends Model
         try{
             if(isset($request['valor_provento']) && !empty($request['valor_provento'])){
                 $request['valor_provento'] = setToDecimal($request['valor_provento']);
-            }  
+            }
 
             if(isset($request['data_provento']) && !empty($request['data_provento'])){
                 $request['data_provento'] = converteData(str_replace('/','-', $request['data_provento']), 'Y-m-d');
@@ -138,7 +193,7 @@ class Proventos extends Model
 
                     $this->create($formData);
                     unset($formData);
-                }       
+                }
             }
 
             DB::commit();
@@ -152,6 +207,6 @@ class Proventos extends Model
                 'error' => true,
                 'msg' => 'Não foi possível adicionar os proventos, tente de novo'
             ];
-        }   
+        }
     }
 }

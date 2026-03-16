@@ -24,7 +24,7 @@
         </a>
         <ul class="submenu">
             <li class="submenu-item">
-                <a href="/orcamentario">
+                <a href="/proventos">
                     <i class="fas fa-angle-right"></i>
                     &nbsp;
                     Calculadora de Proventos

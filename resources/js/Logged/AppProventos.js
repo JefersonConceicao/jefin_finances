@@ -1,10 +1,10 @@
 const { default: Swal } = require('sweetalert2');
-const { 
-    loadingContent, 
-    loadModal, 
-    htmlLoading, 
+const {
+    loadingContent,
+    loadModal,
+    htmlLoading,
     color,
-    optionsSwalDelete, 
+    optionsSwalDelete,
     deleteRowForGrid
 } = require('../Core/AppUsage');
 
@@ -26,15 +26,51 @@ const habilitaEventos = () => {
     });
 }
 
+const togglePeriodoFields = value => {
+    if(value === 'especifico'){
+        $("#rowDataProvento").hide();
+        $("#rowPeriodoEspecifico").show();
+    } else if(value === 'anual'){
+        $("#rowDataProvento").hide();
+        $("#rowPeriodoEspecifico").hide();
+    } else {
+        $("#rowDataProvento").show();
+        $("#rowPeriodoEspecifico").hide();
+    }
+};
+
+const initPeriodoInputs = () => {
+    const selectedPeriod = $("input[name='period_type']:checked").val();
+    togglePeriodoFields(selectedPeriod);
+
+    $("input[name='period_type']").off('click').on("click", function(){
+        const current = $(this).val();
+        if($(this).prop('checked')){
+            if($(this).data('current') === current){
+                // Permite desmarcar o radio atual (volta para nenhum selecionado)
+                $(this).prop('checked', false);
+                $(this).data('current', null);
+                togglePeriodoFields(null);
+                return;
+            }
+
+            $("input[name='period_type']").data('current', null);
+            $(this).data('current', current);
+            togglePeriodoFields(current);
+        }
+    });
+};
+
 const habilitaBotoes = () => {
     $("#addProvento").on("click", function(){
         const url = '/proventos/create';
 
         loadModal(url, function(){
+            initPeriodoInputs();
             $("#formAddProvento").on("submit", function(e){
                 e.preventDefault()
                 formProventos()
-            }); 
+            });
         });
     })
 
@@ -43,6 +79,7 @@ const habilitaBotoes = () => {
         const url = '/proventos/edit/' + id;
 
         loadModal(url, function(){
+            initPeriodoInputs();
             $("#formEditProvento").on("submit", function(e){
                 e.preventDefault()
                 formProventos(id)
@@ -87,8 +124,8 @@ const habilitaBotoes = () => {
                     showConfirmButton: false,
                     timer:3000,
                     background: response.error ? 'red' : color().default
-                }); 
-                
+                });
+
                 getFilterProventos();
            },
            complete:function(){
@@ -127,8 +164,8 @@ const formProventos = id => {
                 didOpen:() => {
                    $(modalObject).modal('hide');
                 }
-            }); 
-            
+            });
+
             getFilterProventos();
         },
         error:function(jqXHR, textStatus, error){
@@ -159,7 +196,7 @@ const getFilterProventos = urlPaginate => {
             loadingContent(grid);
         },
         success: function (response) {
-            $(grid).html($(response).find(grid + " >"));    
+            $(grid).html($(response).find(grid + " >"));
             habilitaBotoes()
         }
     });
@@ -168,4 +205,4 @@ const getFilterProventos = urlPaginate => {
 module.exports = {
     habilitaEventos,
     habilitaBotoes
-}  
+}

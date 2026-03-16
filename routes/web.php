@@ -86,9 +86,5 @@ Route::group(['middleware' => 'auth'], function(){
         Route::put('/payDebt/{id}', 'DividasController@declarePayment')->name('dividas.declarePayment');
         Route::delete('/delete/{id}', 'DividasController@delete')->name('dividas.destroy');
     });
-
-    Route::group(['prefix' => 'orcamentario'], function(){
-        Route::get('/', 'OrcamentarioController@index')->name('orcamentario.index');
-    });
 });
 

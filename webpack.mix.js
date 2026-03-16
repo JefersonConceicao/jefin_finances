@@ -5,6 +5,3 @@ mix.js('resources/js/app.js', 'public/js')
 
 mix.disableNotifications();
 
-mix.browserSync({
-    proxy: 'localhost:8000'
-})
