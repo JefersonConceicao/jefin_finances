@@ -10,6 +10,7 @@ use App\Http\Requests\DespesasRequest;
 //MODELS
 use App\Models\Despesa;
 use App\Models\TiposDespesa;
+use App\Models\Proventos;
 use Illuminate\View\View;
 
 class DespesasController extends Controller
@@ -21,6 +22,7 @@ class DespesasController extends Controller
     {
         $despesa = new Despesa;
         $tipoDespesa = new TiposDespesa;
+        $proventos = new Proventos;
         $user = Auth::user();
 
         $data = $despesa->getDespesas($request->all(), $user)->orderBy('id','DESC')->get();
@@ -34,6 +36,10 @@ class DespesasController extends Controller
             ->where('pago', '=', 0)
             ->sum('valor_total');
 
+        $totalProventos = $proventos
+            ->getProventos($request->all(), $user)
+            ->sum('valor_provento');
+
         $optionsTipoDesesa = $tipoDespesa
             ->where('user_id', $user->id)
             ->pluck('nome', 'id');
@@ -43,7 +49,8 @@ class DespesasController extends Controller
             ->with('optionsMeses', $this->optionsMeses)
             ->with('optionsTipoDespesa', $optionsTipoDesesa)
             ->with('totalValor', $totalValor)
-            ->with('totalDividasAtivas', $totalValorDividasAtivas);
+            ->with('totalDividasAtivas', $totalValorDividasAtivas)
+            ->with('totalProventos', $totalProventos);
     }
 
     /**

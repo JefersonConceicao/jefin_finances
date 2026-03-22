@@ -74,14 +74,15 @@ class ProventosController extends Controller
     }
 
     /**
+     * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function delete($id)
+    public function delete(Request $request, $id)
     {
         $proventos = new Proventos;
 
-        $data = $proventos->deleteProvento($id);
+        $data = $proventos->deleteProvento($id, $request->all());
         return response()->json($data);
     }
 

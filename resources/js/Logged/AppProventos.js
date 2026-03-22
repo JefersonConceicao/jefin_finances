@@ -91,10 +91,42 @@ const habilitaBotoes = () => {
         const id = $(this).attr("id");
         const url = '/proventos/delete/' + id;
 
-        Swal.fire(optionsSwalDelete).then(result => {
-            if(result.isConfirmed){
-                deleteRowForGrid(url, function(){
-                    getFilterProventos()
+        Swal.fire({
+            title: 'Deseja excluir este provento?',
+            text: "Esta ação não poderá ser revertida!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: color().default,
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Sim, excluir apenas este',
+            cancelButtonText: 'Cancelar',
+            showDenyButton: true,
+            denyButtonText: 'Excluir este e os subsequentes',
+            denyButtonColor: '#1cef38',
+        }).then(result => {
+            if(result.isConfirmed || result.isDenied){
+                const deleteSubsequent = result.isDenied;
+                
+                $.ajax({
+                    type: "DELETE",
+                    url,
+                    data: { 
+                        _token: $('meta[name="csrf-token"]').attr('content'),
+                        delete_subsequent: deleteSubsequent 
+                    },
+                    dataType: "JSON",
+                    success: function (response) {
+                        Swal.fire({
+                            toast:true,
+                            position: 'bottom-left',
+                            title: `<h5 style="color:white"> ${response.msg} </h5>`,
+                            icon: !response.error ? 'success' : 'error',
+                            showConfirmButton: false,
+                            timer:3000,
+                            background: response.error ? 'red' : color().default
+                        });
+                        getFilterProventos()
+                    }
                 });
             }
         })
@@ -142,45 +174,76 @@ const formProventos = id => {
     const form = typeof id  === "undefined" ? '#formAddProvento' : '#formEditProvento';
     const type = typeof id  === "undefined" ? 'POST' : 'PUT';
 
-    $.ajax({
-        type,
-        url,
-        data: $(form).serialize(),
-        dataType: "JSON",
-        beforeSend:function(){
-            $(form + " .btnSubmit")
-                .prop("disabled", true)
-                .html(htmlLoading)
-        },
-        success: function (response) {
-            Swal.fire({
-                toast:true,
-                position: 'bottom-left',
-                title: `<h5 style="color:white"> ${response.msg} </h5>`,
-                icon: !response.error ? 'success' : 'error',
-                showConfirmButton: false,
-                timer:3000,
-                background: response.error ? 'red' : color().default,
-                didOpen:() => {
-                   $(modalObject).modal('hide');
-                }
-            });
-
-            getFilterProventos();
-        },
-        error:function(jqXHR, textStatus, error){
-            const errors = jqXHR.responseJSON.errors;
-
-            if(!!errors){
-                AppUsage.showMessagesValidator(form, errors);
-            }
-        },
-        complete:function(){
-            $(form + " .btnSubmit")
-                .prop("disabled", false)
-                .html("Salvar")
+    const executeSubmit = (updateSubsequent = false) => {
+        let formData = $(form).serialize();
+        if(updateSubsequent) {
+            formData += '&update_subsequent=true';
         }
-    });
+
+        $.ajax({
+            type,
+            url,
+            data: formData,
+            dataType: "JSON",
+            beforeSend:function(){
+                $(form + " .btnSubmit")
+                    .prop("disabled", true)
+                    .html(htmlLoading)
+            },
+            success: function (response) {
+                Swal.fire({
+                    toast:true,
+                    position: 'bottom-left',
+                    title: `<h5 style="color:white"> ${response.msg} </h5>`,
+                    icon: !response.error ? 'success' : 'error',
+                    showConfirmButton: false,
+                    timer:3000,
+                    background: response.error ? 'red' : color().default,
+                    didOpen:() => {
+                       $(modalObject).modal('hide');
+                    }
+                });
+
+                getFilterProventos();
+            },
+            error:function(jqXHR, textStatus, error){
+                const errors = jqXHR.responseJSON.errors;
+
+                if(!!errors){
+                    AppUsage.showMessagesValidator(form, errors);
+                }
+            },
+            complete:function(){
+                $(form + " .btnSubmit")
+                    .prop("disabled", false)
+                    .html("Salvar")
+            }
+        });
+    }
+
+    if(typeof id !== "undefined"){
+        Swal.fire({
+            title: 'Deseja alterar apenas este provento?',
+            text: "Você pode aplicar esta alteração aos meses seguintes.",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: color().default,
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Apenas este',
+            cancelButtonText: 'Cancelar',
+            showDenyButton: true,
+            denyButtonText: 'Este e os subsequentes',
+            denyButtonColor: '#1cef38',
+        }).then(result => {
+            if(result.isConfirmed){
+                executeSubmit(false);
+            } else if(result.isDenied){
+                executeSubmit(true);
+            }
+        });
+    } else {
+        executeSubmit();
+    }
 }
 
 const getFilterProventos = urlPaginate => {

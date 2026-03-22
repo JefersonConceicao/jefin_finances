@@ -56,9 +56,28 @@
             <div class="row">
                 <div class="col-md-6">
                     <h3 class="card-title"> Total de registros: {{ count($dataDespesas) }} </h3>
+                    <h6 class="text-info"> Receitas do mês: {{ "R$ " .convertValorReal($totalProventos) }} </h6>
                     <h6> Total despesas: {{ "R$ " .convertValorReal($totalValor) }} </h6>
-                    <h6 class="text-warning"> Valor a pagar: {{ "R$ " .convertValorReal($totalDividasAtivas) }} </h6>
                     <h6 class="text-success"> Valor Pago: {{ "R$ " .convertValorReal($totalValor - $totalDividasAtivas) }} </h6>
+                    <h6 class="text-warning"> Valor a pagar: {{ "R$ " .convertValorReal($totalDividasAtivas) }} </h6>
+
+                    <div class="mt-3" style="max-width: 400px;">
+                        @php
+                            $saldo = $totalProventos - $totalValor;
+                            $percentualComprometido = $totalProventos > 0 ? ($totalValor / $totalProventos) * 100 : 0;
+                            $corProgresso = 'bg-success';
+                            if($percentualComprometido > 70) $corProgresso = 'bg-warning';
+                            if($percentualComprometido > 90) $corProgresso = 'bg-danger';
+                        @endphp
+                        <h6> Saldo Final Estimado: <b class="{{ $saldo >= 0 ? 'text-success' : 'text-danger' }}">{{ "R$ " .convertValorReal($saldo) }}</b></h6>
+                        <p class="mb-1"> Comprometimento da Renda ({{ number_format($percentualComprometido, 1) }}%) </p>
+                        <div class="progress" style="height: 15px;">
+                            <div class="progress-bar {{ $corProgresso }}" role="progressbar" 
+                                style="width: {{ $percentualComprometido > 100 ? 100 : $percentualComprometido }}%" 
+                                aria-valuenow="{{ $percentualComprometido }}" aria-valuemin="0" aria-valuemax="100">
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="col-md-6">
                     <button class="float-end btn btn-primary rounded-pill" id="addDespesa">
