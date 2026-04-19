@@ -33,7 +33,7 @@ const habilitaEventos = () => {
             if(result.isConfirmed){
                 $.get($(this).attr("href"), function (response, textStatus, jqXHR) {
                     if(jqXHR.status == 200 && response.logout){
-                        logoutUserGoogle()
+                        window.location.href = '/'
                     }
                 },
                 "JSON"
