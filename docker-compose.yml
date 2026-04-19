@@ -31,6 +31,7 @@ services:
     image: mysql:5.7
     platform: linux/amd64
     container_name: jefin_finances_db
+    command: --max_allowed_packet=512M
     restart: unless-stopped
     environment:
       MYSQL_DATABASE: jefin_finances
