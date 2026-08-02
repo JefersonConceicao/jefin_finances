@@ -19,11 +19,15 @@ class ProventosController extends Controller
         $proventos = new Proventos;
         $user = Auth::user(); 
 
-        $data = $proventos->getProventos($request->all(), $user)->get();
+        $query = $proventos->getProventos($request->all(), $user);
+
+        $totalProventos = $query->sum('valor_provento');
+        $data = $query->get();
 
         return view('proventos.index')
             ->with('dataProventos', $data)
-            ->with('optionsMeses', $this->optionsMeses);
+            ->with('optionsMeses', $this->optionsMeses)
+            ->with('totalProventos', $totalProventos);
     }
 
     /**

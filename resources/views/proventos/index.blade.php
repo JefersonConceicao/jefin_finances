@@ -11,17 +11,17 @@
                 <div class="col-md-4">
                     <div class="form-group">
                         <label> Nome/Descrição Provento </label>
-                        <input 
+                        <input
                             name="descricao_provento"
                             type="text"
                             class="form-control"
                         />
                     </div>
-                </div>  
+                </div>
                 <div class="col-md-4">
                     <div class="form-group">
                         <label> Mês </label>
-                        <select name="mes" class="form-select"> 
+                        <select name="mes" class="form-select">
                                 <option value=""> Todos os Meses </option>
                             @foreach($optionsMeses as $k => $v)
                                 <option value="{{$k}}" @if($k == date('m')) selected @endif> {{ $v }} </option>
@@ -32,7 +32,7 @@
                 <div class="col-md-4">
                     <div class="form-group">
                         <label> Ano </label>
-                        <input 
+                        <input
                             name="ano"
                             type="text"
                             class="form-control"
@@ -41,7 +41,7 @@
                     </div>
                 </div>
             </div>
-            <div class="row"  style="margin-top:2%;"> 
+            <div class="row"  style="margin-top:2%;">
                 <div class="col-md-12">
                     <button class="btn btn-primary rounded-pill" type="submit">
                         <i class="fa fa-search"> </i> Pesquisar
@@ -50,18 +50,21 @@
             </div>
         </form>
     @endcomponent
-    
+
         <div class="card" id="gridProventos">
             <div class="card-header">
                 <div class="row">
                     <div class="col-md-6">
-                        <h1 class="card-title"> 
+                        <h1 class="card-title">
                             Total de registros: {{ count($dataProventos )}}
                         </h1>
+                        @isset($totalProventos)
+                            <h6 class="text-info"> Receitas do mês: {{ "R$ " .convertValorReal($totalProventos) }} </h6>
+                        @endisset
                     </div>
                     <div class="col-md-6">
-                        <button 
-                            class="btn btn-primary rounded-pill float-end" 
+                        <button
+                            class="btn btn-primary rounded-pill float-end"
                             id="addProvento"
                         >
                             Novo <i class="fa fa-plus-square"> </i>
@@ -72,49 +75,49 @@
             <div class="card-content">
                 <div class="card-body table-responsive">
                     @if(count($dataProventos))
-                        <table class="table table-hover"> 
-                            <thead> 
-                                <tr> 
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
                                     <th> Descrição </th>
                                     <th> Valor </th>
                                     <th> Data </th>
                                     <th width="2%"> Ações </th>
                                 </tr>
                             </thead>
-                            <tbody> 
+                            <tbody>
                                 @foreach($dataProventos as $provento)
-                                    <tr>     
+                                    <tr>
                                         <td> {{ $provento->descricao_provento }} </td>
                                         <td> {{ convertValorReal($provento->valor_provento) }}</td>
                                         <td> {{ converteData($provento->data_provento, 'd/m/Y') }} </td>
-                                        <td> 
+                                        <td>
                                             <div class="text-center" style="display:flex">
-                                                <button 
+                                                <button
                                                     class="btn btn-secondary rounded-pill btnEditProvento"
                                                     id="{{ $provento->id }}"
-                                                > 
+                                                >
                                                     <i class="fa fa-edit"> </i>
                                                 </button>
                                                 &nbsp;
-                                                <button 
+                                                <button
                                                     class="btn btn-danger rounded-pill btnDeleteProvento"
                                                     id="{{ $provento->id }}"
-                                                > 
+                                                >
                                                     <i class="fa fa-trash"> </i>
                                                 </button>
                                             </div>
                                         </td>
-                                    </tr>   
+                                    </tr>
                                 @endforeach
                             </tbody>
                         </table>
-                    @else 
+                    @else
                         <div class="text-center">
                             <h4> Nenhum registro encontrado.</h4>
 
-                            <button class="btn btn-primary rounded-pill" id="copyProventos"> 
+                            <button class="btn btn-primary rounded-pill" id="copyProventos">
                                 Repetir proventos do mês anterior
-                            </button>   
+                            </button>
                         </div>
                     @endif
                 </div>
