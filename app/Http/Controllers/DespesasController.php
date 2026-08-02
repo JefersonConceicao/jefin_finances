@@ -25,7 +25,7 @@ class DespesasController extends Controller
         $proventos = new Proventos;
         $user = Auth::user();
 
-        $data = $despesa->getDespesas($request->all(), $user)->orderBy('id','DESC')->get();
+        $data = $despesa->getDespesas($request->all(), $user)->orderBy('valor_total','DESC')->get();
 
         $totalValor = $despesa
             ->getDespesas($request->all(), $user)

@@ -36,35 +36,30 @@ class Despesa extends Model
             $conditions[] = ['despesa_tipo_id', '=', $request['despesa_tipo_id']];
         }
 
-        $dataWithFilter = $this
+        $query = $this
             ->where($conditions)
             ->with('despesaTipo');
 
         if(empty($request['mes']) && !empty($request['ano'])){
-            return $this
-                ->where($conditions)
+            return $query
                 ->whereYear('created_at', $request['ano'])
-                ->with('despesaTipo');
+                ->orderBy('valor_total', 'DESC');
         }
 
         if(empty($request['ano']) && !empty($request['mes'])){
-            return $this
-            ->where($conditions)
-            ->whereMonth('created_at', $request['mes'])
-            ->with('despesaTipo');
-
+            return $query
+                ->whereMonth('created_at', $request['mes'])
+                ->orderBy('valor_total', 'DESC');
         }
 
         if(!empty($request['mes']) && !empty($request['ano'])){
-            return $this
-            ->where($conditions)
-            ->whereMonth('created_at', $request['mes'])
-            ->whereYear('created_at', $request['ano'])
-            ->with('despesaTipo');
-
+            return $query
+                ->whereMonth('created_at', $request['mes'])
+                ->whereYear('created_at', $request['ano'])
+                ->orderBy('valor_total', 'DESC');
         }
 
-        return $dataWithFilter;
+        return $query->orderBy('valor_total', 'DESC');
     }
 
 
