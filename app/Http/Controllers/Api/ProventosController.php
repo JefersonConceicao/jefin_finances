@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Auth;
 
 //MODELS
+use App\Models\Despesa;
 use App\Models\Proventos; 
 
 class ProventosController extends Controller
@@ -61,5 +62,54 @@ class ProventosController extends Controller
 
         $data = $proventos->deleteProvento($id);
         return response()->json($data);
+    }
+
+    /**
+     * Retorna o saldo restante do mês/ano informado.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function saldoMes(Request $request)
+    {
+        $user = Auth::user();
+        $mes = $request->input('mes');
+        $ano = $request->input('ano');
+
+        if(empty($mes) || empty($ano)){
+            return response()->json([
+                'error' => true,
+                'msg' => 'Os parâmetros mes e ano são obrigatórios.'
+            ], 400);
+        }
+
+        if(!is_numeric($mes) || !is_numeric($ano) || $mes < 1 || $mes > 12){
+            return response()->json([
+                'error' => true,
+                'msg' => 'Os parâmetros mes e ano devem ser valores numéricos válidos.'
+            ], 400);
+        }
+
+        $mes = intval($mes);
+        $ano = intval($ano);
+
+        $totalProventos = Proventos::where('user_id', $user->id)
+            ->whereMonth('data_provento', $mes)
+            ->whereYear('data_provento', $ano)
+            ->sum('valor_provento');
+
+        $totalDespesas = Despesa::where('user_id', $user->id)
+            ->whereMonth('created_at', $mes)
+            ->whereYear('created_at', $ano)
+            ->sum('valor_total');
+
+        return response()->json([
+            'error' => false,
+            'mes' => $mes,
+            'ano' => $ano,
+            'total_proventos' => floatval($totalProventos),
+            'total_despesas' => floatval($totalDespesas),
+            'saldo_restante' => floatval($totalProventos - $totalDespesas)
+        ]);
     }
 }

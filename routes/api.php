@@ -32,6 +32,7 @@ Route::group(['middleware' => ['verifyApi'], 'prefix' => 'auth' ], function(){
 
     Route::group(['prefix' => 'proventos'], function(){
         Route::get('/', 'Api\ProventosController@index')->name('api.proventos.index');
+        Route::get('/saldo-mes', 'Api\ProventosController@saldoMes')->name('api.proventos.saldoMes');
         Route::post('/store', 'Api\ProventosController@store')->name('api.proventos.store');
         Route::put('/update/{id}', 'Api\ProventosController@update')->name('api.proventos.update');
         Route::delete('/delete/{id}', 'Api\ProventosController@delete')->name('api.proventos.delete');
