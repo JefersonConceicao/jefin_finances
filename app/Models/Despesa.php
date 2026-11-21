@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use DB;
 use Carbon\Carbon;
+use Illuminate\Support\Arr;
 use App\Models\Lancamento;
 
 class Despesa extends Model
@@ -29,6 +30,13 @@ class Despesa extends Model
 
     public function despesaFixa(){
         return $this->belongsTo(DespesaFixa::class, 'despesa_fixa_id', 'id');
+    }
+
+    /**
+     * Busca a Despesa só entre as do usuário: a de outro usuário é tratada como inexistente (404).
+     */
+    public function doUsuario($id, $user){
+        return $this->where('user_id', $user->id)->findOrFail($id);
     }
 
     public function getDespesas($request = [], $user){
@@ -101,7 +109,13 @@ class Despesa extends Model
         }
     }
 
-    public function updateDespesa($id, $request = []){
+    public function updateDespesa($id, array $request, $user){
+        //FORA DO try: DESPESA DE OUTRO USUÁRIO VIRA 404, E NÃO UM ERRO GENÉRICO
+        $despesa = $this->doUsuario($id, $user);
+
+        //SÓ ESTES CAMPOS MUDAM PELA EDIÇÃO: DONO, DATA DE CADASTRO, PAGAMENTO E DESPESA FIXA DE ORIGEM FICAM COMO ESTÃO
+        $request = Arr::only($request, ['nome_despesa', 'despesa_tipo_id', 'valor_total', 'ativo', 'data_vencimento']);
+
         try{
             if(isset($request['valor_total']) && !empty($request['valor_total'])){
                 $request['valor_total'] = setToDecimal($request['valor_total']);
@@ -109,9 +123,7 @@ class Despesa extends Model
 
             //A DATA DE CADASTRO NÃO MUDA; ALTERAR O VENCIMENTO MUDA A COMPETÊNCIA
             $request['data_vencimento'] = Carbon::createFromFormat('d/m/Y', $request['data_vencimento'])->format('Y-m-d');
-            unset($request['created_at']);
 
-            $despesa = $this->find($id);
             $despesa->fill($request)->save();
 
             return [
@@ -127,8 +139,8 @@ class Despesa extends Model
         }
     }
 
-    public function deleteDespesa($id){
-        if($this->find($id)->delete()){
+    public function deleteDespesa($id, $user){
+        if($this->doUsuario($id, $user)->delete()){
             return [
                 'error' => false,
                 'msg' => 'Registro excluído com sucesso!'
@@ -142,10 +154,12 @@ class Despesa extends Model
     }
 
     public function pagamentoDespesa($id, $user){
+        //FORA DO try: DESPESA DE OUTRO USUÁRIO VIRA 404, E NÃO UM ERRO GENÉRICO
+        $despesa = $this->doUsuario($id, $user);
+
         try{
             $lancamento = new Lancamento;
 
-            $despesa = $this->find($id);
             $despesa->pago = $despesa->pago == 1 ? 0 : 1;
             $despesa->save();
 
