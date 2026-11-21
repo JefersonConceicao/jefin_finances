@@ -64,6 +64,19 @@ class Despesa extends Model
     }
 
     const MSG_SEGUINTES_NO_PASSADO = '"Esta e as seguintes" vale só a partir do mês atual';
+    const MSG_SEGUINTES_PAGA = 'Esta Ocorrência já está paga. Remova o pagamento antes, ou use "Reajustar" ou "Encerrar" na Despesa Fixa.';
+
+    //POR QUE "ESTA E AS SEGUINTES" NÃO PODE PARTIR DESTA OCORRÊNCIA; null QUANDO PODE
+    private function recusaSeguintes(){
+        if($this->seguintesNoPassado()){
+            return self::MSG_SEGUINTES_NO_PASSADO;
+        }
+        if($this->paga()){
+            return self::MSG_SEGUINTES_PAGA;
+        }
+
+        return null;
+    }
 
     //"ESTA E AS SEGUINTES" (REAJUSTE OU ENCERRAMENTO) SÓ VALE NO MÊS ATUAL OU NUM MÊS FUTURO
     private function seguintesNoPassado(){
@@ -160,8 +173,8 @@ class Despesa extends Model
             $vencimento = Carbon::createFromFormat('!d/m/Y', $request['data_vencimento']);
             $request['data_vencimento'] = $vencimento->format('Y-m-d');
 
-            if($escopo === self::ESCOPO_SEGUINTES && $despesa->despesaFixa && $despesa->seguintesNoPassado()){
-                return ['error' => true, 'msg' => self::MSG_SEGUINTES_NO_PASSADO];
+            if($escopo === self::ESCOPO_SEGUINTES && $despesa->despesaFixa && $recusa = $despesa->recusaSeguintes()){
+                return ['error' => true, 'msg' => $recusa];
             }
 
             if($escopo === self::ESCOPO_SEGUINTES && $despesa->despesaFixa){
@@ -171,8 +184,12 @@ class Despesa extends Model
                 }
 
                 DB::transaction(function() use ($despesa, $request, $vencimento){
+                    //O DIA SÓ MUDA SE O USUÁRIO TROCOU: NUM MÊS CURTO A DATA JÁ VEM CORTADA (31 VIRA 30 OU 28)
+                    $fixa = $despesa->despesaFixa;
+                    $dia = $vencimento->day === $fixa->vigencia()->vencimentoNoMes($despesa->competencia())->day ? null : $vencimento->day;
+
                     //"ESTA E AS SEGUINTES" É O REAJUSTE DA DESPESA FIXA, A PARTIR DO MÊS DESTA OCORRÊNCIA
-                    $despesa->despesaFixa->reajustar($despesa->competencia(), $request['valor_total'], $vencimento->day);
+                    $fixa->reajustar($despesa->competencia(), $request['valor_total'], $dia);
 
                     //O QUE NÃO É DO REAJUSTE (NOME, TIPO, ATIVO) VALE SÓ PARA ESTA OCORRÊNCIA
                     $despesa->refresh()->fill(Arr::only($request, ['nome_despesa', 'despesa_tipo_id', 'ativo']))->save();
@@ -211,8 +228,8 @@ class Despesa extends Model
         //FORA DO try: DESPESA DE OUTRO USUÁRIO VIRA 404, E NÃO UM ERRO GENÉRICO
         $despesa = $this->doUsuario($id, $user);
 
-        if($escopo === self::ESCOPO_SEGUINTES && $despesa->despesaFixa && $despesa->seguintesNoPassado()){
-            return ['error' => true, 'msg' => self::MSG_SEGUINTES_NO_PASSADO];
+        if($escopo === self::ESCOPO_SEGUINTES && $despesa->despesaFixa && $recusa = $despesa->recusaSeguintes()){
+            return ['error' => true, 'msg' => $recusa];
         }
 
         try{

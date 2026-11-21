@@ -110,18 +110,27 @@ trait Recorrente
             $fim = $fim->copy()->startOfMonth();
 
             foreach($recorrencia->ocorrenciasAPartirDe($fim->copy()->addMonthNoOverflow())->get() as $ocorrencia){
-                if(!$recorrencia->ocorrenciaPreservada($ocorrencia)){
-                    $recorrencia->excluirOcorrencia($ocorrencia);
+                if($recorrencia->ocorrenciaPreservada($ocorrencia)){
+                    //A OCORRÊNCIA PRESERVADA CONTINUA DENTRO DA VIGÊNCIA: O FIM VAI ATÉ ELA
+                    if($ocorrencia->competencia()->gt($fim)){
+                        $fim = $ocorrencia->competencia();
+                    }
+                    continue;
                 }
+                $recorrencia->excluirOcorrencia($ocorrencia);
             }
 
             //SEM VIGÊNCIA E SEM NENHUMA OCORRÊNCIA PRESERVADA, A RECORRÊNCIA DEIXA DE EXISTIR
-            if($fim->lt($recorrencia->mes_inicio) && !$recorrencia->ocorrencias()->exists()){
+            if($fim->lt($recorrencia->mes_inicio)){
                 $recorrencia->delete();
                 return;
             }
 
             $recorrencia->mes_fim = $fim->format('Y-m-d');
+            //NADA DEPOIS DO FIM FICA MARCADO COMO GRAVADO
+            if($recorrencia->ocorrencias_ate && $recorrencia->ocorrencias_ate->gt($fim)){
+                $recorrencia->ocorrencias_ate = $fim->format('Y-m-d');
+            }
             $recorrencia->save();
             $this->setRawAttributes($recorrencia->getAttributes(), true);
         });
@@ -145,6 +154,13 @@ trait Recorrente
         }
 
         return $gravadas;
+    }
+
+    /**
+     * O Encerramento só encurta a Vigência: um fim depois do atual estenderia a recorrência.
+     */
+    public function fimDepoisDoAtual(Carbon $fim){
+        return $this->mes_fim && $fim->copy()->startOfMonth()->gt($this->mes_fim);
     }
 
     public function temOcorrencias(){

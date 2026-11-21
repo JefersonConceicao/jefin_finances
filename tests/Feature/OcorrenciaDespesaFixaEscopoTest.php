@@ -305,4 +305,75 @@ class OcorrenciaDespesaFixaEscopoTest extends TestCase
             ->assertJsonFragment(['error' => true, 'msg' => 'Para mudar o mês do Vencimento, use "Só esta"']);
         $this->despesasDoMes(5)->assertSee('10/05/2026');
     }
+
+    /** @test */
+    public function reajuste_numa_ocorrencia_com_o_dia_cortado_no_fim_do_mes_nao_muda_o_dia_da_fixa()
+    {
+        $this->alterarOcorrencia(3, 'seguintes', ['data_vencimento' => '31/03/2026']);
+        $this->despesasDoMes(4)->assertSee('30/04/2026');
+
+        //ABRIL VENCE DIA 30 PORQUE O MÊS É CURTO; MUDAR SÓ O VALOR NÃO PODE TROCAR O DIA 31 POR 30
+        $this->alterarOcorrencia(4, 'seguintes', ['valor_total' => '1.700,00', 'data_vencimento' => '30/04/2026'])
+            ->assertJsonFragment(['error' => false]);
+
+        $this->despesasDoMes(5)->assertSee('31/05/2026')->assertSee('1.700,00');
+        $this->listaDeFixas()->assertSee('Dia 31');
+    }
+
+    /** @test */
+    public function esta_e_as_seguintes_numa_ocorrencia_ja_paga_e_recusado()
+    {
+        $this->pagar(3);
+        $mensagem = 'Esta Ocorrência já está paga. Remova o pagamento antes, ou use "Reajustar" ou "Encerrar" na Despesa Fixa.';
+
+        $this->alterarOcorrencia(3, 'seguintes', ['valor_total' => '1.700,00'])
+            ->assertJsonFragment(['error' => true, 'msg' => $mensagem]);
+        $this->excluirOcorrencia(3, 'seguintes')
+            ->assertJsonFragment(['error' => true, 'msg' => $mensagem]);
+
+        $this->despesasDoMes(4)->assertSee('1.500,00');
+        $this->listaDeFixas()->assertSee('sem fim');
+    }
+
+    /** @test */
+    public function encerrar_depois_do_fim_atual_e_recusado()
+    {
+        $this->actingAs($this->user)
+            ->putJson(route('despesasFixas.encerrar', $this->fixa->id), ['mes_fim' => '2026-04'])
+            ->assertJsonFragment(['error' => false]);
+
+        $this->actingAs($this->user)
+            ->putJson(route('despesasFixas.encerrar', $this->fixa->id), ['mes_fim' => '2026-08'])
+            ->assertJsonFragment(['error' => true, 'msg' => 'A Vigência já termina em 04/2026. Para estender, cadastre uma nova Despesa Fixa.']);
+
+        $this->assertSame(0, $this->ocorrenciasNoMes(5));
+        $this->listaDeFixas()->assertSeeInOrder(['01/2026', '04/2026']);
+    }
+
+    /** @test */
+    public function encerrar_desde_o_inicio_com_uma_ocorrencia_paga_depois_mantem_o_fim_nela()
+    {
+        $this->pagar(3);
+
+        $this->excluirOcorrencia(1, 'seguintes')->assertJsonFragment(['error' => false]);
+
+        $this->assertSame(0, $this->ocorrenciasNoMes(1));
+        $this->assertSame(0, $this->ocorrenciasNoMes(2));
+        $this->despesasDoMes(3)->assertSee('Remover Pagamento');
+        $this->assertSame(0, $this->ocorrenciasNoMes(4));
+        $this->listaDeFixas()->assertSeeInOrder(['01/2026', '03/2026']);
+    }
+
+    /** @test */
+    public function renomear_a_fixa_nao_muda_o_nome_da_ocorrencia_paga()
+    {
+        $this->pagar(1);
+
+        $this->actingAs($this->user)
+            ->putJson(route('despesasFixas.update', $this->fixa->id), ['nome_despesa' => 'Aluguel apto'])
+            ->assertJsonFragment(['error' => false]);
+
+        $this->despesasDoMes(1)->assertDontSee('Aluguel apto');
+        $this->despesasDoMes(2)->assertSee('Aluguel apto');
+    }
 }

@@ -172,6 +172,10 @@ class DespesaFixa extends Model
 
                 $vigencia = $despesaFixa->vigencia();
                 foreach($despesaFixa->ocorrenciasAPartirDe(Carbon::now())->get() as $ocorrencia){
+                    //A OCORRÊNCIA PAGA É HISTÓRICO: FICA COM O NOME QUE TINHA
+                    if($despesaFixa->ocorrenciaPreservada($ocorrencia)){
+                        continue;
+                    }
                     $ocorrencia->nome_despesa = $vigencia->ocorrenciaNoMes($ocorrencia->competencia())->nome($despesaFixa->nome_despesa);
                     $ocorrencia->save();
                 }
@@ -193,6 +197,14 @@ class DespesaFixa extends Model
 
     public function encerrarDespesaFixa($id, $request, $user){
         $despesaFixa = $this->where('user_id', $user->id)->findOrFail($id);
+
+        $fim = Carbon::createFromFormat('!Y-m', $request['mes_fim']);
+        if($despesaFixa->fimDepoisDoAtual($fim)){
+            return [
+                'error' => true,
+                'msg' => 'A Vigência já termina em ' . $despesaFixa->mes_fim->format('m/Y') . '. Para estender, cadastre uma nova Despesa Fixa.'
+            ];
+        }
 
         return $this->resposta(function() use ($despesaFixa, $request){
             $despesaFixa->encerrar(Carbon::createFromFormat('!Y-m', $request['mes_fim']));

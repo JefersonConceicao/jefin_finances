@@ -190,4 +190,12 @@ class DespesaFixaVigenciaTest extends TestCase
             ->assertOk()
             ->assertSeeInOrder(['03/2026', '12/2026', 'Dia 15']);
     }
+
+    /** @test */
+    public function mes_de_fim_e_quantidade_de_parcelas_juntos_sao_recusados()
+    {
+        $this->cadastrarDespesaFixa(['mes_inicio' => '2026-03', 'mes_fim' => '2026-06', 'parcelas' => 10])
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('parcelas');
+    }
 }

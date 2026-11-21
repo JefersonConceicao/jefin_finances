@@ -29,7 +29,11 @@ class DespesasFixasRequest extends FormRequest
                     //VIGÊNCIA: MÊS DE INÍCIO, FIM OPCIONAL (OU QUANTIDADE DE PARCELAS) E DIA DE VENCIMENTO
                     'mes_inicio' => 'required|date_format:Y-m',
                     'mes_fim' => 'nullable|date_format:Y-m|after_or_equal:mes_inicio',
-                    'parcelas' => 'nullable|integer|min:1|max:360',
+                    'parcelas' => ['nullable', 'integer', 'min:1', 'max:360', function($attribute, $value, $fail){
+                        if(!empty($value) && !empty($this->input('mes_fim'))){
+                            $fail('Informe o mês de fim ou a quantidade de parcelas, não os dois');
+                        }
+                    }],
                     'dia_vencimento' => 'required|integer|min:1|max:31',
                 ];
             case 'despesasFixas.update':

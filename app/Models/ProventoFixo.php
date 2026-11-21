@@ -139,6 +139,14 @@ class ProventoFixo extends Model
     public function encerrarProventoFixo($id, $request, $user){
         $proventoFixo = $this->doUsuario($id, $user);
 
+        $fim = Carbon::createFromFormat('!Y-m', $request['mes_fim']);
+        if($proventoFixo->fimDepoisDoAtual($fim)){
+            return [
+                'error' => true,
+                'msg' => 'A Vigência já termina em ' . $proventoFixo->mes_fim->format('m/Y') . '. Para estender, cadastre um novo Provento Fixo.'
+            ];
+        }
+
         return $this->resposta(function() use ($proventoFixo, $request){
             $proventoFixo->encerrar(Carbon::createFromFormat('!Y-m', $request['mes_fim']));
         }, 'Provento fixo encerrado!', 'Não foi possível encerrar, tente de novo.');
