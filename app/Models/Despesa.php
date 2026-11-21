@@ -13,6 +13,7 @@ class Despesa extends Model
         'user_id',
         'nome_despesa',
         'despesa_tipo_id',
+        'despesa_fixa_id',
         'valor_total',
         'ativo',
         'pago',
@@ -22,6 +23,10 @@ class Despesa extends Model
 
     public function despesaTipo(){
         return $this->hasOne(TiposDespesa::class, 'id', 'despesa_tipo_id');
+    }
+
+    public function despesaFixa(){
+        return $this->belongsTo(DespesaFixa::class, 'despesa_fixa_id', 'id');
     }
 
     public function getDespesas($request = [], $user){
@@ -158,54 +163,6 @@ class Despesa extends Model
             return [
                 'error' => true,
                 'msg' => 'Ocorreu um erro ao declarar/remover pagamento, tente de novo'
-            ];
-        }
-    }
-
-    public function copyDespesas($request = [], $user){
-        try{
-            $this->timestamps = false;
-            $anteriorDate = $request['mes'] - 1;
-
-            $despMesAnterior = $this
-            ->whereMonth('created_at', $anteriorDate)
-            ->whereYear('created_at', $request['ano'])
-            ->where('user_id', $user->id);
-
-            if($despMesAnterior->count() == 0){
-               return [
-                    'error' => true,
-                    'msg' => 'Infelizmente não encontramos despesas do mês anterior, é necessario o cadastro manual'
-               ];
-            }
-
-           DB::beginTransaction();
-            foreach($despMesAnterior->get()->toArray() as $k => $v){
-                $formData = [
-                    'user_id' => $v['user_id'],
-                    'nome_despesa' => $v['nome_despesa'],
-                    'despesa_tipo_id' => $v['despesa_tipo_id'],
-                    'valor_total' => $v['valor_total'],
-                    'ativo' => $v['ativo'],
-                    'created_at' => $request['ano'].'-'.$request['mes'].'-'.date('d').' '.date('H:i:s'),
-                    'updated_at' => $request['ano'].'-'.$request['mes'].'-'.date('d').' '.date('H:i:s'),
-                    'pago' => 0
-                ];
-
-                $this->create($formData);
-                unset($formData);
-            }
-
-            DB::commit();
-            return [
-                'error' => false,
-                'msg' => 'Despesas Adicionadas!'
-            ];
-        }catch(\Exception $error){
-            DB::rollback();
-            return [
-                'error' => true,
-                'msg' => 'Algo deu errado, tente de novo.',
             ];
         }
     }

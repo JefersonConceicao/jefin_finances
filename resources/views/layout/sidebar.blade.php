@@ -31,10 +31,24 @@
                 </a>
             </li>
             <li class="submenu-item">
+                <a href="/projecao">
+                    <i class="fas fa-angle-right"></i>
+                    &nbsp;
+                    Projeção
+                </a>
+            </li>
+            <li class="submenu-item">
                 <a href="/despesas">
                     <i class="fas fa-angle-right"></i>
                     &nbsp;
                     Despesas
+                </a>
+            </li>
+            <li class="submenu-item">
+                <a href="/despesasFixas">
+                    <i class="fas fa-angle-right"></i>
+                    &nbsp;
+                    Despesas Fixas
                 </a>
             </li>
 

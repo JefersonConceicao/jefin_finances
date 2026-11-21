@@ -34,6 +34,7 @@ return [
      */
     'storage' => [
         'enabled'    => true,
+        'enabled'    => env('DEBUGBAR_STORAGE_ENABLED', false),
         'driver'     => 'file', // redis, file, pdo, socket, custom
         'path'       => storage_path('debugbar'), // For file driver
         'connection' => null,   // Leave null for default connection (Redis/PDO)

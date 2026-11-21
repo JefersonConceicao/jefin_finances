@@ -9,6 +9,7 @@ use App\Http\Requests\DespesasRequest;
 
 //MODELS
 use App\Models\Despesa;
+use App\Models\DespesaFixa;
 use App\Models\TiposDespesa;
 use App\Models\Proventos;
 use Illuminate\View\View;
@@ -23,12 +24,25 @@ class DespesasController extends Controller
         $despesa = new Despesa;
         $tipoDespesa = new TiposDespesa;
         $proventos = new Proventos;
+        $despesaFixa = new DespesaFixa;
         $user = Auth::user();
+
+        //GERA AS DESPESAS FIXAS DO MÊS FILTRADO (MESES FUTUROS SÃO IGNORADOS)
+        if(!empty($request->mes) && !empty($request->ano)){
+            $despesaFixa->gerarParaMes($user, $request->mes, $request->ano);
+        }else{
+            $despesaFixa->gerarParaMes($user, date('m'), date('Y'));
+        }
 
         $data = $despesa->getDespesas($request->all(), $user)->orderBy('valor_total','DESC')->get();
 
         $totalValor = $despesa
             ->getDespesas($request->all(), $user)
+            ->sum('valor_total');
+
+        $totalFixas = $despesa
+            ->getDespesas($request->all(), $user)
+            ->whereNotNull('despesa_fixa_id')
             ->sum('valor_total');
 
         $totalValorDividasAtivas = $despesa
@@ -49,6 +63,8 @@ class DespesasController extends Controller
             ->with('optionsMeses', $this->optionsMeses)
             ->with('optionsTipoDespesa', $optionsTipoDesesa)
             ->with('totalValor', $totalValor)
+            ->with('totalFixas', $totalFixas)
+            ->with('totalVariaveis', $totalValor - $totalFixas)
             ->with('totalDividasAtivas', $totalValorDividasAtivas)
             ->with('totalProventos', $totalProventos);
     }
@@ -127,14 +143,6 @@ class DespesasController extends Controller
         $despesa = new Despesa;
 
         $data = $despesa->pagamentoDespesa($id, $user);
-        return response()->json($data);
-    }
-
-    public function copyDespesas(Request $request){
-        $despesa = new Despesa;
-        $user = Auth::user();
-
-        $data = $despesa->copyDespesas($request->all(), $user);
         return response()->json($data);
     }
 }

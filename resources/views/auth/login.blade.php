@@ -24,13 +24,23 @@
                         </div>
                         <div class="form-group position-relative has-icon-left mb-4">
                             <label for="password"> Senha </label>
-                            <input 
-                                id="password" 
-                                name="password" 
-                                type="password" 
-                                class="form-control form-control-xl" 
+                            <input
+                                id="password"
+                                name="password"
+                                type="password"
+                                class="form-control form-control-xl"
                                 placeholder="preencha sua senha"
+                                style="padding-right: 3.5rem;"
                             >
+                            <button
+                                type="button"
+                                id="togglePassword"
+                                class="btn btn-link position-absolute top-50 end-0 translate-middle-y text-secondary me-1"
+                                aria-label="Mostrar senha"
+                                title="Mostrar senha"
+                            >
+                                <i class="bi bi-eye fs-4"></i>
+                            </button>
 
                             <div class="form-control-icon">
                                 <i class="bi bi-shield-lock"></i>
@@ -59,4 +69,20 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.getElementById('togglePassword').addEventListener('click', function () {
+            const input = document.getElementById('password');
+            const icon = this.querySelector('i');
+            const mostrar = input.type === 'password';
+
+            input.type = mostrar ? 'text' : 'password';
+            icon.classList.toggle('bi-eye', !mostrar);
+            icon.classList.toggle('bi-eye-slash', mostrar);
+
+            const label = mostrar ? 'Ocultar senha' : 'Mostrar senha';
+            this.setAttribute('aria-label', label);
+            this.setAttribute('title', label);
+        });
+    </script>
 @endsection

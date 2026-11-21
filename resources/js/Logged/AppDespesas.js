@@ -109,38 +109,6 @@ const habilitaBotoes = () => {
             }
         });
     });
-
-    $("#copyDespesas").on("click", function(){
-        const buttonElement = $(this);
-        const url = '/despesas/copyDespesas';
-        const form = "#searchFormDespesas"
-
-        $.ajax({
-            type: "POST",
-            url,
-            data: $(form).serialize(),
-            dataType: "JSON",
-            beforeSend:function(){
-                buttonElement.prop("disabled", true).html(htmlLoading);
-            },
-            success: function (response) {
-                Swal.fire({
-                    toast:true,
-                    position: 'bottom-left',
-                    title: `<h5 style="color:white"> ${response.msg} </h5>`,
-                    icon: !response.error ? 'success' : 'error',
-                    showConfirmButton: false,
-                    timer:3000,
-                    background: response.error ? 'red' : color().default,
-                });
-
-                getFilterDespesas();
-            },
-            complete:function(){
-                buttonElement.prop("disabled", false).html(` Repetir utlimas despesas `);
-            }
-        });
-    });
 }
 
 const formDespesas = id => {

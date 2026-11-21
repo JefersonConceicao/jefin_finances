@@ -3,8 +3,6 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Providers\RouteServiceProvider;
-use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use App\Http\Requests\LoginRequest;
 use Auth;
@@ -49,7 +47,7 @@ class LoginController extends Controller
         if(!$token = auth()->guard('api')->attempt($credentials)){
             return response()->json(['Credenciais Incorretas'], 401);
         }
-        
+
         return response()->json([
             'token' => $token,
             'dataUser' => Auth::guard('api')->user()
@@ -61,7 +59,7 @@ class LoginController extends Controller
 
         try{
             $credentials = ['email' => $request->email, 'password' => 'googleauth', 'temp_user' => 1];
-            
+
             if($user->verifyUserTempByMail($request->email)->exists()){
                 if($this->authenticateTempUser($credentials)){
                     $response = [
@@ -123,7 +121,7 @@ class LoginController extends Controller
     protected function logout(){
         $objUser = new User;
         $sessionUser = Auth::user();
-        
+
         $objUser->deleteTempUser($sessionUser);
         Auth::logout();
         return response()->json(['logout' => true]);

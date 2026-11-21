@@ -1,0 +1,5 @@
+- Não altere comentarios
+- Sempre responda em português
+- Seja extremamente conciso
+- Mostre apenas o código modificado, nao reescreva o arquivo inteiro
+- Não explique o código, apenas quando for solicitado.

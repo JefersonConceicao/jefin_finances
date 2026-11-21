@@ -63,8 +63,18 @@ Route::group(['middleware' => 'auth'], function(){
         Route::put('/update/{id}', 'DespesasController@update')->name('despesas.update');
         Route::delete('/delete/{id}', 'DespesasController@delete')->name('despesas.delete');
         Route::put('/payDespesa/{id}', 'DespesasController@delcararPagamentoDespesa')->name('despesa.pay');
-        Route::post('/copyDespesas', 'DespesasController@copyDespesas')->name('despesas.copyDespesas');
     });
+
+    Route::group(['prefix' => 'despesasFixas'], function(){
+        Route::get('/', 'DespesasFixasController@index')->name('despesasFixas.index');
+        Route::get('/create', 'DespesasFixasController@create')->name('despesasFixas.create');
+        Route::post('/store', 'DespesasFixasController@store')->name('despesasFixas.store');
+        Route::get('/edit/{id}', 'DespesasFixasController@edit')->name('despesasFixas.edit');
+        Route::put('/update/{id}', 'DespesasFixasController@update')->name('despesasFixas.update');
+        Route::delete('/delete/{id}', 'DespesasFixasController@delete')->name('despesasFixas.delete');
+    });
+
+    Route::get('/projecao', 'ProjecaoController@index')->name('projecao.index');
 
     Route::group(['prefix' => 'lancamentos'], function(){
         Route::get('/', 'LancamentosController@index')->name('lancamentos.index');

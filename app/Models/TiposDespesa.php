@@ -70,6 +70,28 @@ class TiposDespesa extends Model
         }
     }
 
+    /**
+     * Tipo usado nas despesas geradas a partir de despesas fixas.
+     * Reaproveita um tipo "Fixa"/"Fixo" do usuário ou cria um novo.
+     */
+    public function idTipoFixaDoUsuario($user){
+        $existente = $this
+            ->where('user_id', $user->id)
+            ->where('nome', 'LIKE', 'fix%')
+            ->orderBy('id')
+            ->value('id');
+
+        if($existente){
+            return $existente;
+        }
+
+        return $this->create([
+            'user_id' => $user->id,
+            'nome' => 'Fixa',
+            'ativo' => 1,
+        ])->id;
+    }
+
     public function deleteTipoDespesa($id){
         if($this->find($id)->delete()){
             return [

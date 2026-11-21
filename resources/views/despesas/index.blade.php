@@ -30,7 +30,7 @@
                         <select name="mes" class="form-select">
                             <option value=""> Todos os meses </option>
                             @foreach ($optionsMeses as $k => $v)
-                                <option value="{{ $k }}" @if ($k == date('m')) selected @endif> {{ $v }} </option>
+                                <option value="{{ $k }}" @if ($k == request('mes', date('m'))) selected @endif> {{ $v }} </option>
                             @endforeach
                         </select>
                     </div>
@@ -38,7 +38,7 @@
                 <div class="col-md-3">
                     <div class="form-group">
                         <label> Ano </label>
-                        <input name="ano" type="text" class="form-control" value="{{ date('Y') }}" />
+                        <input name="ano" type="text" class="form-control" value="{{ request('ano', date('Y')) }}" />
                     </div>
                 </div>
             </div>
@@ -58,6 +58,11 @@
                     <h3 class="card-title"> Total de registros: {{ count($dataDespesas) }} </h3>
                     <h6 class="text-info"> Receitas do mês: {{ "R$ " .convertValorReal($totalProventos) }} </h6>
                     <h6> Total despesas: {{ "R$ " .convertValorReal($totalValor) }} </h6>
+                    <p class="mb-2 text-muted">
+                        Fixas: {{ "R$ " .convertValorReal($totalFixas) }}
+                        &nbsp;|&nbsp;
+                        Variáveis: {{ "R$ " .convertValorReal($totalVariaveis) }}
+                    </p>
                     <h6 class="text-success"> Valor Pago: {{ "R$ " .convertValorReal($totalValor - $totalDividasAtivas) }} </h6>
                     <h6 class="text-warning"> Valor a pagar: {{ "R$ " .convertValorReal($totalDividasAtivas) }} </h6>
 
@@ -105,7 +110,12 @@
                                     <td>
                                         {{ !empty($despesa->created_at) ? converteData($despesa->created_at, 'd/m/Y') : 'Não definido' }}
                                     </td>
-                                    <td> {{ $despesa->nome_despesa }} </td>
+                                    <td>
+                                        {{ $despesa->nome_despesa }}
+                                        @if (!empty($despesa->despesa_fixa_id))
+                                            <span class="badge bg-light-primary ms-1"> Fixa </span>
+                                        @endif
+                                    </td>
                                     <td> {{ convertValorReal($despesa->valor_total) }} </td>
                                     <td>
                                         <b> {{ $despesa->despesaTipo->nome }} </b>
@@ -130,12 +140,10 @@
                 @else
                     <div class="text-center">
                         <h4> Nenhum registro encontrado. </h4>
-
-                        <div class="text-center">
-                            <button class="btn btn-primary rounded-pill" id="copyDespesas">
-                                Repetir despesas do mes anterior
-                            </button>
-                        </div>
+                        <p class="text-muted">
+                            Cadastre seu custo de vida em <a href="/despesasFixas">Despesas Fixas</a>
+                            para que ele seja lançado automaticamente todo mês.
+                        </p>
                     </div>
                 @endif
             </div>

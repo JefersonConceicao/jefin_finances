@@ -8,6 +8,7 @@ window.AppUsage = require('./Core/AppUsage');
 window.AppUsers = require('./Logged/AppUsers');
 window.AppProventos = require('./Logged/AppProventos');
 window.AppDespesas = require('./Logged/AppDespesas');
+window.AppDespesasFixas = require('./Logged/AppDespesasFixas');
 window.AppTipoDespesas = require('./Logged/AppTipoDespesas');
 window.AppLancamentos = require('./Logged/AppLancamentos');
 window.AppDashboard = require('./Logged/AppDashboard');
