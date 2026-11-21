@@ -119,12 +119,13 @@
         </div>
         <div class="col-md-6">
             <div class="form-group">
-                <label> Data Criação <span class="required">  * </span> </label>
-                <input 
-                    name="created_at"
+                <label> Vencimento <span class="required">  * </span> </label>
+                {{-- REGISTRO ANTIGO SEM VENCIMENTO: SUGERE A DATA DE CADASTRO, QUE É A SUA COMPETÊNCIA ATUAL --}}
+                <input
+                    name="data_vencimento"
                     type="text"
                     class="form-control datepicker"
-                    value="{{ converteData($despesa->created_at, 'd/m/Y') }}"
+                    value="{{ converteData($despesa->data_vencimento ?: $despesa->created_at, 'd/m/Y') }}"
                 />
 
                 <div class="error_feedback"> </div>

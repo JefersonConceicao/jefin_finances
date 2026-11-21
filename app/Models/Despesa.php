@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use DB;
+use Carbon\Carbon;
 use App\Models\Lancamento;
 
 class Despesa extends Model
@@ -15,6 +16,7 @@ class Despesa extends Model
         'despesa_tipo_id',
         'despesa_fixa_id',
         'valor_total',
+        'data_vencimento',
         'ativo',
         'pago',
         'created_at',
@@ -45,22 +47,25 @@ class Despesa extends Model
             ->where($conditions)
             ->with('despesaTipo');
 
+        //COMPETÊNCIA: MÊS DO VENCIMENTO; REGISTROS ANTIGOS SEM VENCIMENTO USAM A DATA DE CADASTRO (ADR-0002)
+        $competencia = DB::raw('COALESCE(data_vencimento, created_at)');
+
         if(empty($request['mes']) && !empty($request['ano'])){
             return $query
-                ->whereYear('created_at', $request['ano'])
+                ->whereYear($competencia, $request['ano'])
                 ->orderBy('valor_total', 'DESC');
         }
 
         if(empty($request['ano']) && !empty($request['mes'])){
             return $query
-                ->whereMonth('created_at', $request['mes'])
+                ->whereMonth($competencia, $request['mes'])
                 ->orderBy('valor_total', 'DESC');
         }
 
         if(!empty($request['mes']) && !empty($request['ano'])){
             return $query
-                ->whereMonth('created_at', $request['mes'])
-                ->whereYear('created_at', $request['ano'])
+                ->whereMonth($competencia, $request['mes'])
+                ->whereYear($competencia, $request['ano'])
                 ->orderBy('valor_total', 'DESC');
         }
 
@@ -76,9 +81,11 @@ class Despesa extends Model
                 $request['valor_total'] = setToDecimal($request['valor_total']);
             }
 
-            if(isset($request['created_at']) && !empty($request['created_at'])){
-                $request['created_at'] = converteData(str_replace('/', '-', $request['created_at']), 'Y-m-d H:i:s');
-            }
+            //COMPETÊNCIA É O MÊS DO VENCIMENTO (ADR-0002); SEM DATA INFORMADA, VENCE HOJE
+            $request['data_vencimento'] = !empty($request['data_vencimento'])
+                ? Carbon::createFromFormat('d/m/Y', $request['data_vencimento'])->format('Y-m-d')
+                : Carbon::today()->format('Y-m-d');
+            unset($request['created_at']);
 
             $this->fill($request)->save();
             return [
@@ -100,9 +107,9 @@ class Despesa extends Model
                 $request['valor_total'] = setToDecimal($request['valor_total']);
             }
 
-            if(isset($request['created_at']) && !empty($request['created_at'])){
-                $request['created_at'] = converteData(str_replace('/', '-', $request['created_at']), 'Y-m-d H:i:s');
-            }
+            //A DATA DE CADASTRO NÃO MUDA; ALTERAR O VENCIMENTO MUDA A COMPETÊNCIA
+            $request['data_vencimento'] = Carbon::createFromFormat('d/m/Y', $request['data_vencimento'])->format('Y-m-d');
+            unset($request['created_at']);
 
             $despesa = $this->find($id);
             $despesa->fill($request)->save();

@@ -23,12 +23,13 @@ class DespesasRequest extends FormRequest
         $currentRoute = explode('.', Route::currentRouteName());
         switch(end($currentRoute)){
             case 'store':
+                //SEM data_vencimento, A DESPESA VENCE HOJE
                 return [
                     'nome_despesa' => 'required',
                     'despesa_tipo_id' => 'required',
                     'valor_total' => 'required',
                     'ativo' => 'required',
-                    'created_at' => 'required' 
+                    'data_vencimento' => 'nullable|date_format:d/m/Y'
                 ];
             case 'update': 
                 return [
@@ -36,8 +37,8 @@ class DespesasRequest extends FormRequest
                     'despesa_tipo_id' => 'required',
                     'valor_total' => 'required',
                     'ativo' => 'required',
-                    'created_at' => 'required' 
-                ];  
+                    'data_vencimento' => 'required|date_format:d/m/Y'
+                ];
         }
     }
 

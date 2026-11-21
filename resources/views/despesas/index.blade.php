@@ -97,7 +97,7 @@
                     <table class="table table-hover table-responsive">
                         <thead>
                             <tr>
-                                <th> Criada em </th>
+                                <th> Vencimento </th>
                                 <th> Nome </th>
                                 <th> Valor (R$) </th>
                                 <th> Tipo </th>
@@ -108,7 +108,8 @@
                             @foreach ($dataDespesas as $despesa)
                                 <tr style="cursor:pointer;" id="{{ $despesa->id }}" class="rowSettingsDespesa">
                                     <td>
-                                        {{ !empty($despesa->created_at) ? converteData($despesa->created_at, 'd/m/Y') : 'Não definido' }}
+                                        {{-- REGISTRO ANTIGO SEM VENCIMENTO: MOSTRA A DATA DE CADASTRO, QUE DEFINE SUA COMPETÊNCIA --}}
+                                        {{ converteData($despesa->data_vencimento ?: $despesa->created_at, 'd/m/Y') }}
                                     </td>
                                     <td>
                                         {{ $despesa->nome_despesa }}
