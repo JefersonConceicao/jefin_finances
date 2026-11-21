@@ -63,7 +63,7 @@ class ProventosController extends Controller
     {
         $proventos = new Proventos;
 
-        $data = $proventos->find($id);
+        $data = $proventos->doUsuario($id, Auth::user());
         return view('proventos.edit')   
             ->with('provento', $data);
     }
@@ -77,7 +77,7 @@ class ProventosController extends Controller
     {
         $proventos = new Proventos;
 
-        $data = $proventos->updateProvento($id, $request->all());
+        $data = $proventos->updateProvento($id, $request->all(), Auth::user());
         return response()->json($data);
     }
 
@@ -90,7 +90,7 @@ class ProventosController extends Controller
     {
         $proventos = new Proventos;
 
-        $data = $proventos->deleteProvento($id, $request->all());
+        $data = $proventos->deleteProvento($id, $request->all(), Auth::user());
         return response()->json($data);
     }
 

@@ -46,7 +46,7 @@ class ProventosController extends Controller
         $user = Auth::user();
         $proventos = new Proventos;
 
-        $data = $proventos->updateProvento($id, $request->all());
+        $data = $proventos->updateProvento($id, $request->all(), Auth::user());
         return response()->json($data);
     }
 
@@ -59,7 +59,7 @@ class ProventosController extends Controller
         $user = Auth::user();
         $proventos = new Proventos;
 
-        $data = $proventos->deleteProvento($id);
+        $data = $proventos->deleteProvento($id, [], Auth::user());
         return response()->json($data);
     }
 }
