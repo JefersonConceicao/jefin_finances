@@ -69,15 +69,25 @@ class Vigencia
 
         $ocorrencias = [];
         for ($mes = $de; $mes->lte($ate); $mes = $mes->copy()->addMonthNoOverflow()) {
-            $ocorrencias[] = new Ocorrencia(
-                $mes->copy(),
-                $this->vencimentoNoMes($mes),
-                $this->fim ? $this->inicio->diffInMonths($mes) + 1 : null,
-                $this->totalParcelas()
-            );
+            $ocorrencias[] = $this->ocorrenciaNoMes($mes);
         }
 
         return $ocorrencias;
+    }
+
+    /**
+     * A Ocorrência daquele mês: o Vencimento nele e, quando há fim, a parcela.
+     */
+    public function ocorrenciaNoMes(Carbon $mes): Ocorrencia
+    {
+        $mes = $mes->copy()->startOfMonth();
+
+        return new Ocorrencia(
+            $mes,
+            $this->vencimentoNoMes($mes),
+            $this->fim ? $this->inicio->diffInMonths($mes) + 1 : null,
+            $this->totalParcelas()
+        );
     }
 
     /**

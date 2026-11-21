@@ -64,12 +64,7 @@
                         <tbody>
                             @foreach ($dataDespesasFixas as $fixa)
                                 <tr id="{{ $fixa->id }}">
-                                    <td>
-                                        {{ $fixa->nome_despesa }}
-                                        @if ($fixa->isTravada())
-                                            <i class="fa fa-lock text-muted ms-1" title="Já lançada em {{ $fixa->despesas_count }} mês(es). Apenas inativação permitida."></i>
-                                        @endif
-                                    </td>
+                                    <td> {{ $fixa->nome_despesa }} </td>
                                     <td>
                                         {{ $fixa->mes_inicio->format('m/Y') }}
                                         &ndash;
@@ -84,10 +79,10 @@
                                     </td>
                                     <td>
                                         <div class="text-center" style="display:flex;">
-                                            <button class="btn btn-secondary rounded-pill btnEditDespesaFixa" title="{{ $fixa->isTravada() ? 'Ativar/Inativar' : 'Alterar' }}">
+                                            <button class="btn btn-secondary rounded-pill btnEditDespesaFixa" title="Alterar, Reajustar ou Encerrar">
                                                 <i class="fa fa-edit"> </i>
                                             </button>
-                                            @if (!$fixa->isTravada())
+                                            @if (!$fixa->temOcorrencias())
                                                 &nbsp;
                                                 <button class="btn btn-danger rounded-pill btnDeleteDespesaFixa" title="Excluir">
                                                     <i class="fa fa-trash"> </i>

@@ -106,7 +106,7 @@
                         </thead>
                         <tbody>
                             @foreach ($dataDespesas as $despesa)
-                                <tr style="cursor:pointer;" id="{{ $despesa->id }}" class="rowSettingsDespesa">
+                                <tr style="cursor:pointer;" id="{{ $despesa->id }}" class="rowSettingsDespesa" data-ocorrencia="{{ empty($despesa->despesa_fixa_id) ? 0 : 1 }}">
                                     <td>
                                         {{-- REGISTRO ANTIGO SEM VENCIMENTO: MOSTRA A DATA DE CADASTRO, QUE DEFINE SUA COMPETÊNCIA --}}
                                         {{ converteData($despesa->data_vencimento ?: $despesa->created_at, 'd/m/Y') }}

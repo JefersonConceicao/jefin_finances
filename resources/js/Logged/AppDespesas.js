@@ -59,12 +59,27 @@ const habilitaBotoes = () => {
     });
 
     $(".btnDeleteDespesa").on("click", function(){
-        const id = $(this).parents('tr').attr("id");
-        const url = '/despesas/delete/' + id;
+        const row = $(this).parents('tr');
+        const url = '/despesas/delete/' + row.attr("id");
 
-        Swal.fire(optionsSwalDelete).then(result => {
+        //OCORRÊNCIA DE DESPESA FIXA: ESCOLHE "SÓ ESTA" OU "ESTA E AS SEGUINTES" (ENCERRAMENTO)
+        const options = row.data('ocorrencia') == 1
+            ? Object.assign({}, optionsSwalDelete, {
+                text: 'Esta é uma Ocorrência de Despesa Fixa.',
+                input: 'radio',
+                inputOptions: {
+                    so_esta: 'Só esta',
+                    seguintes: 'Esta e as seguintes (encerra a Despesa Fixa)'
+                },
+                inputValue: 'so_esta',
+            })
+            : optionsSwalDelete;
+
+        Swal.fire(options).then(result => {
             if(result.isConfirmed){
-                deleteRowForGrid(url, function(){
+                const escopo = result.value === 'seguintes' ? '?escopo=seguintes' : '';
+
+                deleteRowForGrid(url + escopo, function(){
                     getFilterDespesas()
                 });
             }

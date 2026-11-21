@@ -62488,11 +62488,23 @@ var habilitaBotoes = function habilitaBotoes() {
     });
   });
   $(".btnDeleteDespesa").on("click", function () {
-    var id = $(this).parents('tr').attr("id");
-    var url = '/despesas/delete/' + id;
-    Swal.fire(optionsSwalDelete).then(function (result) {
+    var row = $(this).parents('tr');
+    var url = '/despesas/delete/' + row.attr("id");
+
+    //OCORRÊNCIA DE DESPESA FIXA: ESCOLHE "SÓ ESTA" OU "ESTA E AS SEGUINTES" (ENCERRAMENTO)
+    var options = row.data('ocorrencia') == 1 ? Object.assign({}, optionsSwalDelete, {
+      text: 'Esta é uma Ocorrência de Despesa Fixa.',
+      input: 'radio',
+      inputOptions: {
+        so_esta: 'Só esta',
+        seguintes: 'Esta e as seguintes (encerra a Despesa Fixa)'
+      },
+      inputValue: 'so_esta'
+    }) : optionsSwalDelete;
+    Swal.fire(options).then(function (result) {
       if (result.isConfirmed) {
-        deleteRowForGrid(url, function () {
+        var escopo = result.value === 'seguintes' ? '?escopo=seguintes' : '';
+        deleteRowForGrid(url + escopo, function () {
           getFilterDespesas();
         });
       }
@@ -62679,6 +62691,21 @@ var habilitaBotoes = function habilitaBotoes() {
         e.preventDefault();
         formDespesasFixas(id);
       });
+      $("#btnReajustarDespesaFixa").on("click", function () {
+        acaoDespesaFixa('/despesasFixas/reajustar/' + id, '#reajusteDespesaFixa', $(this));
+      });
+      $("#btnEncerrarDespesaFixa").on("click", function () {
+        var button = $(this);
+        Swal.fire(Object.assign({}, optionsSwalDelete, {
+          title: 'Encerrar a Despesa Fixa?',
+          text: 'As Ocorrências depois do mês escolhido serão excluídas.',
+          confirmButtonText: 'Sim, encerrar'
+        })).then(function (result) {
+          if (result.isConfirmed) {
+            acaoDespesaFixa('/despesasFixas/encerrar/' + id, '#encerramentoDespesaFixa', button);
+          }
+        });
+      });
     });
   });
   $(".btnDeleteDespesaFixa").on("click", function () {
@@ -62731,6 +62758,45 @@ var formDespesasFixas = function formDespesasFixas(id) {
     },
     complete: function complete() {
       $(form + " .btnSubmit").prop("disabled", false).html("Salvar");
+    }
+  });
+};
+
+//REAJUSTAR E ENCERRAR ENVIAM SÓ OS CAMPOS DA PRÓPRIA SEÇÃO DO MODAL
+var acaoDespesaFixa = function acaoDespesaFixa(url, secao, button) {
+  var form = '#formEditDespesaFixa';
+  var textoBotao = button.html();
+  $.ajax({
+    type: 'PUT',
+    url: url,
+    data: $(secao + ' :input').serialize(),
+    dataType: "JSON",
+    beforeSend: function beforeSend() {
+      button.prop("disabled", true).html(htmlLoading);
+    },
+    success: function success(response) {
+      Swal.fire({
+        toast: true,
+        position: 'bottom-left',
+        title: "<h5 style=\"color:white\"> ".concat(response.msg, " </h5>"),
+        icon: !response.error ? 'success' : 'error',
+        showConfirmButton: false,
+        timer: 3000,
+        background: response.error ? 'red' : color()["default"],
+        didOpen: function didOpen() {
+          if (!response.error) $(modalObject).modal('hide');
+        }
+      });
+      getFilterDespesasFixas();
+    },
+    error: function error(jqXHR) {
+      var errors = jqXHR.responseJSON ? jqXHR.responseJSON.errors : null;
+      if (!!errors) {
+        AppUsage.showMessagesValidator(form, errors);
+      }
+    },
+    complete: function complete() {
+      button.prop("disabled", false).html(textoBotao);
     }
   });
 };

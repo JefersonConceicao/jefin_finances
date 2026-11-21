@@ -133,7 +133,8 @@ class DespesasController extends Controller
     {
         $despesa = new Despesa;
 
-        $data = $despesa->deleteDespesa($id, Auth::user());
+        $escopo = request('escopo') === Despesa::ESCOPO_SEGUINTES ? Despesa::ESCOPO_SEGUINTES : Despesa::ESCOPO_SO_ESTA;
+        $data = $despesa->deleteDespesa($id, Auth::user(), $escopo);
         return response()->json($data);
     }
 

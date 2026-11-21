@@ -72,6 +72,8 @@ Route::group(['middleware' => 'auth'], function(){
         Route::get('/edit/{id}', 'DespesasFixasController@edit')->name('despesasFixas.edit');
         Route::put('/update/{id}', 'DespesasFixasController@update')->name('despesasFixas.update');
         Route::delete('/delete/{id}', 'DespesasFixasController@delete')->name('despesasFixas.delete');
+        Route::put('/reajustar/{id}', 'DespesasFixasController@reajustar')->name('despesasFixas.reajustar');
+        Route::put('/encerrar/{id}', 'DespesasFixasController@encerrar')->name('despesasFixas.encerrar');
     });
 
     Route::get('/projecao', 'ProjecaoController@index')->name('projecao.index');

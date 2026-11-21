@@ -186,8 +186,6 @@ class DespesaFixaVigenciaTest extends TestCase
 
         $this->actingAs($this->user)->get(route('despesasFixas.edit', $fixa->id))
             ->assertOk()
-            ->assertSee('value="2026-03"', false)
-            ->assertSee('value="2026-12"', false)
-            ->assertSee('value="15"', false);
+            ->assertSeeInOrder(['03/2026', '12/2026', 'Dia 15']);
     }
 }

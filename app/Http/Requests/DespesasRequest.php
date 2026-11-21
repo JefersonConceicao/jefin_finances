@@ -44,7 +44,9 @@ class DespesasRequest extends FormRequest
                     'despesa_tipo_id' => ['required', $this->tipoDoUsuario()],
                     'valor_total' => 'required',
                     'ativo' => 'required',
-                    'data_vencimento' => 'required|date_format:d/m/Y'
+                    'data_vencimento' => 'required|date_format:d/m/Y',
+                    //SÓ VALE PARA OCORRÊNCIA DE DESPESA FIXA: "SÓ ESTA" OU "ESTA E AS SEGUINTES"
+                    'escopo' => 'nullable|in:so_esta,seguintes',
                 ];
         }
     }

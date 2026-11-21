@@ -44,6 +44,24 @@ const habilitaBotoes = () => {
                 e.preventDefault()
                 formDespesasFixas(id)
             });
+
+            $("#btnReajustarDespesaFixa").on("click", function(){
+                acaoDespesaFixa('/despesasFixas/reajustar/' + id, '#reajusteDespesaFixa', $(this))
+            });
+
+            $("#btnEncerrarDespesaFixa").on("click", function(){
+                const button = $(this);
+
+                Swal.fire(Object.assign({}, optionsSwalDelete, {
+                    title: 'Encerrar a Despesa Fixa?',
+                    text: 'As Ocorrências depois do mês escolhido serão excluídas.',
+                    confirmButtonText: 'Sim, encerrar',
+                })).then(result => {
+                    if(result.isConfirmed){
+                        acaoDespesaFixa('/despesasFixas/encerrar/' + id, '#encerramentoDespesaFixa', button)
+                    }
+                });
+            });
         });
     });
 
@@ -106,6 +124,48 @@ const formDespesasFixas = id => {
             $(form + " .btnSubmit")
                 .prop("disabled", false)
                 .html("Salvar")
+        }
+    });
+}
+
+//REAJUSTAR E ENCERRAR ENVIAM SÓ OS CAMPOS DA PRÓPRIA SEÇÃO DO MODAL
+const acaoDespesaFixa = (url, secao, button) => {
+    const form = '#formEditDespesaFixa';
+    const textoBotao = button.html();
+
+    $.ajax({
+        type: 'PUT',
+        url,
+        data: $(secao + ' :input').serialize(),
+        dataType: "JSON",
+        beforeSend:function(){
+            button.prop("disabled", true).html(htmlLoading)
+        },
+        success: function (response) {
+            Swal.fire({
+                toast:true,
+                position: 'bottom-left',
+                title: `<h5 style="color:white"> ${response.msg} </h5>`,
+                icon: !response.error ? 'success' : 'error',
+                showConfirmButton: false,
+                timer:3000,
+                background: response.error ? 'red' : color().default,
+                didOpen:() => {
+                    if(!response.error) $(modalObject).modal('hide');
+                }
+            });
+
+            getFilterDespesasFixas();
+        },
+        error:function(jqXHR){
+            const errors = jqXHR.responseJSON ? jqXHR.responseJSON.errors : null;
+
+            if(!!errors){
+                AppUsage.showMessagesValidator(form, errors);
+            }
+        },
+        complete:function(){
+            button.prop("disabled", false).html(textoBotao)
         }
     });
 }

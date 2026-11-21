@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Route;
+use Carbon\Carbon;
 
 class DespesasFixasRequest extends FormRequest
 {
@@ -20,23 +21,45 @@ class DespesasFixasRequest extends FormRequest
      */
     public function rules()
     {
-        $rules = [
-            'nome_despesa' => 'required|max:100',
-            'valor' => 'required',
-            'ativo' => 'required',
-        ];
-
-        if(Route::currentRouteName() === 'despesasFixas.store'){
-            //VIGÊNCIA: MÊS DE INÍCIO, FIM OPCIONAL (OU QUANTIDADE DE PARCELAS) E DIA DE VENCIMENTO
-            $rules += [
-                'mes_inicio' => 'required|date_format:Y-m',
-                'mes_fim' => 'nullable|date_format:Y-m|after_or_equal:mes_inicio',
-                'parcelas' => 'nullable|integer|min:1|max:360',
-                'dia_vencimento' => 'required|integer|min:1|max:31',
-            ];
+        switch(Route::currentRouteName()){
+            case 'despesasFixas.store':
+                return [
+                    'nome_despesa' => 'required|max:100',
+                    'valor' => 'required',
+                    //VIGÊNCIA: MÊS DE INÍCIO, FIM OPCIONAL (OU QUANTIDADE DE PARCELAS) E DIA DE VENCIMENTO
+                    'mes_inicio' => 'required|date_format:Y-m',
+                    'mes_fim' => 'nullable|date_format:Y-m|after_or_equal:mes_inicio',
+                    'parcelas' => 'nullable|integer|min:1|max:360',
+                    'dia_vencimento' => 'required|integer|min:1|max:31',
+                ];
+            case 'despesasFixas.update':
+                return [
+                    'nome_despesa' => 'required|max:100',
+                ];
+            case 'despesasFixas.reajustar':
+                //O REAJUSTE VALE DE UM MÊS EM DIANTE, A PARTIR DO MÊS ATUAL
+                return [
+                    'a_partir_de' => ['required', 'date_format:Y-m', $this->mesAtualOuFuturo()],
+                    'valor' => 'required',
+                    'dia_vencimento' => 'required|integer|min:1|max:31',
+                ];
+            case 'despesasFixas.encerrar':
+                //O ENCERRAMENTO É NO MÊS ATUAL OU NUM MÊS FUTURO
+                return [
+                    'mes_fim' => ['required', 'date_format:Y-m', $this->mesAtualOuFuturo()],
+                ];
         }
 
-        return $rules;
+        return [];
+    }
+
+    private function mesAtualOuFuturo(){
+        return function($attribute, $value, $fail){
+            $mes = \DateTime::createFromFormat('!Y-m', (string) $value);
+            if($mes && $mes->format('Y-m') < Carbon::now()->format('Y-m')){
+                $fail('Escolha o mês atual ou um mês futuro');
+            }
+        };
     }
 
     public function messages(){

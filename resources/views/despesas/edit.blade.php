@@ -132,6 +132,25 @@
             </div>
         </div>
     </div>  
+    @if (!empty($despesa->despesa_fixa_id))
+        <div class="row">
+            <div class="col-md-12">
+                <div class="form-group">
+                    <label> Aplicar a </label>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="escopo" id="escopoSoEsta" value="so_esta" checked />
+                        <label class="form-check-label" for="escopoSoEsta"> Só esta </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="escopo" id="escopoSeguintes" value="seguintes" />
+                        <label class="form-check-label" for="escopoSeguintes">
+                            Esta e as seguintes <small class="text-muted">(Reajuste do valor e do dia de vencimento)</small>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
 @endsection
 
 @section('btn_fechar', 'Fechar')

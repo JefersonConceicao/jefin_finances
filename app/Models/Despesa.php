@@ -28,6 +28,16 @@ class Despesa extends Model
         return $this->hasOne(TiposDespesa::class, 'id', 'despesa_tipo_id');
     }
 
+    const ESCOPO_SO_ESTA = 'so_esta';
+    const ESCOPO_SEGUINTES = 'seguintes';
+
+    /**
+     * Mês em que a Despesa conta: o do Vencimento; registros antigos sem Vencimento usam a data de cadastro (ADR-0002).
+     */
+    public function competencia(){
+        return Carbon::parse($this->data_vencimento ?: $this->created_at)->startOfMonth();
+    }
+
     public function despesaFixa(){
         return $this->belongsTo(DespesaFixa::class, 'despesa_fixa_id', 'id');
     }
@@ -124,6 +134,8 @@ class Despesa extends Model
         //FORA DO try: DESPESA DE OUTRO USUÁRIO VIRA 404, E NÃO UM ERRO GENÉRICO
         $despesa = $this->doUsuario($id, $user);
 
+        $escopo = $request['escopo'] ?? self::ESCOPO_SO_ESTA;
+
         //SÓ ESTES CAMPOS MUDAM PELA EDIÇÃO: DONO, DATA DE CADASTRO, PAGAMENTO E DESPESA FIXA DE ORIGEM FICAM COMO ESTÃO
         $request = Arr::only($request, ['nome_despesa', 'despesa_tipo_id', 'valor_total', 'ativo', 'data_vencimento']);
 
@@ -133,9 +145,15 @@ class Despesa extends Model
             }
 
             //A DATA DE CADASTRO NÃO MUDA; ALTERAR O VENCIMENTO MUDA A COMPETÊNCIA
-            $request['data_vencimento'] = Carbon::createFromFormat('d/m/Y', $request['data_vencimento'])->format('Y-m-d');
+            $vencimento = Carbon::createFromFormat('!d/m/Y', $request['data_vencimento']);
+            $request['data_vencimento'] = $vencimento->format('Y-m-d');
 
-            $despesa->fill($request)->save();
+            if($escopo === self::ESCOPO_SEGUINTES && $despesa->despesaFixa){
+                //"ESTA E AS SEGUINTES" É O REAJUSTE DA DESPESA FIXA, A PARTIR DO MÊS DESTA OCORRÊNCIA
+                $despesa->despesaFixa->reajustar($despesa->competencia(), $request['valor_total'], $vencimento->day);
+            }else{
+                $despesa->fill($request)->save();
+            }
 
             return [
                 'error' => false,
@@ -150,20 +168,32 @@ class Despesa extends Model
         }
     }
 
-    public function deleteDespesa($id, $user){
+    /**
+     * Exclui a Despesa e os Lançamentos do dono dela. Chamar dentro de uma transação.
+     */
+    public function excluirComLancamentos(){
+        //TRAVA A DESPESA: UM PAGAMENTO AO MESMO TEMPO NÃO LANÇA DEPOIS DA LIMPEZA ABAIXO
+        static::lockForUpdate()->findOrFail($this->id);
+        //A DESPESA PAGA LEVA JUNTO OS LANÇAMENTOS DO DONO
+        Lancamento::where('despesa_id', $this->id)->where('user_id', $this->user_id)->delete();
+        //DADO ANTIGO: LANÇAMENTO DE OUTRO USUÁRIO NESTA DESPESA É DELE; SÓ SE DESLIGA DELA E VIRA "OUTRO LANÇAMENTO"
+        Lancamento::where('despesa_id', $this->id)->update(['despesa_id' => null]);
+        $this->delete();
+    }
+
+    public function deleteDespesa($id, $user, $escopo = self::ESCOPO_SO_ESTA){
         //FORA DO try: DESPESA DE OUTRO USUÁRIO VIRA 404, E NÃO UM ERRO GENÉRICO
         $despesa = $this->doUsuario($id, $user);
 
         try{
             //OU SAI TUDO OU NADA
-            DB::transaction(function() use ($despesa, $id, $user){
-                //TRAVA A DESPESA: UM PAGAMENTO AO MESMO TEMPO NÃO LANÇA DEPOIS DA LIMPEZA ABAIXO
-                $this->where('user_id', $user->id)->lockForUpdate()->findOrFail($id);
-                //A DESPESA PAGA LEVA JUNTO OS LANÇAMENTOS DO DONO
-                Lancamento::where('despesa_id', $id)->where('user_id', $user->id)->delete();
-                //DADO ANTIGO: LANÇAMENTO DE OUTRO USUÁRIO NESTA DESPESA É DELE; SÓ SE DESLIGA DELA E VIRA "OUTRO LANÇAMENTO"
-                Lancamento::where('despesa_id', $id)->update(['despesa_id' => null]);
-                $despesa->delete();
+            DB::transaction(function() use ($despesa, $escopo){
+                if($escopo === self::ESCOPO_SEGUINTES && $despesa->despesaFixa){
+                    //"ESTA E AS SEGUINTES" É O ENCERRAMENTO DA DESPESA FIXA NO MÊS ANTERIOR A ESTA OCORRÊNCIA
+                    $despesa->despesaFixa->encerrar($despesa->competencia()->subMonthNoOverflow());
+                }else{
+                    $despesa->excluirComLancamentos();
+                }
             });
 
             return [

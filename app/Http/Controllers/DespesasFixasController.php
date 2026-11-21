@@ -68,4 +68,20 @@ class DespesasFixasController extends Controller
         $data = $despesaFixa->deleteDespesaFixa($id, $user);
         return response()->json($data);
     }
+
+    public function reajustar(DespesasFixasRequest $request, $id)
+    {
+        $despesaFixa = new DespesaFixa;
+
+        $data = $despesaFixa->reajustarDespesaFixa($id, $request->all(), Auth::user());
+        return response()->json($data);
+    }
+
+    public function encerrar(DespesasFixasRequest $request, $id)
+    {
+        $despesaFixa = new DespesaFixa;
+
+        $data = $despesaFixa->encerrarDespesaFixa($id, $request->all(), Auth::user());
+        return response()->json($data);
+    }
 }
