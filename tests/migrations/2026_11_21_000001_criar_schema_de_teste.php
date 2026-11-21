@@ -56,6 +56,7 @@ class CriarSchemaDeTeste extends Migration
             $table->unsignedInteger('despesa_tipo_id');
             $table->unsignedInteger('despesa_fixa_id')->nullable();
             $table->decimal('valor_total', 6, 2);
+            $table->date('data_vencimento')->nullable();
             $table->unsignedTinyInteger('ativo')->default(1);
             $table->dateTime('created_at')->nullable();
             $table->dateTime('updated_at')->nullable();

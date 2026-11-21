@@ -98,10 +98,10 @@
         </div>
         <div class="col-md-6">
             <div class="form-group">
-                <label> Data Criação <span class="required"> * </span> </label>
+                <label> Vencimento </label>
 
                 <input
-                    name="created_at"
+                    name="data_vencimento"
                     type="text"
                     class="form-control datepicker"
                     value="{{ date('d/m/Y') }}" />

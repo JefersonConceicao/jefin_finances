@@ -62465,12 +62465,7 @@ var habilitaBotoes = function habilitaBotoes() {
   $("#addDespesa").on("click", function () {
     var url = '/despesas/create';
     loadModal(url, function () {
-      //SETA O MES DO FILTRO PARA A DATA DE CRIAÇÃO DA DESPESA
-      var mesFiltrado = $("select[name='mes'] option:selected").val();
-      var anoFiltrado = $("input[name='ano']").val();
-      if (!mesFiltrado || !anoFiltrado) return;
-      var stringDate = "01/".concat(mesFiltrado, "/").concat(anoFiltrado);
-      $("input[name='created_at']").val(stringDate);
+      //O VENCIMENTO JÁ VEM COM A DATA DE HOJE (PREENCHIDO NA VIEW)
       $("#formAddDespesas").on("submit", function (e) {
         e.preventDefault();
         formDespesas();
