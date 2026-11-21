@@ -79,6 +79,7 @@ class User extends Authenticatable implements JWTSubject
                 'userAdded' => $this->find($this->id)
             ];
         }catch(\Exception $error){
+            \Log::error($error->getMessage(), ['exception' => $error]);
             return [
                 'error' => true,
                 'msg' => 'Não foi possível criar a conta, tente novamente',
@@ -146,10 +147,10 @@ class User extends Authenticatable implements JWTSubject
                 'msg' => 'Registro salvo com sucesso!'
             ];
         }catch(\Exception $error){
+            \Log::error($error->getMessage(), ['exception' => $error]);
             return [
                 'error' => true,
-                'msg' => 'Não foi possível salvar o registro, tente de novo',
-                'error_message' => $error->getMessage()
+                'msg' => 'Não foi possível salvar o registro, tente de novo'
             ];
         }
     }

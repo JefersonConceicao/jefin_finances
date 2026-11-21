@@ -63,10 +63,10 @@ class DespesaFixa extends Model
                 'msg' => 'Despesa fixa adicionada!'
             ];
         }catch(\Exception $error){
+            \Log::error($error->getMessage(), ['exception' => $error]);
             return [
                 'error' => true,
-                'msg' => 'Não foi possível salvar o registro, tente de novo',
-                'error_message' => $error->getMessage()
+                'msg' => 'Não foi possível salvar o registro, tente de novo'
             ];
         }
     }
@@ -101,10 +101,10 @@ class DespesaFixa extends Model
                 'msg' => $despesaFixa->ativo ? 'Despesa fixa alterada com sucesso!' : 'Despesa fixa inativada!'
             ];
         }catch(\Exception $error){
+            \Log::error($error->getMessage(), ['exception' => $error]);
             return [
                 'error' => true,
-                'msg' => 'Não foi possível alterar o registro, tente de novo.',
-                'error_message' => $error->getMessage()
+                'msg' => 'Não foi possível alterar o registro, tente de novo.'
             ];
         }
     }
@@ -127,6 +127,7 @@ class DespesaFixa extends Model
                 'msg' => 'Registro excluído com sucesso!'
             ];
         }catch(\Exception $error){
+            \Log::error($error->getMessage(), ['exception' => $error]);
             return [
                 'error' => true,
                 'msg' => 'Não foi possível excluír o registro, tente de novo'

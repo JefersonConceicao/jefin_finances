@@ -169,10 +169,10 @@ class Proventos extends Model
             ];
         }catch(\Exception $error){
             DB::rollback();
+            \Log::error($error->getMessage(), ['exception' => $error]);
             return [
                 'error' => true,
-                'msg' => 'Não foi possível salvar o registro.',
-                'error_message' => $error->getMessage()
+                'msg' => 'Não foi possível salvar o registro.'
             ];
         }
     }
