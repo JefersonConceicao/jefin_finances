@@ -88,7 +88,10 @@ class TiposDespesasController extends Controller
     public function optionsDespesasJSON(){
         $tiposDespesa = new TiposDespesa;
 
-        $data = $tiposDespesa->get(['nome','id']);
+        //OPÇÕES DO CADASTRO DE DESPESA VARIÁVEL: SÓ OS TIPOS DO USUÁRIO, SEM O RESERVADO
+        $data = $tiposDespesa->opcoesDespesaVariavel(Auth::user())
+            ->map(function($nome, $id){ return ['nome' => $nome, 'id' => $id]; })
+            ->values();
         return response()->json($data);
     }
 }

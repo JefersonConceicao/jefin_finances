@@ -52,9 +52,26 @@ class TiposDespesa extends Model
         }
     }
 
+    /**
+     * Opções de Tipo de Despesa para uma Despesa Variável: os do usuário, sem o tipo reservado.
+     */
+    public function opcoesDespesaVariavel($user){
+        return $this
+            ->where('user_id', $user->id)
+            ->where('reservado', 0)
+            ->pluck('nome', 'id');
+    }
+
+    const MSG_RESERVADO = 'O tipo "Fixa" é reservado às Despesas Fixas e não pode ser alterado nem excluído';
+
     public function updateTiposDespesa($id, $request = []){
         try{ 
             $tipoDespesa = $this->find($id);
+
+            if($tipoDespesa->reservado){
+                return ['error' => true, 'msg' => self::MSG_RESERVADO];
+            }
+
             $tipoDespesa->fill($request)->save();
 
             return [
@@ -71,13 +88,13 @@ class TiposDespesa extends Model
     }
 
     /**
-     * Tipo usado nas despesas geradas a partir de despesas fixas.
-     * Reaproveita um tipo "Fixa"/"Fixo" do usuário ou cria um novo.
+     * Tipo de Despesa "Fixa" reservado do usuário, usado em toda Despesa Fixa e nas Ocorrências dela.
+     * É identificado pelo marcador `reservado`, não pelo nome; se o usuário ainda não tiver, é criado.
      */
     public function idTipoFixaDoUsuario($user){
         $existente = $this
             ->where('user_id', $user->id)
-            ->where('nome', 'LIKE', 'fix%')
+            ->where('reservado', 1)
             ->orderBy('id')
             ->value('id');
 
@@ -85,15 +102,26 @@ class TiposDespesa extends Model
             return $existente;
         }
 
-        return $this->create([
+        //reservado FICA FORA DO fillable PARA O FORMULÁRIO NÃO CONSEGUIR MARCAR UM TIPO COMO RESERVADO
+        $tipo = new static;
+        $tipo->forceFill([
             'user_id' => $user->id,
             'nome' => 'Fixa',
             'ativo' => 1,
-        ])->id;
+            'reservado' => 1,
+        ])->save();
+
+        return $tipo->id;
     }
 
     public function deleteTipoDespesa($id){
-        if($this->find($id)->delete()){
+        $tipoDespesa = $this->find($id);
+
+        if($tipoDespesa->reservado){
+            return ['error' => true, 'msg' => self::MSG_RESERVADO];
+        }
+
+        if($tipoDespesa->delete()){
             return [
                 'error' => false,
                 'msg' => 'Registro excluído com sucesso!'  

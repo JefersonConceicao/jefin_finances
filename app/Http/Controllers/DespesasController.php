@@ -77,7 +77,7 @@ class DespesasController extends Controller
         $user = Auth::user();
         $tipoDespesa = new TiposDespesa;
 
-        $optionsTipoDespesa = $tipoDespesa->where('user_id', $user->id)->pluck('nome', 'id');
+        $optionsTipoDespesa = $tipoDespesa->opcoesDespesaVariavel($user);
 
         return view('despesas.create')
             ->with('optionsTipoDespesa', $optionsTipoDespesa);
@@ -106,7 +106,10 @@ class DespesasController extends Controller
         $despesa = new Despesa;
 
         $data = $despesa->doUsuario($id, $user);
-        $optionsTipoDespesa = $tipoDespesa->where('user_id', $user->id)->pluck('nome', 'id');
+        //A OCORRÊNCIA DE UMA DESPESA FIXA FICA COM O TIPO RESERVADO; A DESPESA VARIÁVEL NÃO PODE ESCOLHÊ-LO
+        $optionsTipoDespesa = !empty($data->despesa_fixa_id)
+            ? $tipoDespesa->where('id', $data->despesa_tipo_id)->pluck('nome', 'id')
+            : $tipoDespesa->opcoesDespesaVariavel($user);
 
         return view('despesas.edit')
             ->with('despesa', $data)

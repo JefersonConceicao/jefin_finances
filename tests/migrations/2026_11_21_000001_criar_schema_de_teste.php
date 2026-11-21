@@ -32,6 +32,7 @@ class CriarSchemaDeTeste extends Migration
             $table->increments('id');
             $table->string('nome', 120)->default('0');
             $table->integer('ativo')->default(1);
+            $table->boolean('reservado')->default(false);
             $table->unsignedInteger('user_id')->nullable();
             $table->foreign('user_id')->references('id')->on('users');
         });
