@@ -100,7 +100,7 @@
                         @if (count($mes['marcos']) > 0)
                             <div class="mb-2">
                                 @foreach ($mes['marcos'] as $marco)
-                                    <span class="badge {{ $marco['tipo'] === 'comeca' ? 'bg-light-warning' : 'bg-light-success' }} mb-1">
+                                    <span class="badge {{ $marco['efeito'] === 'ganho' ? 'bg-light-success' : 'bg-light-warning' }} mb-1">
                                         {{ $marco['descricao'] }}
                                     </span>
                                 @endforeach

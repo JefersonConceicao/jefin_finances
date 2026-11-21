@@ -145,7 +145,7 @@ class ProjecaoTest extends TestCase
         $resposta = $this->projecao();
 
         $this->assertEquals(
-            [['tipo' => 'termina', 'descricao' => 'Cartão (10/10) termina']],
+            [['tipo' => 'termina', 'descricao' => 'Cartão (10/10) termina', 'efeito' => 'ganho']],
             $this->marcosDoMes($resposta, 3)->all()
         );
         $this->assertEquals([[
@@ -166,7 +166,7 @@ class ProjecaoTest extends TestCase
             ->assertSee('Seguro começa')
             ->assertSee('em 2 meses começa Seguro: -R$ 180,00');
 
-        $this->assertEquals([['tipo' => 'comeca', 'descricao' => 'Seguro começa']], $this->marcosDoMes($resposta, 2)->all());
+        $this->assertEquals([['tipo' => 'comeca', 'descricao' => 'Seguro começa', 'efeito' => 'atencao']], $this->marcosDoMes($resposta, 2)->all());
         $this->assertEquals([[
             'tipo' => 'atencao',
             'mes' => '2027-01',
@@ -184,8 +184,8 @@ class ProjecaoTest extends TestCase
 
         $resposta = $this->projecao();
 
-        $this->assertEquals([['tipo' => 'termina', 'descricao' => 'Bolsa termina']], $this->marcosDoMes($resposta, 1)->all());
-        $this->assertEquals([['tipo' => 'comeca', 'descricao' => 'Freela começa']], $this->marcosDoMes($resposta, 4)->all());
+        $this->assertEquals([['tipo' => 'termina', 'descricao' => 'Bolsa termina', 'efeito' => 'atencao']], $this->marcosDoMes($resposta, 1)->all());
+        $this->assertEquals([['tipo' => 'comeca', 'descricao' => 'Freela começa', 'efeito' => 'ganho']], $this->marcosDoMes($resposta, 4)->all());
         $this->assertEquals([
             ['tipo' => 'atencao', 'mes' => '2026-12', 'distancia' => 1, 'valor' => 800.0, 'descricao' => 'em 1 mês termina Bolsa: -R$ 800,00'],
             ['tipo' => 'ganho', 'mes' => '2027-03', 'distancia' => 4, 'valor' => 2000.0, 'descricao' => 'em 4 meses começa Freela: +R$ 2.000,00'],
@@ -217,7 +217,41 @@ class ProjecaoTest extends TestCase
         $this->assertEmpty(collect($this->meses($curta))->pluck('marcos')->flatten(1));
 
         $longa = $this->projecao(['horizonte' => 12]);
-        $this->assertEquals([['tipo' => 'comeca', 'descricao' => 'Escola começa']], $this->marcosDoMes($longa, 10)->all());
+        $this->assertEquals([['tipo' => 'comeca', 'descricao' => 'Escola começa', 'efeito' => 'atencao']], $this->marcosDoMes($longa, 10)->all());
         $this->assertSame(10, $this->alertas($longa)->first()['distancia']);
+    }
+
+    /** @test */
+    public function com_horizonte_12_o_ultimo_mes_tem_as_recorrencias_sem_fim()
+    {
+        $this->cadastrarProventoFixo(['descricao' => 'Salário', 'valor' => '5.000,00']);
+        $this->cadastrarDespesaFixa(['nome_despesa' => 'Aluguel']);
+
+        $ultimo = $this->meses($this->projecao(['horizonte' => 12]))[12];
+
+        $this->assertSame(['11', '2027'], [$ultimo['mes'], $ultimo['ano']]);
+        $this->assertEquals(5000, $ultimo['proventos']);
+        $this->assertEquals(1000, $ultimo['fixas']);
+    }
+
+    /** @test */
+    public function depois_de_um_encerramento_o_marco_usa_o_nome_da_ultima_ocorrencia()
+    {
+        $this->cadastrarDespesaFixa(['nome_despesa' => 'Cartão', 'parcelas' => 10]);
+        $this->cadastrarDespesaFixa(['nome_despesa' => 'Netflix', 'valor' => '50,00']);
+
+        foreach (\App\Models\DespesaFixa::all() as $fixa) {
+            $this->actingAs($this->user)
+                ->putJson(route('despesasFixas.encerrar', $fixa->id), ['mes_fim' => '2027-02'])
+                ->assertJsonFragment(['error' => false]);
+        }
+
+        $this->actingAs($this->user)->get(route('despesas.index', ['mes' => 2, 'ano' => 2027]))
+            ->assertSee('Cartão (4/10)');
+
+        $this->assertEquals([
+            ['tipo' => 'termina', 'descricao' => 'Cartão (4/10) termina', 'efeito' => 'ganho'],
+            ['tipo' => 'termina', 'descricao' => 'Netflix termina', 'efeito' => 'ganho'],
+        ], $this->marcosDoMes($this->projecao(), 3)->all());
     }
 }

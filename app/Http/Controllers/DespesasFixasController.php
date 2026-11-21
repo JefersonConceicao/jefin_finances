@@ -23,7 +23,7 @@ class DespesasFixasController extends Controller
 
         return view('despesas_fixas.index')
             ->with('dataDespesasFixas', $data)
-            ->with('totalBasal', $despesaFixa->totalAtivas($user));
+            ->with('totalVigentes', $despesaFixa->totalVigentes($user));
     }
 
     public function create()

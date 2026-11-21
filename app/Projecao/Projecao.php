@@ -22,6 +22,7 @@ class Projecao
     private $mesAtual;
     private $despesasFixas = null;
     private $proventosFixos = null;
+    private $recorrencias = null;
 
     public function __construct($user, $horizonte = null, Carbon $hoje = null)
     {
@@ -145,14 +146,17 @@ class Projecao
      */
     private function recorrencias()
     {
+        if($this->recorrencias !== null){
+            return $this->recorrencias;
+        }
+
         $recorrencias = [];
 
         foreach($this->despesasFixas() as $fixa){
-            $parcelas = $fixa->vigencia()->totalParcelas();
             $recorrencias[] = [
                 'despesa' => true,
                 'nome' => $fixa->nome_despesa,
-                'nomeNoFim' => $parcelas ? "{$fixa->nome_despesa} ({$parcelas}/{$parcelas})" : $fixa->nome_despesa,
+                'nomeNoFim' => $this->nomeNoFim($fixa),
                 'valor' => (float) $fixa->valor,
                 'inicio' => $fixa->mes_inicio,
                 'fim' => $fixa->mes_fim,
@@ -170,7 +174,24 @@ class Projecao
             ];
         }
 
-        return $recorrencias;
+        return $this->recorrencias = $recorrencias;
+    }
+
+    /**
+     * Nome da Despesa Fixa no mês de fim: o da Ocorrência gravada nele, que mostra a parcela
+     * ("Cartão (10/10)"; "Cartão (4/10)" se foi encerrada antes). Sem Ocorrência, o calculado pela Vigência.
+     */
+    private function nomeNoFim(DespesaFixa $fixa)
+    {
+        if(!$fixa->mes_fim){
+            return $fixa->nome_despesa;
+        }
+
+        $ultima = $fixa->ocorrenciasAPartirDe($fixa->mes_fim)
+            ->where('data_vencimento', '<=', $fixa->mes_fim->copy()->endOfMonth()->format('Y-m-d'))
+            ->value('nome_despesa');
+
+        return $ultima ?: $fixa->vigencia()->ocorrenciaNoMes($fixa->mes_fim)->nome($fixa->nome_despesa);
     }
 
     private function marcosDoMes(Carbon $mes)
@@ -178,11 +199,20 @@ class Projecao
         $marcos = [];
 
         foreach($this->recorrencias() as $recorrencia){
+            //EFEITO NO FLUXO: DESPESA QUE COMEÇA OU PROVENTO QUE TERMINA PEDE ATENÇÃO; O CONTRÁRIO É GANHO
             if($recorrencia['inicio']->format('Y-m') === $mes->format('Y-m')){
-                $marcos[] = ['tipo' => 'comeca', 'descricao' => "{$recorrencia['nome']} começa"];
+                $marcos[] = [
+                    'tipo' => 'comeca',
+                    'descricao' => "{$recorrencia['nome']} começa",
+                    'efeito' => $recorrencia['despesa'] ? 'atencao' : 'ganho',
+                ];
             }
             if($recorrencia['fim'] && $recorrencia['fim']->format('Y-m') === $mes->format('Y-m')){
-                $marcos[] = ['tipo' => 'termina', 'descricao' => "{$recorrencia['nomeNoFim']} termina"];
+                $marcos[] = [
+                    'tipo' => 'termina',
+                    'descricao' => "{$recorrencia['nomeNoFim']} termina",
+                    'efeito' => $recorrencia['despesa'] ? 'ganho' : 'atencao',
+                ];
             }
         }
 

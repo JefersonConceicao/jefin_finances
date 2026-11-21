@@ -133,7 +133,11 @@ class DespesaFixa extends Model
         $despesa->data_vencimento = $noMes->vencimento->format('Y-m-d');
     }
 
-    //A OCORRÊNCIA PAGA LEVA JUNTO OS LANÇAMENTOS DELA
+    //A OCORRÊNCIA JÁ PAGA É HISTÓRICO: TEM LANÇAMENTO COM O VALOR PAGO
+    protected function ocorrenciaPreservada($despesa){
+        return $despesa->paga();
+    }
+
     protected function excluirOcorrencia($despesa){
         $despesa->excluirComLancamentos();
     }
@@ -211,10 +215,19 @@ class DespesaFixa extends Model
         }, 'Registro excluído com sucesso!', 'Não foi possível excluír o registro, tente de novo');
     }
 
-    public function totalAtivas($user){
+    /**
+     * Soma do Valor Previsto das Despesas Fixas cuja Vigência inclui o mês atual.
+     */
+    public function totalVigentes($user){
+        $mesAtual = Carbon::now()->startOfMonth()->format('Y-m-d');
+
         return $this
             ->where('user_id', $user->id)
             ->where('ativo', 1)
+            ->where('mes_inicio', '<=', $mesAtual)
+            ->where(function($query) use ($mesAtual){
+                $query->whereNull('mes_fim')->orWhere('mes_fim', '>=', $mesAtual);
+            })
             ->sum('valor');
     }
 }

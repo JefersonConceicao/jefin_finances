@@ -55,15 +55,15 @@ class ProventoFixoTest extends TestCase
     }
 
     /** @test */
-    public function provento_fixo_sem_fim_criado_em_novembro_gera_de_novembro_ate_outubro_do_ano_seguinte()
+    public function provento_fixo_sem_fim_criado_em_novembro_gera_de_novembro_ate_12_meses_a_frente()
     {
         $this->cadastrarProventoFixo()->assertJsonFragment(['error' => false]);
 
         $this->assertSame(0, $this->ocorrenciasNoMes(10, 2026));
         $this->proventosDoMes(11, 2026)->assertSee('01/11/2026')->assertSee('12.500,00');
-        $this->proventosDoMes(10, 2027)->assertSee('01/10/2027');
-        $this->assertSame(1, $this->ocorrenciasNoMes(10, 2027));
-        $this->assertSame(0, $this->ocorrenciasNoMes(11, 2027));
+        $this->proventosDoMes(11, 2027)->assertSee('01/11/2027');
+        $this->assertSame(1, $this->ocorrenciasNoMes(11, 2027));
+        $this->assertSame(0, $this->ocorrenciasNoMes(12, 2027));
     }
 
     /** @test */
@@ -74,9 +74,9 @@ class ProventoFixoTest extends TestCase
         $this->hoje(2026, 12, 3);
         $this->proventosDoMes(12, 2026)->assertOk();
 
+        $this->assertSame(1, $this->ocorrenciasNoMes(12, 2027));
+        $this->assertSame(0, $this->ocorrenciasNoMes(1, 2028));
         $this->assertSame(1, $this->ocorrenciasNoMes(11, 2027));
-        $this->assertSame(0, $this->ocorrenciasNoMes(12, 2027));
-        $this->assertSame(1, $this->ocorrenciasNoMes(10, 2027));
     }
 
     /** @test */

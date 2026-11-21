@@ -32,16 +32,21 @@ trait Recorrente
     //DIA DO MÊS DE CADA OCORRÊNCIA
     abstract protected function diaDaOcorrencia();
 
+    //OCORRÊNCIA QUE O REAJUSTE E O ENCERRAMENTO NÃO TOCAM (EX.: DESPESA JÁ PAGA, QUE É HISTÓRICO)
+    protected function ocorrenciaPreservada($ocorrencia){
+        return false;
+    }
+
     public function vigencia(){
         return new Vigencia($this->mes_inicio, $this->mes_fim, (int) $this->diaDaOcorrencia());
     }
 
     /**
      * Grava as Ocorrências que faltam: só meses depois da última gravada, nunca meses passados.
-     * Chamar dentro de uma transação.
+     * Com $ate, grava até aquele mês, mesmo além da janela. Chamar dentro de uma transação.
      */
-    public function gravarOcorrencias(){
-        $ocorrencias = $this->vigencia()->ocorrenciasAGravar(Carbon::now(), $this->ocorrencias_ate);
+    public function gravarOcorrencias(?Carbon $ate = null){
+        $ocorrencias = $this->vigencia()->ocorrenciasAGravar(Carbon::now(), $this->ocorrencias_ate, $ate);
 
         foreach($ocorrencias as $ocorrencia){
             $this->criarOcorrencia($ocorrencia);
@@ -65,11 +70,14 @@ trait Recorrente
 
     /**
      * Reajuste: o novo Valor Previsto (e o dia, quando há) vale do mês informado em diante, sobrescrevendo
-     * também as Ocorrências ajustadas à mão. As Ocorrências anteriores não mudam.
+     * também as Ocorrências ajustadas à mão (menos as preservadas). As Ocorrências anteriores não mudam.
      */
     public function reajustar(Carbon $aPartirDe, $valor = null, $dia = null){
         DB::transaction(function() use ($aPartirDe, $valor, $dia){
             $recorrencia = static::lockForUpdate()->findOrFail($this->id);
+
+            //OS MESES ANTES DO REAJUSTE QUE AINDA NÃO FORAM GRAVADOS FICAM COM O VALOR ANTIGO
+            $recorrencia->gravarOcorrencias($aPartirDe->copy()->startOfMonth()->subMonthNoOverflow());
 
             if($valor !== null){
                 $recorrencia->valor = $valor;
@@ -81,6 +89,9 @@ trait Recorrente
 
             $vigencia = $recorrencia->vigencia();
             foreach($recorrencia->ocorrenciasAPartirDe($aPartirDe)->get() as $ocorrencia){
+                if($recorrencia->ocorrenciaPreservada($ocorrencia)){
+                    continue;
+                }
                 $recorrencia->reajustarOcorrencia($ocorrencia, $vigencia->ocorrenciaNoMes($ocorrencia->competencia()));
                 $ocorrencia->save();
             }
@@ -90,8 +101,8 @@ trait Recorrente
     }
 
     /**
-     * Encerramento: o fim da Vigência passa a ser o mês informado, e as Ocorrências depois dele são excluídas.
-     * Se o fim ficar antes do início, não sobra Vigência e a recorrência é excluída.
+     * Encerramento: o fim da Vigência passa a ser o mês informado, e as Ocorrências depois dele são excluídas
+     * (menos as preservadas). Se o fim ficar antes do início e nada sobrar, a recorrência é excluída.
      */
     public function encerrar(Carbon $fim){
         DB::transaction(function() use ($fim){
@@ -99,10 +110,13 @@ trait Recorrente
             $fim = $fim->copy()->startOfMonth();
 
             foreach($recorrencia->ocorrenciasAPartirDe($fim->copy()->addMonthNoOverflow())->get() as $ocorrencia){
-                $recorrencia->excluirOcorrencia($ocorrencia);
+                if(!$recorrencia->ocorrenciaPreservada($ocorrencia)){
+                    $recorrencia->excluirOcorrencia($ocorrencia);
+                }
             }
 
-            if($fim->lt($recorrencia->mes_inicio)){
+            //SEM VIGÊNCIA E SEM NENHUMA OCORRÊNCIA PRESERVADA, A RECORRÊNCIA DEIXA DE EXISTIR
+            if($fim->lt($recorrencia->mes_inicio) && !$recorrencia->ocorrencias()->exists()){
                 $recorrencia->delete();
                 return;
             }

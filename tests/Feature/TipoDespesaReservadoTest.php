@@ -117,4 +117,18 @@ class TipoDespesaReservadoTest extends TestCase
             ->assertStatus(422)
             ->assertJsonValidationErrors('despesa_tipo_id');
     }
+
+    /** @test */
+    public function outro_usuario_nao_ve_altera_nem_exclui_o_tipo_de_despesa()
+    {
+        $moradia = TiposDespesa::create(['nome' => 'Moradia', 'ativo' => 1, 'user_id' => $this->user->id]);
+        $outro = factory(User::class)->create();
+
+        $this->actingAs($outro)->get(route('tiposDespesas.edit', $moradia->id))->assertNotFound();
+        $this->actingAs($outro)->putJson(route('tiposDespesas.update', $moradia->id), ['nome' => 'Invadido', 'ativo' => 1])->assertNotFound();
+        $this->actingAs($outro)->deleteJson(route('tiposDespesas.delete', $moradia->id))->assertNotFound();
+        $this->actingAs($this->user)->deleteJson(route('tiposDespesas.delete', 999999))->assertNotFound();
+
+        $this->actingAs($this->user)->get(route('tiposDespesas.index'))->assertSee('Moradia')->assertDontSee('Invadido');
+    }
 }

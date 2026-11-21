@@ -7,21 +7,12 @@
     @component('components.filtro')
         <form id="searchFormDespesasFixas">
             <div class="row">
-                <div class="col-md-8">
+                <div class="col-md-12">
                     <div class="form-group">
                         <label> Nome </label>
                         <input type="text" class="form-control" name="nome_despesa" />
                     </div>
                 </div>
-                <div class="col-md-4">
-                    <div class="form-group">
-                        <label> Ativo </label>
-                        <select name="ativo" class="form-select">
-                            <option value=""> Todos </option>
-                            <option value="1"> Sim </option>
-                            <option value="0"> Não </option>
-                        </select>
-                    </div>
                 </div>
             </div>
             <div class="row" style="margin-top:2%">
@@ -38,7 +29,7 @@
             <div class="row">
                 <div class="col-md-6">
                     <h3 class="card-title"> Total de registros: {{ count($dataDespesasFixas) }} </h3>
-                    <h6 class="text-primary"> Custo de vida basal (ativas): {{ "R$ " .convertValorReal($totalBasal) }} </h6>
+                    <h6 class="text-primary"> Valor Previsto das vigentes neste mês: {{ "R$ " .convertValorReal($totalVigentes) }} </h6>
                 </div>
                 <div class="col-md-6">
                     <button class="float-end btn btn-primary rounded-pill" id="addDespesaFixa">
@@ -57,7 +48,6 @@
                                 <th> Vigência </th>
                                 <th> Valor Previsto (R$) </th>
                                 <th> Vencimento </th>
-                                <th> Ativo </th>
                                 <th width="2%"> Ações </th>
                             </tr>
                         </thead>
@@ -72,11 +62,6 @@
                                     </td>
                                     <td> {{ convertValorReal($fixa->valor) }} </td>
                                     <td> Dia {{ $fixa->dia_vencimento }} </td>
-                                    <td>
-                                        <span class="badge bg-{{ $fixa->ativo ? 'success' : 'danger' }}">
-                                            {{ $fixa->ativo ? 'Sim' : 'Não' }}
-                                        </span>
-                                    </td>
                                     <td>
                                         <div class="text-center" style="display:flex;">
                                             <button class="btn btn-secondary rounded-pill btnEditDespesaFixa" title="Alterar, Reajustar ou Encerrar">

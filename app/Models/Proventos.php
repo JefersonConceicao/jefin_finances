@@ -29,6 +29,13 @@ class Proventos extends Model
         return Carbon::parse($this->data_provento)->startOfMonth();
     }
 
+    const MSG_SEGUINTES_NO_PASSADO = '"Este e os seguintes" vale só a partir do mês atual';
+
+    //"ESTE E OS SEGUINTES" (REAJUSTE OU ENCERRAMENTO) SÓ VALE NO MÊS ATUAL OU NUM MÊS FUTURO
+    private function seguintesNoPassado(){
+        return $this->competencia()->lt(Carbon::now()->startOfMonth());
+    }
+
     public function getProventos($request = [], $user){
         $conditions = [];
         $conditions[] = ['user_id', '=', $user->id];
@@ -173,9 +180,27 @@ class Proventos extends Model
 
             $seguintes = isset($request['update_subsequent']) && $request['update_subsequent'] == 'true';
 
+            if($seguintes && $provento->proventoFixo && $provento->seguintesNoPassado()){
+                return ['error' => true, 'msg' => self::MSG_SEGUINTES_NO_PASSADO];
+            }
+
             if($seguintes && $provento->proventoFixo){
-                //OCORRÊNCIA DE PROVENTO FIXO: "ESTE E OS SUBSEQUENTES" É O REAJUSTE, A PARTIR DO MÊS DELA
-                $provento->proventoFixo->reajustar($provento->competencia(), $request['valor_provento']);
+                //O REAJUSTE MUDA O VALOR, NÃO O MÊS: MOVER A OCORRÊNCIA DE MÊS É "APENAS ESTE"
+                if(!empty($request['data_provento']) && Carbon::parse($request['data_provento'])->format('Y-m') !== $provento->competencia()->format('Y-m')){
+                    return ['error' => true, 'msg' => 'Para mudar o mês, use "Apenas este"'];
+                }
+
+                DB::transaction(function() use ($provento, $request){
+                    //OCORRÊNCIA DE PROVENTO FIXO: "ESTE E OS SUBSEQUENTES" É O REAJUSTE, A PARTIR DO MÊS DELA
+                    $provento->proventoFixo->reajustar($provento->competencia(), $request['valor_provento']);
+
+                    //A DESCRIÇÃO NOVA VALE SÓ PARA ESTE MÊS
+                    if(!empty($request['descricao_provento'])){
+                        $provento->refresh();
+                        $provento->descricao_provento = $request['descricao_provento'];
+                        $provento->save();
+                    }
+                });
                 $msg = 'Reajuste aplicado a este mês e aos seguintes!';
             }elseif($seguintes){
                 $originalDescription = $provento->descricao_provento;
@@ -216,6 +241,10 @@ class Proventos extends Model
 
         try {
             $seguintes = isset($request['delete_subsequent']) && $request['delete_subsequent'] == 'true';
+
+            if($seguintes && $provento->proventoFixo && $provento->seguintesNoPassado()){
+                return ['error' => true, 'msg' => self::MSG_SEGUINTES_NO_PASSADO];
+            }
 
             if($seguintes && $provento->proventoFixo){
                 //OCORRÊNCIA DE PROVENTO FIXO: "ESTE E OS SUBSEQUENTES" É O ENCERRAMENTO NO MÊS ANTERIOR

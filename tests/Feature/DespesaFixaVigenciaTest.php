@@ -79,20 +79,21 @@ class DespesaFixaVigenciaTest extends TestCase
     }
 
     /** @test */
-    public function fixa_sem_fim_grava_12_meses_e_ao_avancar_um_mes_a_janela_ganha_exatamente_um_mes()
+    public function fixa_sem_fim_grava_12_meses_a_frente_e_ao_avancar_um_mes_a_janela_ganha_exatamente_um_mes()
     {
         $this->cadastrarDespesaFixa(['mes_inicio' => '2026-02'])->assertJsonFragment(['error' => false]);
 
+        //DO MÊS ATUAL ATÉ 12 MESES À FRENTE (ADR-0001), O MESMO QUE O MAIOR HORIZONTE DA PROJEÇÃO
         $this->assertSame(1, $this->ocorrenciasNoMes(2, 2026));
-        $this->assertSame(1, $this->ocorrenciasNoMes(1, 2027));
-        $this->assertSame(0, $this->ocorrenciasNoMes(2, 2027));
+        $this->assertSame(1, $this->ocorrenciasNoMes(2, 2027));
+        $this->assertSame(0, $this->ocorrenciasNoMes(3, 2027));
 
         $this->hoje(2026, 3, 5);
         $this->actingAs($this->user)->get(route('despesasFixas.index'))->assertOk();
 
+        $this->assertSame(1, $this->ocorrenciasNoMes(3, 2027));
+        $this->assertSame(0, $this->ocorrenciasNoMes(4, 2027));
         $this->assertSame(1, $this->ocorrenciasNoMes(2, 2027));
-        $this->assertSame(0, $this->ocorrenciasNoMes(3, 2027));
-        $this->assertSame(1, $this->ocorrenciasNoMes(1, 2027));
     }
 
     /** @test */
@@ -136,7 +137,7 @@ class DespesaFixaVigenciaTest extends TestCase
         $this->actingAs($this->user)->get(route('despesasFixas.index'))->assertOk();
 
         $this->assertSame(0, $this->ocorrenciasNoMes(7, 2026));
-        $this->assertSame(1, $this->ocorrenciasNoMes(2, 2027));
+        $this->assertSame(1, $this->ocorrenciasNoMes(3, 2027));
     }
 
     /** @test */
@@ -168,6 +169,7 @@ class DespesaFixaVigenciaTest extends TestCase
         ]);
 
         $this->actingAs($this->user)->get(route('despesasFixas.index'))
+            ->assertDontSee('<th> Ativo </th>', false)
             ->assertSeeInOrder(['Aluguel', '02/2026', 'sem fim', '1.500,00', 'Dia 10'])
             ->assertSeeInOrder(['Financiamento', '03/2026', '12/2026', '800,00', 'Dia 15']);
     }

@@ -170,4 +170,38 @@ class OcorrenciaProventoFixoEscopoTest extends TestCase
         $this->proventosDoMes(12, 2026)->assertSee('5.000,00');
         $this->assertSame(1, $this->ocorrenciasNoMes(1, 2027));
     }
+
+    /** @test */
+    public function este_e_os_seguintes_a_partir_de_um_mes_passado_e_recusado()
+    {
+        $this->hoje(2027, 1, 5);
+
+        $this->alterarOcorrencia(12, 2026, '9.000,00', true)
+            ->assertJsonFragment(['error' => true, 'msg' => '"Este e os seguintes" vale só a partir do mês atual']);
+        $this->excluirOcorrencia(12, 2026, true)
+            ->assertJsonFragment(['error' => true, 'msg' => '"Este e os seguintes" vale só a partir do mês atual']);
+
+        $this->proventosDoMes(12, 2026)->assertSee('5.000,00');
+        $this->assertSame(1, $this->ocorrenciasNoMes(2, 2027));
+    }
+
+    /** @test */
+    public function com_este_e_os_seguintes_a_descricao_nova_vale_para_este_mes_e_mudar_de_mes_e_recusado()
+    {
+        $this->actingAs($this->user)->putJson(route('proventos.update', $this->ocorrencia(1, 2027)->id), [
+            'descricao_provento' => 'Salário com bônus',
+            'valor_provento' => '5.500,00',
+            'data_provento' => '01/01/2027',
+            'update_subsequent' => 'true',
+        ])->assertJsonFragment(['error' => false]);
+
+        $this->proventosDoMes(1, 2027)->assertSee('Salário com bônus')->assertSee('5.500,00');
+
+        $this->actingAs($this->user)->putJson(route('proventos.update', $this->ocorrencia(2, 2027)->id), [
+            'descricao_provento' => 'Salário',
+            'valor_provento' => '5.500,00',
+            'data_provento' => '01/03/2027',
+            'update_subsequent' => 'true',
+        ])->assertJsonFragment(['error' => true, 'msg' => 'Para mudar o mês, use "Apenas este"']);
+    }
 }

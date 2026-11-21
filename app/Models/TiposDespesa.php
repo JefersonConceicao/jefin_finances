@@ -64,22 +64,33 @@ class TiposDespesa extends Model
 
     const MSG_RESERVADO = 'O tipo "Fixa" é reservado às Despesas Fixas e não pode ser alterado nem excluído';
 
-    public function updateTiposDespesa($id, $request = []){
+    /**
+     * Busca o Tipo de Despesa só entre os do usuário: o de outro usuário é tratado como inexistente (404).
+     */
+    public function doUsuario($id, $user){
+        return $this->where('user_id', $user->id)->findOrFail($id);
+    }
+
+    public function updateTiposDespesa($id, $request = [], $user = null){
+        //FORA DO try: TIPO DE OUTRO USUÁRIO VIRA 404, E NÃO UM ERRO GENÉRICO
+        $tipoDespesa = $this->doUsuario($id, $user);
+
         try{ 
-            $tipoDespesa = $this->find($id);
 
             if($tipoDespesa->reservado){
                 return ['error' => true, 'msg' => self::MSG_RESERVADO];
             }
 
-            $tipoDespesa->fill($request)->save();
+            //SÓ NOME E ATIVO MUDAM: O DONO E O MARCADOR DE RESERVADO FICAM COMO ESTÃO
+            $tipoDespesa->fill(\Illuminate\Support\Arr::only($request, ['nome', 'ativo']))->save();
 
             return [
                 'error' => false,
                 'msg' => 'Registro alterado com sucesso!',
                 'dataUpdated' => $tipoDespesa  
             ];
-        }catch(\Excpetion $error){
+        }catch(\Exception $error){
+            \Log::error($error->getMessage(), ['exception' => $error]);
             return [
                 'error' => true,
                 'msg' => 'Não foi possível atlerar o registro, tente de novo',
@@ -114,8 +125,8 @@ class TiposDespesa extends Model
         return $tipo->id;
     }
 
-    public function deleteTipoDespesa($id){
-        $tipoDespesa = $this->find($id);
+    public function deleteTipoDespesa($id, $user = null){
+        $tipoDespesa = $this->doUsuario($id, $user);
 
         if($tipoDespesa->reservado){
             return ['error' => true, 'msg' => self::MSG_RESERVADO];

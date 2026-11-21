@@ -224,4 +224,85 @@ class OcorrenciaDespesaFixaEscopoTest extends TestCase
             ->assertSee('Reajustar')
             ->assertSee('Encerrar');
     }
+
+    private function pagar($mes)
+    {
+        $this->actingAs($this->user)
+            ->putJson(route('despesa.pay', $this->ocorrencia($mes)->id))
+            ->assertJsonFragment(['msg' => 'Pagamento registrado']);
+    }
+
+    /** @test */
+    public function esta_e_as_seguintes_a_partir_de_um_mes_passado_e_recusado()
+    {
+        $this->hoje(2026, 3, 5);
+
+        $this->alterarOcorrencia(2, 'seguintes', ['valor_total' => '250,00'])
+            ->assertJsonFragment(['error' => true, 'msg' => '"Esta e as seguintes" vale só a partir do mês atual']);
+        $this->excluirOcorrencia(2, 'seguintes')
+            ->assertJsonFragment(['error' => true, 'msg' => '"Esta e as seguintes" vale só a partir do mês atual']);
+
+        $this->despesasDoMes(2)->assertSee('1.500,00');
+        $this->despesasDoMes(4)->assertSee('1.500,00');
+        $this->listaDeFixas()->assertSee('sem fim');
+    }
+
+    /** @test */
+    public function encerrar_mantem_a_ocorrencia_ja_paga_depois_do_fim()
+    {
+        $this->pagar(6);
+
+        $this->actingAs($this->user)
+            ->putJson(route('despesasFixas.encerrar', $this->fixa->id), ['mes_fim' => '2026-04'])
+            ->assertJsonFragment(['error' => false]);
+
+        $this->despesasDoMes(6)->assertSee('Remover Pagamento');
+        $this->assertSame(0, $this->ocorrenciasNoMes(7));
+    }
+
+    /** @test */
+    public function reajuste_nao_muda_a_ocorrencia_ja_paga()
+    {
+        $this->pagar(3);
+
+        $this->alterarOcorrencia(2, 'seguintes', ['valor_total' => '250,00'])->assertJsonFragment(['error' => false]);
+
+        $this->despesasDoMes(3)->assertSee('1.500,00')->assertDontSee('250,00');
+        $this->despesasDoMes(4)->assertSee('250,00');
+    }
+
+    /** @test */
+    public function reajuste_que_comeca_depois_da_janela_gravada_so_vale_a_partir_do_mes_escolhido()
+    {
+        //A JANELA VAI ATÉ JAN/2027; O REAJUSTE COMEÇA EM JUN/2027
+        $this->actingAs($this->user)
+            ->putJson(route('despesasFixas.reajustar', $this->fixa->id), [
+                'a_partir_de' => '2027-06',
+                'valor' => '2.000,00',
+                'dia_vencimento' => 10,
+            ])
+            ->assertJsonFragment(['error' => false]);
+
+        $this->hoje(2026, 7, 5);
+        $this->listaDeFixas();
+
+        $this->despesasDoMes(2, 2027)->assertSee('1.500,00')->assertDontSee('2.000,00');
+        $this->despesasDoMes(5, 2027)->assertSee('1.500,00')->assertDontSee('2.000,00');
+        $this->despesasDoMes(6, 2027)->assertSee('2.000,00');
+        $this->despesasDoMes(7, 2027)->assertSee('2.000,00');
+    }
+
+    /** @test */
+    public function com_esta_e_as_seguintes_o_nome_novo_vale_para_esta_ocorrencia_e_mudar_de_mes_e_recusado()
+    {
+        $this->alterarOcorrencia(3, 'seguintes', ['nome_despesa' => 'Aluguel + condomínio', 'valor_total' => '1.800,00'])
+            ->assertJsonFragment(['error' => false]);
+
+        $this->despesasDoMes(3)->assertSee('Aluguel + condomínio')->assertSee('1.800,00');
+        $this->despesasDoMes(4)->assertSee('1.800,00');
+
+        $this->alterarOcorrencia(5, 'seguintes', ['data_vencimento' => '10/06/2026'])
+            ->assertJsonFragment(['error' => true, 'msg' => 'Para mudar o mês do Vencimento, use "Só esta"']);
+        $this->despesasDoMes(5)->assertSee('10/05/2026');
+    }
 }

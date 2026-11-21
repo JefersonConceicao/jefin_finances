@@ -10,7 +10,7 @@ use Carbon\Carbon;
  */
 class Vigencia
 {
-    //RECORRÊNCIA SEM FIM MANTÉM ESTA QUANTIDADE DE MESES GRAVADOS, CONTANDO O MÊS ATUAL
+    //RECORRÊNCIA SEM FIM MANTÉM ESTES MESES GRAVADOS À FRENTE DO MÊS ATUAL (ADR-0001), O MESMO QUE O MAIOR HORIZONTE DA PROJEÇÃO
     const JANELA_MESES = 12;
 
     private $inicio;
@@ -51,9 +51,11 @@ class Vigencia
      * Ocorrências que faltam gravar: do mês seguinte à última gravada (ou do início) até o fim,
      * ou até completar a janela quando não há fim. Meses passados nunca são gerados.
      *
+     * Com $ate, grava até aquele mês (sem passar do fim), mesmo além da janela.
+     *
      * @return Ocorrencia[]
      */
-    public function ocorrenciasAGravar(Carbon $hoje, ?Carbon $gravadasAte): array
+    public function ocorrenciasAGravar(Carbon $hoje, ?Carbon $gravadasAte, ?Carbon $ate = null): array
     {
         $mesAtual = $hoje->copy()->startOfMonth();
 
@@ -65,7 +67,14 @@ class Vigencia
             $de = $mesAtual->copy();
         }
 
-        $ate = $this->fim ?: $mesAtual->copy()->addMonthsNoOverflow(self::JANELA_MESES - 1);
+        if ($ate) {
+            $ate = $ate->copy()->startOfMonth();
+            if ($this->fim && $this->fim->lt($ate)) {
+                $ate = $this->fim->copy();
+            }
+        } else {
+            $ate = $this->fim ?: $mesAtual->copy()->addMonthsNoOverflow(self::JANELA_MESES);
+        }
 
         $ocorrencias = [];
         for ($mes = $de; $mes->lte($ate); $mes = $mes->copy()->addMonthNoOverflow()) {
