@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Validation\Rule;
+use App\Models\Despesa;
 
 class LancamentosRequest extends FormRequest
 {
@@ -37,9 +38,17 @@ class LancamentosRequest extends FormRequest
                     ],
                     //SÓ PODE PAGAR DESPESA DO PRÓPRIO USUÁRIO
                     'despesa_id' => [
+                        //PARA NA PRIMEIRA FALHA: DESPESA DE OUTRO USUÁRIO OU id INVÁLIDO NÃO CHEGAM À CONFERÊNCIA DO PAGAMENTO
+                        'bail',
                         'nullable',
                         'integer',
                         Rule::exists('despesas', 'id')->where('user_id', $this->user()->id),
+                        //UMA DESPESA SÓ TEM UM PAGAMENTO: SEGUNDO LANÇAMENTO PARA A MESMA DESPESA É RECUSADO
+                        function($attribute, $value, $fail){
+                            if(Despesa::estaPaga($value, $this->user())){
+                                $fail('Despesa já está paga');
+                            }
+                        },
                     ],
                 ];
         }

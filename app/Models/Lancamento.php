@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use DB;
 
 class Lancamento extends Model
 {
@@ -69,33 +70,56 @@ class Lancamento extends Model
             ->get();
     }
 
-    public function saveLancamento($request = [], $user){
-        try{
-            $request['user_id'] = $user->id;
+    /**
+     * Grava o Lançamento e, se ele paga uma Despesa, marca o pago dela, numa transação.
+     * Lança a exceção em caso de falha, para quem chama dentro de outra transação desfazê-la.
+     */
+    public function lancar(array $request, $user){
+        $request['user_id'] = $user->id;
 
-            if(isset($request['data_lancamento']) && !empty($request['data_lancamento'])){
-                $request['data_lancamento'] = converteData(str_replace('/', '-',$request['data_lancamento']), 'Y-m-d');
-            }
+        //SÓ CONVERTE A DATA DO FORMULÁRIO (d/m/Y); A DATA E HORA DO PAGAMENTO (Y-m-d H:i:s) FICA COMO VEIO
+        if(isset($request['data_lancamento']) && strpos($request['data_lancamento'], '/') !== false){
+            $request['data_lancamento'] = converteData(str_replace('/', '-',$request['data_lancamento']), 'Y-m-d');
+        }
 
-            if(isset($request['valor']) && !empty($request['valor'])){
-                $request['valor'] = setToDecimal($request['valor']);
+        if(isset($request['valor']) && !empty($request['valor'])){
+            $request['valor'] = setToDecimal($request['valor']);
+        }
+
+        //O LANÇAMENTO E O pago DA DESPESA MUDAM JUNTOS: SE UM FALHAR, NENHUM FICA
+        DB::transaction(function() use ($request, $user){
+            $despesa = null;
+
+            if(!empty($request['despesa_id'])){
+                //TRAVA A DESPESA E CONFERE DE NOVO: A VALIDAÇÃO NÃO IMPEDE DOIS PAGAMENTOS AO MESMO TEMPO
+                $despesa = Despesa::where('user_id', $user->id)->lockForUpdate()->findOrFail($request['despesa_id']);
+                if(Despesa::estaPaga($despesa->id, $user)){
+                    throw new \RuntimeException('Despesa já está paga');
+                }
             }
 
             $this->fill($request)->save();
 
-            if(isset($request['despesa_id']) && !empty($request['despesa_id'])){
-                $this->despesa()->update(['pago' => 1]);
+            if($despesa){
+                $despesa->pago = 1;
+                $despesa->save();
             }
+        });
+    }
+
+    public function saveLancamento($request = [], $user){
+        try{
+            $this->lancar($request, $user);
 
             return [
                 'error' => false,
                 'msg' => 'Novo lançamento efetuado',
             ];
         }catch(\Exception $error){
+            \Log::error($error->getMessage(), ['exception' => $error]);
             return [
                 'error' => true,
-                'msg' => 'Não foi possível efetuar o lançamento, tente de novo',
-                'error_message' => $error->getMessage()
+                'msg' => 'Não foi possível efetuar o lançamento, tente de novo'
             ];
         }
     }
@@ -110,20 +134,38 @@ class Lancamento extends Model
     public function deleteLancamento($id, $user){
         $lancamento = $this->doUsuario($id, $user);
 
-        //SÓ DESFAZ O PAGAMENTO DE DESPESA DO PRÓPRIO USUÁRIO (DADOS ANTIGOS PODEM LIGAR À DESPESA DE OUTRO)
-        $lancamento->despesa()->where('user_id', $user->id)->update([
-            'pago' => 0
-        ]);
+        try{
+            //O pago DA DESPESA E A EXCLUSÃO MUDAM JUNTOS: SE A EXCLUSÃO FALHAR, A DESPESA CONTINUA PAGA
+            DB::transaction(function() use ($lancamento, $user){
+                //TRAVA A DESPESA COMO O PAGAMENTO FAZ, PARA A CONFERÊNCIA ABAIXO NÃO CORRER JUNTO COM ELE
+                if($lancamento->despesa_id){
+                    Despesa::where('id', $lancamento->despesa_id)->where('user_id', $user->id)->lockForUpdate()->first();
+                }
 
-        if($lancamento->delete()){
+                if(!$lancamento->delete()){
+                    throw new \RuntimeException('Lançamento não foi excluído');
+                }
+
+                //A DESPESA SÓ VOLTA A "A PAGAR" QUANDO NÃO RESTA LANÇAMENTO DO USUÁRIO PARA ELA
+                $restaOutro = static::where('despesa_id', $lancamento->despesa_id)->where('user_id', $user->id)->exists();
+
+                if($lancamento->despesa_id && !$restaOutro){
+                    //SÓ DESFAZ O PAGAMENTO DE DESPESA DO PRÓPRIO USUÁRIO (DADOS ANTIGOS PODEM LIGAR À DESPESA DE OUTRO)
+                    $lancamento->despesa()->where('user_id', $user->id)->update([
+                        'pago' => 0
+                    ]);
+                }
+            });
+
             return [
                 'error' => false,
                 'msg' => 'Registro excluído com sucesso!'
             ];
-        }else{
+        }catch(\Exception $error){
+            \Log::error($error->getMessage(), ['exception' => $error]);
             return [
                 'error' => true,
-                'msg' => 'Não foi possível salvar o registro, tente de novo'
+                'msg' => 'Não foi possível excluir o registro, tente de novo'
             ];
         }
     }

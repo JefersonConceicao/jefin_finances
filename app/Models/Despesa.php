@@ -39,6 +39,15 @@ class Despesa extends Model
         return $this->where('user_id', $user->id)->findOrFail($id);
     }
 
+    /**
+     * A Despesa está paga se tem o pago marcado ou se já existe Lançamento do usuário para ela
+     * (dados antigos podem ter Lançamento com pago = 0).
+     */
+    public static function estaPaga($id, $user){
+        return static::where('id', $id)->where('user_id', $user->id)->where('pago', 1)->exists()
+            || Lancamento::where('despesa_id', $id)->where('user_id', $user->id)->exists();
+    }
+
     public function getDespesas($request = [], $user){
         $conditions = [];
         $conditions[] = ['user_id', '=', $user->id];
@@ -83,6 +92,8 @@ class Despesa extends Model
 
     public function saveDespesa($request = [], $user){
         try{
+            //A DESPESA NASCE A PAGAR: O pago SÓ MUDA PELO PAGAMENTO, QUE CRIA O LANÇAMENTO JUNTO
+            $request = Arr::except($request, ['pago']);
             $request['user_id'] = $user->id;
 
             if(isset($request['valor_total']) && !empty($request['valor_total'])){
@@ -101,10 +112,10 @@ class Despesa extends Model
                 'msg' => 'Despesa adicionada!'
             ];
         }catch(\Exception $error){
+            \Log::error($error->getMessage(), ['exception' => $error]);
             return [
                 'error' => true,
-                'msg' => 'Não foi possível salvar o registro, tente de novo',
-                'error_message' => $error->getMessage()
+                'msg' => 'Não foi possível salvar o registro, tente de novo'
             ];
         }
     }
@@ -131,21 +142,36 @@ class Despesa extends Model
                 'msg' => 'Despesa alterada com sucesso!'
             ];
         }catch(\Exception $error){
+            \Log::error($error->getMessage(), ['exception' => $error]);
             return [
                 'error' => true,
-                'msg' => 'Não foi possível alterar o registro, tente de novo.',
-                'error_message' => $error->getMessage()
+                'msg' => 'Não foi possível alterar o registro, tente de novo.'
             ];
         }
     }
 
     public function deleteDespesa($id, $user){
-        if($this->doUsuario($id, $user)->delete()){
+        //FORA DO try: DESPESA DE OUTRO USUÁRIO VIRA 404, E NÃO UM ERRO GENÉRICO
+        $despesa = $this->doUsuario($id, $user);
+
+        try{
+            //OU SAI TUDO OU NADA
+            DB::transaction(function() use ($despesa, $id, $user){
+                //TRAVA A DESPESA: UM PAGAMENTO AO MESMO TEMPO NÃO LANÇA DEPOIS DA LIMPEZA ABAIXO
+                $this->where('user_id', $user->id)->lockForUpdate()->findOrFail($id);
+                //A DESPESA PAGA LEVA JUNTO OS LANÇAMENTOS DO DONO
+                Lancamento::where('despesa_id', $id)->where('user_id', $user->id)->delete();
+                //DADO ANTIGO: LANÇAMENTO DE OUTRO USUÁRIO NESTA DESPESA É DELE; SÓ SE DESLIGA DELA E VIRA "OUTRO LANÇAMENTO"
+                Lancamento::where('despesa_id', $id)->update(['despesa_id' => null]);
+                $despesa->delete();
+            });
+
             return [
                 'error' => false,
                 'msg' => 'Registro excluído com sucesso!'
             ];
-        }else{
+        }catch(\Exception $error){
+            \Log::error($error->getMessage(), ['exception' => $error]);
             return [
                 'error' => true,
                 'msg' => 'Não foi possível excluír o registro, tente de novo'
@@ -155,33 +181,47 @@ class Despesa extends Model
 
     public function pagamentoDespesa($id, $user){
         //FORA DO try: DESPESA DE OUTRO USUÁRIO VIRA 404, E NÃO UM ERRO GENÉRICO
-        $despesa = $this->doUsuario($id, $user);
+        $this->doUsuario($id, $user);
 
         try{
-            $lancamento = new Lancamento;
+            //O pago E O LANÇAMENTO MUDAM JUNTOS: SE O LANÇAMENTO FALHAR, A DESPESA FICA COMO ESTAVA
+            $pago = DB::transaction(function() use ($id, $user){
+                //RELÊ COM TRAVA: DOIS CLIQUES AO MESMO TEMPO NÃO LANÇAM DOIS PAGAMENTOS
+                $despesa = $this->where('user_id', $user->id)->lockForUpdate()->findOrFail($id);
+                //SÓ LANÇAMENTOS DO PRÓPRIO USUÁRIO (DADOS ANTIGOS PODEM TER LANÇAMENTO DE OUTRO NESTA DESPESA)
+                $lancamentos = Lancamento::where('despesa_id', $id)->where('user_id', $user->id);
 
-            $despesa->pago = $despesa->pago == 1 ? 0 : 1;
-            $despesa->save();
+                if($despesa->pago == 1){
+                    $despesa->pago = 0;
+                    $despesa->save();
+                    $lancamentos->delete();
+                    return false;
+                }
 
-            if($despesa->pago == 1){
-                $formDataLancamento = [
+                //DADO ANTIGO COM LANÇAMENTO E pago = 0: SÓ ACERTA O pago, SEM LANÇAR DE NOVO
+                if($lancamentos->exists()){
+                    $despesa->pago = 1;
+                    $despesa->save();
+                    return true;
+                }
+
+                //lancar MARCA O pago E LANÇA A EXCEÇÃO SE FALHAR, DESFAZENDO ESTA TRANSAÇÃO
+                (new Lancamento)->lancar([
                     'data_lancamento' => date('Y-m-d H:i:s'),
                     'despesa_id' => $id,
                     'valor' => floatVal($despesa->valor_total),
                     'descricao' => $despesa->nome_despesa,
-                ];
+                ], $user);
 
-                $lancamento->saveLancamento($formDataLancamento, $user);
-            }else{
-                //SÓ APAGA LANÇAMENTOS DO PRÓPRIO USUÁRIO (DADOS ANTIGOS PODEM TER LANÇAMENTO DE OUTRO NESTA DESPESA)
-                $lancamento->where('despesa_id', $id)->where('user_id', $user->id)->delete();
-            }
+                return true;
+            });
 
             return [
                 'error' => false,
-                'msg' => $despesa->pago == 1 ? "Pagamento registrado" : "Remoção de Pagamento efetuado com sucesso!"
+                'msg' => $pago ? "Pagamento registrado" : "Remoção de Pagamento efetuado com sucesso!"
             ];
         }catch(\Exception $error){
+            \Log::error($error->getMessage(), ['exception' => $error]);
             return [
                 'error' => true,
                 'msg' => 'Ocorreu um erro ao declarar/remover pagamento, tente de novo'
