@@ -71,7 +71,7 @@ class LancamentosController extends Controller
     {
         $lancamento = new Lancamento;
 
-        $data = $lancamento->deleteLancamento($id);
+        $data = $lancamento->deleteLancamento($id, Auth::user());
         return response()->json($data);
     }
 

@@ -100,12 +100,22 @@ class Lancamento extends Model
         }
     }
 
-    public function deleteLancamento($id){
-        $this->find($id)->despesa()->update([
+    /**
+     * Busca o Lançamento só entre os do usuário: o de outro usuário é tratado como inexistente (404).
+     */
+    public function doUsuario($id, $user){
+        return $this->where('user_id', $user->id)->findOrFail($id);
+    }
+
+    public function deleteLancamento($id, $user){
+        $lancamento = $this->doUsuario($id, $user);
+
+        //SÓ DESFAZ O PAGAMENTO DE DESPESA DO PRÓPRIO USUÁRIO (DADOS ANTIGOS PODEM LIGAR À DESPESA DE OUTRO)
+        $lancamento->despesa()->where('user_id', $user->id)->update([
             'pago' => 0
         ]);
 
-        if($this->find($id)->delete()){
+        if($lancamento->delete()){
             return [
                 'error' => false,
                 'msg' => 'Registro excluído com sucesso!'
