@@ -1,7 +1,7 @@
 @extends('layout.page')
 @section('content_header')
     <h3> Despesas Fixas </h3>
-    <p class="text-subtitle"> Custo de vida basal, lançado automaticamente todo mês. </p>
+    <p class="text-subtitle"> Gastos que se repetem todo mês dentro da Vigência. </p>
 @endsection
 @section('content-page')
     @component('components.filtro')
@@ -54,7 +54,9 @@
                         <thead>
                             <tr>
                                 <th> Nome </th>
-                                <th> Valor mensal (R$) </th>
+                                <th> Vigência </th>
+                                <th> Valor Previsto (R$) </th>
+                                <th> Vencimento </th>
                                 <th> Ativo </th>
                                 <th width="2%"> Ações </th>
                             </tr>
@@ -68,7 +70,13 @@
                                             <i class="fa fa-lock text-muted ms-1" title="Já lançada em {{ $fixa->despesas_count }} mês(es). Apenas inativação permitida."></i>
                                         @endif
                                     </td>
+                                    <td>
+                                        {{ $fixa->mes_inicio->format('m/Y') }}
+                                        &ndash;
+                                        {{ $fixa->mes_fim ? $fixa->mes_fim->format('m/Y') : 'sem fim' }}
+                                    </td>
                                     <td> {{ convertValorReal($fixa->valor) }} </td>
+                                    <td> Dia {{ $fixa->dia_vencimento }} </td>
                                     <td>
                                         <span class="badge bg-{{ $fixa->ativo ? 'success' : 'danger' }}">
                                             {{ $fixa->ativo ? 'Sim' : 'Não' }}

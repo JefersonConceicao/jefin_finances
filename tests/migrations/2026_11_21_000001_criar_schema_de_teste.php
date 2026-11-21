@@ -44,6 +44,10 @@ class CriarSchemaDeTeste extends Migration
             $table->unsignedInteger('despesa_tipo_id');
             $table->decimal('valor', 6, 2);
             $table->unsignedTinyInteger('ativo')->default(1);
+            $table->date('mes_inicio');
+            $table->date('mes_fim')->nullable();
+            $table->unsignedTinyInteger('dia_vencimento');
+            $table->date('ocorrencias_ate')->nullable();
             $table->dateTime('created_at')->nullable();
             $table->dateTime('updated_at')->nullable();
             $table->foreign('user_id')->references('id')->on('users');

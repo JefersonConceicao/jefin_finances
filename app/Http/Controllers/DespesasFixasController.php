@@ -18,6 +18,7 @@ class DespesasFixasController extends Controller
         $user = Auth::user();
         $despesaFixa = new DespesaFixa;
 
+        $despesaFixa->completarJanela($user);
         $data = $despesaFixa->getDespesasFixas($request->all(), $user)->get();
 
         return view('despesas_fixas.index')

@@ -5,6 +5,7 @@ namespace App\Models;
 use Carbon\Carbon;
 use DB;
 use Illuminate\Database\Eloquent\Model;
+use App\Recorrencia\Vigencia;
 
 class DespesaFixa extends Model
 {
@@ -15,6 +16,15 @@ class DespesaFixa extends Model
         'despesa_tipo_id',
         'valor',
         'ativo',
+        'mes_inicio',
+        'mes_fim',
+        'dia_vencimento',
+    ];
+
+    protected $casts = [
+        'mes_inicio' => 'date',
+        'mes_fim' => 'date',
+        'ocorrencias_ate' => 'date',
     ];
 
     public function despesaTipo(){
@@ -51,12 +61,29 @@ class DespesaFixa extends Model
 
     public function saveDespesaFixa($request = [], $user){
         try{
-            $request['user_id'] = $user->id;
-            $request['valor'] = setToDecimal($request['valor']);
-            $request['despesa_tipo_id'] = (new TiposDespesa)->idTipoFixaDoUsuario($user);
+            //A FIXA E TODAS AS OCORRÊNCIAS DELA SÃO GRAVADAS JUNTAS: SE UMA FALHAR, NADA FICA
+            DB::transaction(function() use ($request, $user){
+                $inicio = Carbon::createFromFormat('!Y-m', $request['mes_inicio']);
 
-            $this->fill($request)->save();
-            $this->gerarParaMes($user, date('m'), date('Y'));
+                if(!empty($request['parcelas'])){
+                    $fim = Vigencia::fimPorParcelas($inicio, (int) $request['parcelas']);
+                }else{
+                    $fim = !empty($request['mes_fim']) ? Carbon::createFromFormat('!Y-m', $request['mes_fim']) : null;
+                }
+
+                $this->fill([
+                    'user_id' => $user->id,
+                    'nome_despesa' => $request['nome_despesa'],
+                    'valor' => setToDecimal($request['valor']),
+                    'ativo' => $request['ativo'] ?? 1,
+                    'despesa_tipo_id' => (new TiposDespesa)->idTipoFixaDoUsuario($user),
+                    'mes_inicio' => $inicio->format('Y-m-d'),
+                    'mes_fim' => $fim ? $fim->format('Y-m-d') : null,
+                    'dia_vencimento' => (int) $request['dia_vencimento'],
+                ])->save();
+
+                $this->gravarOcorrencias();
+            });
 
             return [
                 'error' => false,
@@ -69,6 +96,58 @@ class DespesaFixa extends Model
                 'msg' => 'Não foi possível salvar o registro, tente de novo'
             ];
         }
+    }
+
+    public function vigencia(){
+        return new Vigencia($this->mes_inicio, $this->mes_fim, (int) $this->dia_vencimento);
+    }
+
+    /**
+     * Grava as Ocorrências que faltam (ADR-0001): só meses depois da última gravada, nunca meses passados.
+     * Chamar dentro de uma transação.
+     */
+    public function gravarOcorrencias(){
+        $ocorrencias = $this->vigencia()->ocorrenciasAGravar(Carbon::now(), $this->ocorrencias_ate);
+
+        foreach($ocorrencias as $ocorrencia){
+            Despesa::create([
+                'user_id' => $this->user_id,
+                'nome_despesa' => $ocorrencia->nome($this->nome_despesa),
+                'despesa_tipo_id' => $this->despesa_tipo_id,
+                'despesa_fixa_id' => $this->id,
+                'valor_total' => $this->valor,
+                'data_vencimento' => $ocorrencia->vencimento->format('Y-m-d'),
+                'ativo' => 1,
+                'pago' => 0,
+            ]);
+        }
+
+        if(!empty($ocorrencias)){
+            $this->ocorrencias_ate = end($ocorrencias)->mes->format('Y-m-d');
+            $this->save();
+        }
+
+        return count($ocorrencias);
+    }
+
+    /**
+     * Completa a janela de Ocorrências das fixas do usuário. Idempotente: abrir a tela de novo não grava nada.
+     */
+    public function completarJanela($user){
+        $ids = $this
+            ->where('user_id', $user->id)
+            ->where('ativo', 1)
+            ->pluck('id');
+
+        $gravadas = 0;
+        foreach($ids as $id){
+            $gravadas += DB::transaction(function() use ($id){
+                //TRAVA A FIXA: DUAS TELAS ABERTAS AO MESMO TEMPO NÃO GRAVAM A MESMA OCORRÊNCIA DUAS VEZES
+                return static::lockForUpdate()->find($id)->gravarOcorrencias();
+            });
+        }
+
+        return $gravadas;
     }
 
     /**
@@ -94,7 +173,7 @@ class DespesaFixa extends Model
                 $despesaFixa->fill($request)->save();
             }
 
-            $this->gerarParaMes($user, date('m'), date('Y'));
+            $this->completarJanela($user);
 
             return [
                 'error' => false,
@@ -140,52 +219,5 @@ class DespesaFixa extends Model
             ->where('user_id', $user->id)
             ->where('ativo', 1)
             ->sum('valor');
-    }
-
-    /**
-     * Cria as despesas do mês a partir das despesas fixas ativas.
-     * Meses futuros não são gravados (apenas projetados).
-     */
-    public function gerarParaMes($user, $mes, $ano){
-        if(empty($mes) || empty($ano) || !is_numeric($mes) || !is_numeric($ano)){
-            return 0;
-        }
-
-        $inicioMes = Carbon::create((int) $ano, (int) $mes, 1)->startOfDay();
-        if($inicioMes->gt(Carbon::now()->startOfMonth())){
-            return 0;
-        }
-
-        $fimMes = $inicioMes->copy()->endOfMonth();
-
-        $fixasPendentes = $this
-            ->where('user_id', $user->id)
-            ->where('ativo', 1)
-            ->where('created_at', '<=', $fimMes)
-            ->whereDoesntHave('despesas', function($query) use ($inicioMes, $fimMes){
-                $query->whereBetween('created_at', [$inicioMes, $fimMes]);
-            })
-            ->get();
-
-        if($fixasPendentes->isEmpty()){
-            return 0;
-        }
-
-        DB::transaction(function() use ($fixasPendentes, $user, $inicioMes){
-            foreach($fixasPendentes as $fixa){
-                Despesa::create([
-                    'user_id' => $user->id,
-                    'nome_despesa' => $fixa->nome_despesa,
-                    'despesa_tipo_id' => $fixa->despesa_tipo_id,
-                    'despesa_fixa_id' => $fixa->id,
-                    'valor_total' => $fixa->valor,
-                    'ativo' => 1,
-                    'pago' => 0,
-                    'created_at' => $inicioMes->format('Y-m-d H:i:s'),
-                ]);
-            }
-        });
-
-        return $fixasPendentes->count();
     }
 }

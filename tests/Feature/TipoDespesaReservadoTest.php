@@ -28,6 +28,8 @@ class TipoDespesaReservadoTest extends TestCase
             'nome_despesa' => $nome,
             'valor' => '1.500,00',
             'ativo' => 1,
+            'mes_inicio' => date('Y-m'),
+            'dia_vencimento' => 10,
         ])->assertJsonFragment(['error' => false]);
     }
 

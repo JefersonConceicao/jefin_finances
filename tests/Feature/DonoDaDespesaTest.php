@@ -108,6 +108,8 @@ class DonoDaDespesaTest extends TestCase
             'despesa_tipo_id' => $tipoDoOutro->id,
             'valor' => 100,
             'ativo' => 1,
+            'mes_inicio' => '2026-11-01',
+            'dia_vencimento' => 5,
         ]);
 
         $this->actingAs($this->dono)->putJson(route('despesas.update', $this->despesa->id), [

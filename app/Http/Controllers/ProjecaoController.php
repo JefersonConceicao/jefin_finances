@@ -22,7 +22,7 @@ class ProjecaoController extends Controller
         $proventos = new Proventos;
 
         $mesAtual = Carbon::now()->startOfMonth();
-        $despesaFixa->gerarParaMes($user, $mesAtual->format('m'), $mesAtual->format('Y'));
+        $despesaFixa->completarJanela($user);
 
         $fixasAtivas = $despesaFixa
             ->getDespesasFixas(['ativo' => 1], $user)
