@@ -65,6 +65,17 @@ Route::group(['middleware' => 'auth'], function(){
         Route::put('/payDespesa/{id}', 'DespesasController@delcararPagamentoDespesa')->name('despesa.pay');
     });
 
+    Route::group(['prefix' => 'proventosFixos'], function(){
+        Route::get('/', 'ProventosFixosController@index')->name('proventosFixos.index');
+        Route::get('/create', 'ProventosFixosController@create')->name('proventosFixos.create');
+        Route::post('/store', 'ProventosFixosController@store')->name('proventosFixos.store');
+        Route::get('/edit/{id}', 'ProventosFixosController@edit')->name('proventosFixos.edit');
+        Route::put('/update/{id}', 'ProventosFixosController@update')->name('proventosFixos.update');
+        Route::delete('/delete/{id}', 'ProventosFixosController@delete')->name('proventosFixos.delete');
+        Route::put('/reajustar/{id}', 'ProventosFixosController@reajustar')->name('proventosFixos.reajustar');
+        Route::put('/encerrar/{id}', 'ProventosFixosController@encerrar')->name('proventosFixos.encerrar');
+    });
+
     Route::group(['prefix' => 'despesasFixas'], function(){
         Route::get('/', 'DespesasFixasController@index')->name('despesasFixas.index');
         Route::get('/create', 'DespesasFixasController@create')->name('despesasFixas.create');

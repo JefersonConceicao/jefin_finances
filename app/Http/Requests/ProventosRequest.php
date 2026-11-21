@@ -28,7 +28,8 @@ class ProventosRequest extends FormRequest
                 $validate = [
                     'descricao_provento' => 'required',
                     'valor_provento' => 'required',
-                    'period_type' => 'nullable|in:especifico,anual',
+                    //O PROVENTO ANUAL SAIU: O QUE SE REPETE TODO MÊS É UM PROVENTO FIXO
+                    'period_type' => 'nullable|in:especifico',
                     'data_provento' => 'required_without:period_type|nullable|date_format:d/m/Y',
                     'periodo_inicio' => 'required_if:period_type,especifico|nullable|date_format:d/m/Y',
                     'periodo_fim' => 'required_if:period_type,especifico|nullable|date_format:d/m/Y',
@@ -38,7 +39,8 @@ class ProventosRequest extends FormRequest
                 $validate = [
                     'descricao_provento' => 'required',
                     'valor_provento' => 'required',
-                    'period_type' => 'nullable|in:especifico,anual',
+                    //O PROVENTO ANUAL SAIU: O QUE SE REPETE TODO MÊS É UM PROVENTO FIXO
+                    'period_type' => 'nullable|in:especifico',
                     'data_provento' => 'required_without:period_type|nullable|date_format:d/m/Y',
                     'periodo_inicio' => 'required_if:period_type,especifico|nullable|date_format:d/m/Y',
                     'periodo_fim' => 'required_if:period_type,especifico|nullable|date_format:d/m/Y',
@@ -57,6 +59,7 @@ class ProventosRequest extends FormRequest
             'date_format' => 'A data deve estar no formato DD/MM/AAAA',
             'periodo_inicio.required_if' => 'O campo Período Início é obrigatório quando Especificar Periodo estiver selecionado',
             'periodo_fim.required_if' => 'O campo Período Fim é obrigatório quando Especificar Periodo estiver selecionado',
+            'period_type.in' => 'Para repetir todo mês, cadastre um Provento Fixo',
             'data_provento.required_without' => 'Informe a data do provento ou selecione um tipo de período'
         ];
     }

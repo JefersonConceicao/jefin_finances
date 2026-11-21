@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests\ProventosRequest;
 //MODEL
 use App\Models\Proventos;
+use App\Models\ProventoFixo;
 use Auth;
 
 class ProventosController extends Controller
@@ -18,6 +19,9 @@ class ProventosController extends Controller
     {
         $proventos = new Proventos;
         $user = Auth::user(); 
+
+        //COMPLETA A JANELA DE OCORRÊNCIAS DOS PROVENTOS FIXOS (ADR-0001)
+        (new ProventoFixo)->completarJanela($user);
 
         $query = $proventos->getProventos($request->all(), $user);
 

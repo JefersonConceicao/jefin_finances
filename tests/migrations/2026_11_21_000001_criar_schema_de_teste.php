@@ -71,15 +71,31 @@ class CriarSchemaDeTeste extends Migration
             $table->foreign('despesa_fixa_id')->references('id')->on('despesas_fixas')->onDelete('set null');
         });
 
+        Schema::create('proventos_fixos', function (Blueprint $table) {
+            $table->increments('id');
+            $table->unsignedInteger('user_id');
+            $table->string('descricao', 255);
+            $table->decimal('valor', 10, 2);
+            $table->unsignedTinyInteger('ativo')->default(1);
+            $table->date('mes_inicio');
+            $table->date('mes_fim')->nullable();
+            $table->date('ocorrencias_ate')->nullable();
+            $table->dateTime('created_at')->nullable();
+            $table->dateTime('updated_at')->nullable();
+            $table->foreign('user_id')->references('id')->on('users');
+        });
+
         Schema::create('proventos', function (Blueprint $table) {
             $table->increments('id');
             $table->unsignedInteger('user_id');
-            $table->decimal('valor_provento', 6, 2)->nullable();
+            $table->unsignedInteger('provento_fixo_id')->nullable();
+            $table->decimal('valor_provento', 10, 2)->nullable();
             $table->date('data_provento');
             $table->dateTime('created_at')->nullable();
             $table->dateTime('updated_at')->nullable();
             $table->string('descricao_provento');
             $table->foreign('user_id')->references('id')->on('users');
+            $table->foreign('provento_fixo_id')->references('id')->on('proventos_fixos')->onDelete('set null');
         });
 
         Schema::create('lancamentos', function (Blueprint $table) {
@@ -113,7 +129,7 @@ class CriarSchemaDeTeste extends Migration
 
     public function down()
     {
-        foreach (['dividas', 'lancamentos', 'proventos', 'despesas', 'despesas_fixas', 'despesas_tipos', 'users'] as $tabela) {
+        foreach (['dividas', 'lancamentos', 'proventos', 'proventos_fixos', 'despesas', 'despesas_fixas', 'despesas_tipos', 'users'] as $tabela) {
             Schema::dropIfExists($tabela);
         }
     }

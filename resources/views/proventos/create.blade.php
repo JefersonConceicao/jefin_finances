@@ -26,10 +26,6 @@
                     <input class="form-check-input" type="radio" name="period_type" id="period_type_especifico" value="especifico">
                     <label class="form-check-label" for="period_type_especifico"> Especificar Periodo </label>
                 </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="period_type" id="period_type_anual" value="anual">
-                    <label class="form-check-label" for="period_type_anual"> Periodo anual </label>
-                </div>
 
                 <div class="error_feedback"> </div>
             </div>

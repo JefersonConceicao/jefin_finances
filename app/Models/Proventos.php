@@ -20,6 +20,15 @@ class Proventos extends Model
 
     public $timestamps = true;
 
+    public function proventoFixo(){
+        return $this->belongsTo(ProventoFixo::class, 'provento_fixo_id', 'id');
+    }
+
+    //MÊS EM QUE O PROVENTO CONTA
+    public function competencia(){
+        return Carbon::parse($this->data_provento)->startOfMonth();
+    }
+
     public function getProventos($request = [], $user){
         $conditions = [];
         $conditions[] = ['user_id', '=', $user->id];
@@ -63,41 +72,6 @@ class Proventos extends Model
 
             if(isset($request['data_provento']) && !empty($request['data_provento'])){
                 $request['data_provento'] = converteData(str_replace('/','-', $request['data_provento']), 'Y-m-d');
-            }
-
-            if(isset($request['period_type']) && $request['period_type'] === 'anual'){
-                $year = !empty($request['data_provento']) ? Carbon::createFromFormat('Y-m-d', $request['data_provento'])->year : date('Y');
-
-                DB::beginTransaction();
-                $lastCreated = null;
-                for($month = 1; $month <= 12; $month++){
-                    $exists = $this->where('user_id', $user->id)
-                        ->where('descricao_provento', $request['descricao_provento'])
-                        ->whereMonth('data_provento', $month)
-                        ->whereYear('data_provento', $year)
-                        ->first();
-
-                    if($exists){
-                        $exists->valor_provento += $request['valor_provento'];
-                        $exists->save();
-                        $lastCreated = $exists;
-                    } else {
-                        $item = self::create([
-                            'user_id' => $user->id,
-                            'descricao_provento' => $request['descricao_provento'],
-                            'valor_provento' => $request['valor_provento'],
-                            'data_provento' => sprintf('%04d-%02d-01', $year, $month)
-                        ]);
-                        $lastCreated = $item;
-                    }
-                }
-                DB::commit();
-
-                return [
-                    'error' => false,
-                    'msg' => 'Provento anual adicionado!',
-                    'dataAdded' => $lastCreated
-                ];
             }
 
             if(isset($request['period_type']) && $request['period_type'] === 'especifico'){

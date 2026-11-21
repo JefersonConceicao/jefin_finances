@@ -5,10 +5,14 @@ namespace App\Models;
 use Carbon\Carbon;
 use DB;
 use Illuminate\Database\Eloquent\Model;
+use App\Recorrencia\Ocorrencia;
+use App\Recorrencia\Recorrente;
 use App\Recorrencia\Vigencia;
 
 class DespesaFixa extends Model
 {
+    use Recorrente;
+
     protected $table = 'despesas_fixas';
     protected $fillable = [
         'user_id',
@@ -54,7 +58,7 @@ class DespesaFixa extends Model
         return $this
             ->where($conditions)
             ->with('despesaTipo')
-            ->withCount('despesas')
+            ->withCount('ocorrencias')
             ->orderBy('ativo', 'DESC')
             ->orderBy('valor', 'DESC');
     }
@@ -98,123 +102,40 @@ class DespesaFixa extends Model
         }
     }
 
-    public function vigencia(){
-        return new Vigencia($this->mes_inicio, $this->mes_fim, (int) $this->dia_vencimento);
+    public function ocorrencias(){
+        return $this->despesas();
     }
 
-    /**
-     * Grava as Ocorrências que faltam (ADR-0001): só meses depois da última gravada, nunca meses passados.
-     * Chamar dentro de uma transação.
-     */
-    public function gravarOcorrencias(){
-        $ocorrencias = $this->vigencia()->ocorrenciasAGravar(Carbon::now(), $this->ocorrencias_ate);
-
-        foreach($ocorrencias as $ocorrencia){
-            Despesa::create([
-                'user_id' => $this->user_id,
-                'nome_despesa' => $ocorrencia->nome($this->nome_despesa),
-                'despesa_tipo_id' => $this->despesa_tipo_id,
-                'despesa_fixa_id' => $this->id,
-                'valor_total' => $this->valor,
-                'data_vencimento' => $ocorrencia->vencimento->format('Y-m-d'),
-                'ativo' => 1,
-                'pago' => 0,
-            ]);
-        }
-
-        if(!empty($ocorrencias)){
-            $this->ocorrencias_ate = end($ocorrencias)->mes->format('Y-m-d');
-            $this->save();
-        }
-
-        return count($ocorrencias);
+    //COMPETÊNCIA É O MÊS DO VENCIMENTO; REGISTROS ANTIGOS SEM VENCIMENTO USAM A DATA DE CADASTRO (ADR-0002)
+    protected function colunaCompetencia(){
+        return 'COALESCE(data_vencimento, created_at)';
     }
 
-    /**
-     * Ocorrências desta fixa com Competência no mês informado ou depois.
-     * Competência é o mês do Vencimento; registros antigos sem Vencimento usam a data de cadastro (ADR-0002).
-     */
-    public function ocorrenciasAPartirDe(Carbon $mes){
-        return $this->despesas()
-            ->where(DB::raw('COALESCE(data_vencimento, created_at)'), '>=', $mes->copy()->startOfMonth()->format('Y-m-d'));
+    protected function diaDaOcorrencia(){
+        return $this->dia_vencimento;
     }
 
-    /**
-     * Reajuste: o novo Valor Previsto e/ou dia de vencimento valem do mês informado em diante, sobrescrevendo
-     * também as Ocorrências ajustadas à mão. As Ocorrências anteriores não mudam.
-     */
-    public function reajustar(Carbon $aPartirDe, $valor = null, $diaVencimento = null){
-        DB::transaction(function() use ($aPartirDe, $valor, $diaVencimento){
-            $fixa = static::lockForUpdate()->findOrFail($this->id);
-
-            if($valor !== null){
-                $fixa->valor = $valor;
-            }
-            if($diaVencimento !== null){
-                $fixa->dia_vencimento = (int) $diaVencimento;
-            }
-            $fixa->save();
-
-            $vigencia = $fixa->vigencia();
-            foreach($fixa->ocorrenciasAPartirDe($aPartirDe)->get() as $ocorrencia){
-                $mes = Carbon::parse($ocorrencia->data_vencimento ?: $ocorrencia->created_at);
-                $ocorrencia->valor_total = $fixa->valor;
-                $ocorrencia->data_vencimento = $vigencia->vencimentoNoMes($mes)->format('Y-m-d');
-                $ocorrencia->save();
-            }
-
-            $this->setRawAttributes($fixa->getAttributes(), true);
-        });
+    protected function criarOcorrencia(Ocorrencia $ocorrencia){
+        Despesa::create([
+            'user_id' => $this->user_id,
+            'nome_despesa' => $ocorrencia->nome($this->nome_despesa),
+            'despesa_tipo_id' => $this->despesa_tipo_id,
+            'despesa_fixa_id' => $this->id,
+            'valor_total' => $this->valor,
+            'data_vencimento' => $ocorrencia->vencimento->format('Y-m-d'),
+            'ativo' => 1,
+            'pago' => 0,
+        ]);
     }
 
-    /**
-     * Encerramento: o fim da Vigência passa a ser o mês informado, e as Ocorrências depois dele são excluídas
-     * (com os Lançamentos delas). Se o fim ficar antes do início, não sobra Vigência e a fixa é excluída.
-     */
-    public function encerrar(Carbon $fim){
-        DB::transaction(function() use ($fim){
-            $fixa = static::lockForUpdate()->findOrFail($this->id);
-            $fim = $fim->copy()->startOfMonth();
-
-            foreach($fixa->ocorrenciasAPartirDe($fim->copy()->addMonthNoOverflow())->get() as $ocorrencia){
-                $ocorrencia->excluirComLancamentos();
-            }
-
-            if($fim->lt($fixa->mes_inicio)){
-                $fixa->delete();
-                return;
-            }
-
-            $fixa->mes_fim = $fim->format('Y-m-d');
-            $fixa->save();
-            $this->setRawAttributes($fixa->getAttributes(), true);
-        });
+    protected function reajustarOcorrencia($despesa, Ocorrencia $noMes){
+        $despesa->valor_total = $this->valor;
+        $despesa->data_vencimento = $noMes->vencimento->format('Y-m-d');
     }
 
-    /**
-     * Completa a janela de Ocorrências das fixas do usuário. Idempotente: abrir a tela de novo não grava nada.
-     */
-    public function completarJanela($user){
-        $ids = $this
-            ->where('user_id', $user->id)
-            ->where('ativo', 1)
-            ->pluck('id');
-
-        $gravadas = 0;
-        foreach($ids as $id){
-            $gravadas += DB::transaction(function() use ($id){
-                //TRAVA A FIXA: DUAS TELAS ABERTAS AO MESMO TEMPO NÃO GRAVAM A MESMA OCORRÊNCIA DUAS VEZES
-                return static::lockForUpdate()->find($id)->gravarOcorrencias();
-            });
-        }
-
-        return $gravadas;
-    }
-
-    public function temOcorrencias(){
-        return isset($this->despesas_count)
-            ? $this->despesas_count > 0
-            : $this->despesas()->exists();
+    //A OCORRÊNCIA PAGA LEVA JUNTO OS LANÇAMENTOS DELA
+    protected function excluirOcorrencia($despesa){
+        $despesa->excluirComLancamentos();
     }
 
     private function resposta(callable $operacao, $sucesso, $falha){
