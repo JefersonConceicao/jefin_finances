@@ -105,7 +105,7 @@ class DespesasController extends Controller
         $tipoDespesa = new TiposDespesa;
         $despesa = new Despesa;
 
-        $data = $despesa->find($id);
+        $data = $despesa->doUsuario($id, $user);
         $optionsTipoDespesa = $tipoDespesa->where('user_id', $user->id)->pluck('nome', 'id');
 
         return view('despesas.edit')
@@ -122,7 +122,7 @@ class DespesasController extends Controller
     {
         $despesa = new Despesa;
 
-        $data = $despesa->updateDespesa($id, $request->all());
+        $data = $despesa->updateDespesa($id, $request->all(), Auth::user());
         return response()->json($data);
     }
 
@@ -134,7 +134,7 @@ class DespesasController extends Controller
     {
         $despesa = new Despesa;
 
-        $data = $despesa->deleteDespesa($id);
+        $data = $despesa->deleteDespesa($id, Auth::user());
         return response()->json($data);
     }
 

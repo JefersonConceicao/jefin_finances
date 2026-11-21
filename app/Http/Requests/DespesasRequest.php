@@ -4,6 +4,8 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Validation\Rule;
+use App\Models\Despesa;
 
 class DespesasRequest extends FormRequest
 {
@@ -12,6 +14,11 @@ class DespesasRequest extends FormRequest
      */
     public function authorize()
     {
+        //NA EDIÇÃO, DESPESA DE OUTRO USUÁRIO VIRA 404 ANTES DA VALIDAÇÃO (QUE RESPONDERIA 422)
+        if($this->route()->getName() === 'despesas.update'){
+            (new Despesa)->doUsuario($this->route('id'), $this->user());
+        }
+
         return true;
     }
 
@@ -26,7 +33,7 @@ class DespesasRequest extends FormRequest
                 //SEM data_vencimento, A DESPESA VENCE HOJE
                 return [
                     'nome_despesa' => 'required',
-                    'despesa_tipo_id' => 'required',
+                    'despesa_tipo_id' => ['required', $this->tipoDoUsuario()],
                     'valor_total' => 'required',
                     'ativo' => 'required',
                     'data_vencimento' => 'nullable|date_format:d/m/Y'
@@ -34,7 +41,7 @@ class DespesasRequest extends FormRequest
             case 'update': 
                 return [
                     'nome_despesa' => 'required',
-                    'despesa_tipo_id' => 'required',
+                    'despesa_tipo_id' => ['required', $this->tipoDoUsuario()],
                     'valor_total' => 'required',
                     'ativo' => 'required',
                     'data_vencimento' => 'required|date_format:d/m/Y'
@@ -42,9 +49,15 @@ class DespesasRequest extends FormRequest
         }
     }
 
+    //O TIPO DE DESPESA PRECISA SER DO PRÓPRIO USUÁRIO
+    private function tipoDoUsuario(){
+        return Rule::exists('despesas_tipos', 'id')->where('user_id', $this->user()->id);
+    }
+
     public function messages(){
         return [
-            'required' => 'Campo obrigatório'
+            'required' => 'Campo obrigatório',
+            'despesa_tipo_id.exists' => 'Tipo de despesa inválido'
         ];
     }
 }
