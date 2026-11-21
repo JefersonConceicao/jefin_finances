@@ -173,7 +173,8 @@ class Despesa extends Model
 
                 $lancamento->saveLancamento($formDataLancamento, $user);
             }else{
-                $lancamento->where('despesa_id', $id)->delete();
+                //SÓ APAGA LANÇAMENTOS DO PRÓPRIO USUÁRIO (DADOS ANTIGOS PODEM TER LANÇAMENTO DE OUTRO NESTA DESPESA)
+                $lancamento->where('despesa_id', $id)->where('user_id', $user->id)->delete();
             }
 
             return [

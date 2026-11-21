@@ -23,12 +23,4 @@ class LancamentosController extends Controller
     
         return response()->json($data);
     }
-
-    public function store(Request $request){
-        $user = Auth::user();
-        $lancamento = new Lancamento;
-
-        $data = $lancamento->saveLancamento($request->all(), $user);
-        return response()->json($data);
-    }
 }
