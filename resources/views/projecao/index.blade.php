@@ -15,6 +15,24 @@
         </div>
     </form>
 
+    @if (count($alertas) > 0)
+        <div class="card">
+            <div class="card-header pb-0">
+                <h4 class="card-title mb-0"> Alertas </h4>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                    @foreach ($alertas as $alerta)
+                        <li class="mb-1 {{ $alerta['tipo'] === 'ganho' ? 'text-success' : 'text-warning' }}">
+                            <i class="fa {{ $alerta['tipo'] === 'ganho' ? 'fa-arrow-up' : 'fa-exclamation-triangle' }}"></i>
+                            {{ $alerta['descricao'] }}
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
+        </div>
+    @endif
+
     <div class="row">
         @foreach ($meses as $mes)
             @php
@@ -78,6 +96,16 @@
                                 </td>
                             </tr>
                         </table>
+
+                        @if (count($mes['marcos']) > 0)
+                            <div class="mb-2">
+                                @foreach ($mes['marcos'] as $marco)
+                                    <span class="badge {{ $marco['tipo'] === 'comeca' ? 'bg-light-warning' : 'bg-light-success' }} mb-1">
+                                        {{ $marco['descricao'] }}
+                                    </span>
+                                @endforeach
+                            </div>
+                        @endif
 
                         @if (!is_null($percentual))
                             <p class="mb-1"> <small> Comprometimento da renda ({{ number_format($percentual, 1, ',', '.') }}%) </small> </p>

@@ -27,6 +27,7 @@ class ProjecaoController extends Controller
         return view('projecao.index')
             ->with('horizonte', $projecao->horizonte())
             ->with('horizontes', Projecao::HORIZONTES)
-            ->with('meses', $projecao->meses($this->optionsMeses));
+            ->with('meses', $projecao->meses($this->optionsMeses))
+            ->with('alertas', $projecao->alertas());
     }
 }

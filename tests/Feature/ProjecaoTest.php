@@ -126,4 +126,98 @@ class ProjecaoTest extends TestCase
         $this->assertEquals([4000, 7700, 11700, 15700], array_column($meses, 'saldoAcumulado'));
         $this->assertArrayNotHasKey('receitas', $meses[0]);
     }
+
+    private function alertas($resposta)
+    {
+        return collect($resposta->viewData('alertas'));
+    }
+
+    private function marcosDoMes($resposta, $indice)
+    {
+        return collect($this->meses($resposta)[$indice]['marcos']);
+    }
+
+    /** @test */
+    public function fixa_de_cartao_que_termina_em_3_meses_gera_marco_de_termina_e_alerta_de_ganho()
+    {
+        $this->cadastrarDespesaFixa(['nome_despesa' => 'Cartão', 'valor' => '450,00', 'mes_inicio' => '2026-05', 'parcelas' => 10]);
+
+        $resposta = $this->projecao();
+
+        $this->assertEquals(
+            [['tipo' => 'termina', 'descricao' => 'Cartão (10/10) termina']],
+            $this->marcosDoMes($resposta, 3)->all()
+        );
+        $this->assertEquals([[
+            'tipo' => 'ganho',
+            'mes' => '2027-02',
+            'distancia' => 3,
+            'valor' => 450.0,
+            'descricao' => 'em 3 meses termina Cartão (10/10): seu fluxo melhora em R$ 450,00',
+        ]], $this->alertas($resposta)->all());
+    }
+
+    /** @test */
+    public function seguro_que_comeca_em_2_meses_gera_marco_de_comeca_e_alerta_de_atencao()
+    {
+        $this->cadastrarDespesaFixa(['nome_despesa' => 'Seguro', 'valor' => '180,00', 'mes_inicio' => '2027-01']);
+
+        $resposta = $this->projecao()
+            ->assertSee('Seguro começa')
+            ->assertSee('em 2 meses começa Seguro: -R$ 180,00');
+
+        $this->assertEquals([['tipo' => 'comeca', 'descricao' => 'Seguro começa']], $this->marcosDoMes($resposta, 2)->all());
+        $this->assertEquals([[
+            'tipo' => 'atencao',
+            'mes' => '2027-01',
+            'distancia' => 2,
+            'valor' => 180.0,
+            'descricao' => 'em 2 meses começa Seguro: -R$ 180,00',
+        ]], $this->alertas($resposta)->all());
+    }
+
+    /** @test */
+    public function provento_fixo_que_comeca_ou_termina_no_horizonte_gera_o_alerta_correspondente()
+    {
+        $this->cadastrarProventoFixo(['descricao' => 'Freela', 'valor' => '2.000,00', 'mes_inicio' => '2027-03']);
+        $this->cadastrarProventoFixo(['descricao' => 'Bolsa', 'valor' => '800,00', 'mes_fim' => '2026-12']);
+
+        $resposta = $this->projecao();
+
+        $this->assertEquals([['tipo' => 'termina', 'descricao' => 'Bolsa termina']], $this->marcosDoMes($resposta, 1)->all());
+        $this->assertEquals([['tipo' => 'comeca', 'descricao' => 'Freela começa']], $this->marcosDoMes($resposta, 4)->all());
+        $this->assertEquals([
+            ['tipo' => 'atencao', 'mes' => '2026-12', 'distancia' => 1, 'valor' => 800.0, 'descricao' => 'em 1 mês termina Bolsa: -R$ 800,00'],
+            ['tipo' => 'ganho', 'mes' => '2027-03', 'distancia' => 4, 'valor' => 2000.0, 'descricao' => 'em 4 meses começa Freela: +R$ 2.000,00'],
+        ], $this->alertas($resposta)->all());
+    }
+
+    /** @test */
+    public function despesa_variavel_com_vencimento_futuro_gera_alerta_de_atencao()
+    {
+        $this->cadastrarDespesaVariavel('Mercado', '400,00', '12/11/2026');
+        $this->cadastrarDespesaVariavel('IPVA', '1.200,00', '15/02/2027');
+
+        $this->assertEquals([[
+            'tipo' => 'atencao',
+            'mes' => '2027-02',
+            'distancia' => 3,
+            'valor' => 1200.0,
+            'descricao' => 'em 3 meses vence IPVA: -R$ 1.200,00',
+        ]], $this->alertas($this->projecao())->all());
+    }
+
+    /** @test */
+    public function marcos_e_alertas_fora_do_horizonte_nao_aparecem()
+    {
+        $this->cadastrarDespesaFixa(['nome_despesa' => 'Escola', 'valor' => '900,00', 'mes_inicio' => '2027-09']);
+
+        $curta = $this->projecao();
+        $this->assertEmpty($this->alertas($curta));
+        $this->assertEmpty(collect($this->meses($curta))->pluck('marcos')->flatten(1));
+
+        $longa = $this->projecao(['horizonte' => 12]);
+        $this->assertEquals([['tipo' => 'comeca', 'descricao' => 'Escola começa']], $this->marcosDoMes($longa, 10)->all());
+        $this->assertSame(10, $this->alertas($longa)->first()['distancia']);
+    }
 }
