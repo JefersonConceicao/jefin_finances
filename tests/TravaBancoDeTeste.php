@@ -16,8 +16,12 @@ class TravaBancoDeTeste
     {
         $config = $app['config'];
         $conexao = $config->get('database.default');
-        $driver = $config->get("database.connections.{$conexao}.driver");
-        $banco = $config->get("database.connections.{$conexao}.database");
+
+        //CONFERE A CONEXÃO COMO O LARAVEL A MONTA (A url SOBRESCREVE driver/database). NÃO ABRE O PDO.
+        $app['db']->purge($conexao);
+        $resolvida = $app['db']->connection($conexao);
+        $driver = $resolvida->getDriverName();
+        $banco = $resolvida->getDatabaseName();
 
         if ($driver !== 'sqlite' || $banco !== ':memory:') {
             throw new \RuntimeException(sprintf(
@@ -29,5 +33,13 @@ class TravaBancoDeTeste
                 $banco
             ));
         }
+
+        //REMOVE AS DEMAIS CONEXÕES (EX.: mysql COM AS CREDENCIAIS DO .env) PARA NENHUM TESTE ALCANÇÁ-LAS
+        foreach (array_keys($config->get('database.connections')) as $nome) {
+            if ($nome !== $conexao) {
+                $app['db']->purge($nome);
+            }
+        }
+        $config->set('database.connections', [$conexao => $config->get("database.connections.{$conexao}")]);
     }
 }
