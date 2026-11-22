@@ -18,6 +18,9 @@ Route::post('/requestSignUP', 'Auth\RegisterController@registerUser')->name('aut
 //SAIR DO SISTEMA
 Route::get('/logout', 'Auth\LoginController@logout')->name('auth.logout');
 
+//GUIA DO USUÁRIO: PÚBLICO, ABRE PELA TELA DE LOGIN
+Route::view('/guia', 'guia.index')->name('guia.index');
+
 //ROTAS COM AUTENTICAÇÃO
 Route::group(['middleware' => 'auth'], function(){
     Route::get('/home', 'HomeController@index')->name('home.index');

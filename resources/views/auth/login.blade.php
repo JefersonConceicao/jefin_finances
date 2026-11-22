@@ -61,6 +61,11 @@
                             <a href="/signup" class="font-bold">Cadastre-se</a>.
                         </p>
                         <p><a class="font-bold" href="/forgotPassword"> Esqueci minha senha</a>.</p>
+                        <p>
+                            <a class="font-bold" href="{{ route('guia.index') }}">
+                                <i class="bi bi-book"></i> Guia do usuário
+                            </a>
+                        </p>
                     </div>
                 </div>
             </div>
