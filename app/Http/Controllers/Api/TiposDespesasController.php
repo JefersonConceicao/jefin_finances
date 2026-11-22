@@ -30,7 +30,7 @@ class TiposDespesasController extends Controller
         $user = Auth::user();
         $tiposDespesa = new TiposDespesa;
 
-        $data = $tiposDespesa->saveTiposDespesa($request->all());
+        $data = $tiposDespesa->saveTiposDespesa($request->all(), $user);
         return response()->json($data);
     }
 
@@ -43,7 +43,7 @@ class TiposDespesasController extends Controller
     {
         $tiposDespesa = new TiposDespesa;
 
-        $data = $tiposDespesa->updateTiposDespesa($id, $request->all());
+        $data = $tiposDespesa->updateTiposDespesa($id, $request->all(), Auth::user());
         return response()->json($data);
     }
 
@@ -55,7 +55,7 @@ class TiposDespesasController extends Controller
     {
         $tiposDespesa = new TiposDespesa;
 
-        $data = $tiposDespesa->deleteTipoDespesa($id);
+        $data = $tiposDespesa->deleteTipoDespesa($id, Auth::user());
         return response()->json($data);
     }
 }

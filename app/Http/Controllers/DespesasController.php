@@ -27,12 +27,8 @@ class DespesasController extends Controller
         $despesaFixa = new DespesaFixa;
         $user = Auth::user();
 
-        //GERA AS DESPESAS FIXAS DO MÊS FILTRADO (MESES FUTUROS SÃO IGNORADOS)
-        if(!empty($request->mes) && !empty($request->ano)){
-            $despesaFixa->gerarParaMes($user, $request->mes, $request->ano);
-        }else{
-            $despesaFixa->gerarParaMes($user, date('m'), date('Y'));
-        }
+        //COMPLETA A JANELA DE OCORRÊNCIAS DAS DESPESAS FIXAS (ADR-0001)
+        $despesaFixa->completarJanela($user);
 
         $data = $despesa->getDespesas($request->all(), $user)->orderBy('valor_total','DESC')->get();
 
@@ -77,7 +73,7 @@ class DespesasController extends Controller
         $user = Auth::user();
         $tipoDespesa = new TiposDespesa;
 
-        $optionsTipoDespesa = $tipoDespesa->where('user_id', $user->id)->pluck('nome', 'id');
+        $optionsTipoDespesa = $tipoDespesa->opcoesDespesaVariavel($user);
 
         return view('despesas.create')
             ->with('optionsTipoDespesa', $optionsTipoDespesa);
@@ -106,7 +102,10 @@ class DespesasController extends Controller
         $despesa = new Despesa;
 
         $data = $despesa->doUsuario($id, $user);
-        $optionsTipoDespesa = $tipoDespesa->where('user_id', $user->id)->pluck('nome', 'id');
+        //A OCORRÊNCIA DE UMA DESPESA FIXA FICA COM O TIPO RESERVADO; A DESPESA VARIÁVEL NÃO PODE ESCOLHÊ-LO
+        $optionsTipoDespesa = !empty($data->despesa_fixa_id)
+            ? $tipoDespesa->where('id', $data->despesa_tipo_id)->pluck('nome', 'id')
+            : $tipoDespesa->opcoesDespesaVariavel($user);
 
         return view('despesas.edit')
             ->with('despesa', $data)
@@ -134,7 +133,8 @@ class DespesasController extends Controller
     {
         $despesa = new Despesa;
 
-        $data = $despesa->deleteDespesa($id, Auth::user());
+        $escopo = request('escopo') === Despesa::ESCOPO_SEGUINTES ? Despesa::ESCOPO_SEGUINTES : Despesa::ESCOPO_SO_ESTA;
+        $data = $despesa->deleteDespesa($id, Auth::user(), $escopo);
         return response()->json($data);
     }
 

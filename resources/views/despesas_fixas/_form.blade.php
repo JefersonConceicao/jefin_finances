@@ -1,16 +1,5 @@
-@php
-    $despesaFixa = $despesaFixa ?? null;
-    $travada = $despesaFixa && $despesaFixa->isTravada();
-@endphp
-@if ($travada)
-    <div class="alert alert-light-warning">
-        <i class="fa fa-lock"></i>
-        Esta despesa fixa já foi lançada em Despesas. Para preservar o histórico, ela só pode ser
-        <b>inativada</b>. Se o valor mudou, inative esta e cadastre uma nova.
-    </div>
-@endif
 <div class="row">
-    <div class="col-md-8">
+    <div class="col-md-12">
         <div class="form-group">
             <label> Nome Despesa <span class="required"> * </span> </label>
             <input
@@ -19,19 +8,7 @@
                 class="form-control"
                 maxlength="100"
                 placeholder="Ex: Aluguel, Internet, Plano de saúde"
-                value="{{ $despesaFixa->nome_despesa ?? '' }}"
-                @if ($travada) readonly @endif
             />
-            <div class="error_feedback"> </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="form-group">
-            <label> Ativo <span class="required"> * </span> </label>
-            <select name="ativo" class="form-select">
-                <option value="1" @if(($despesaFixa->ativo ?? 1) == 1) selected @endif> Sim </option>
-                <option value="0" @if(($despesaFixa->ativo ?? 1) == 0) selected @endif> Não </option>
-            </select>
             <div class="error_feedback"> </div>
         </div>
     </div>
@@ -39,14 +16,60 @@
 <div class="row">
     <div class="col-md-6">
         <div class="form-group">
-            <label> Valor mensal (R$) <span class="required"> * </span> </label>
+            <label> Valor Previsto (R$) <span class="required"> * </span> </label>
             <input
                 name="valor"
                 type="text"
                 class="form-control decimalValue"
-                value="{{ $despesaFixa ? convertValorReal($despesaFixa->valor) : '' }}"
-                @if ($travada) readonly @endif
             />
+            <div class="error_feedback"> </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="form-group">
+            <label> Dia de vencimento <span class="required"> * </span> </label>
+            <input
+                name="dia_vencimento"
+                type="number"
+                min="1"
+                max="31"
+                class="form-control"
+                placeholder="Ex: 10"
+            />
+            <div class="error_feedback"> </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-4">
+        <div class="form-group">
+            <label> Mês de início <span class="required"> * </span> </label>
+            <input
+                name="mes_inicio"
+                type="month"
+                class="form-control"
+                value="{{ now()->format('Y-m') }}"
+            />
+            <div class="error_feedback"> </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="form-group">
+            <label> Mês de fim </label>
+            <input
+                name="mes_fim"
+                type="month"
+                class="form-control"
+            />
+            <small class="text-muted"> Vazio: sem fim </small>
+            <div class="error_feedback"> </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="form-group">
+            <label> Ou quantidade de parcelas </label>
+            <input name="parcelas" type="number" min="1" max="360" class="form-control" placeholder="Ex: 10" />
+            <small class="text-muted"> Calcula o mês de fim </small>
             <div class="error_feedback"> </div>
         </div>
     </div>
@@ -54,7 +77,6 @@
 <p class="text-muted mb-0">
     <small>
         <i class="fa fa-info-circle"></i>
-        Despesas fixas ativas são lançadas automaticamente em Despesas todo mês.
-        Depois do primeiro lançamento, nome e valor não podem mais ser alterados.
+        As Ocorrências são gravadas em Despesas para toda a Vigência (12 meses à frente quando não há fim).
     </small>
 </p>

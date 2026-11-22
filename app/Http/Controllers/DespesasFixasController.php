@@ -18,11 +18,12 @@ class DespesasFixasController extends Controller
         $user = Auth::user();
         $despesaFixa = new DespesaFixa;
 
+        $despesaFixa->completarJanela($user);
         $data = $despesaFixa->getDespesasFixas($request->all(), $user)->get();
 
         return view('despesas_fixas.index')
             ->with('dataDespesasFixas', $data)
-            ->with('totalBasal', $despesaFixa->totalAtivas($user));
+            ->with('totalVigentes', $despesaFixa->totalVigentes($user));
     }
 
     public function create()
@@ -65,6 +66,22 @@ class DespesasFixasController extends Controller
         $despesaFixa = new DespesaFixa;
 
         $data = $despesaFixa->deleteDespesaFixa($id, $user);
+        return response()->json($data);
+    }
+
+    public function reajustar(DespesasFixasRequest $request, $id)
+    {
+        $despesaFixa = new DespesaFixa;
+
+        $data = $despesaFixa->reajustarDespesaFixa($id, $request->all(), Auth::user());
+        return response()->json($data);
+    }
+
+    public function encerrar(DespesasFixasRequest $request, $id)
+    {
+        $despesaFixa = new DespesaFixa;
+
+        $data = $despesaFixa->encerrarDespesaFixa($id, $request->all(), Auth::user());
         return response()->json($data);
     }
 }

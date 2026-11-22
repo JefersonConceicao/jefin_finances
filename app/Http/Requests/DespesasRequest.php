@@ -44,14 +44,21 @@ class DespesasRequest extends FormRequest
                     'despesa_tipo_id' => ['required', $this->tipoDoUsuario()],
                     'valor_total' => 'required',
                     'ativo' => 'required',
-                    'data_vencimento' => 'required|date_format:d/m/Y'
+                    'data_vencimento' => 'required|date_format:d/m/Y',
+                    //SÓ VALE PARA OCORRÊNCIA DE DESPESA FIXA: "SÓ ESTA" OU "ESTA E AS SEGUINTES"
+                    'escopo' => 'nullable|in:so_esta,seguintes',
                 ];
         }
     }
 
-    //O TIPO DE DESPESA PRECISA SER DO PRÓPRIO USUÁRIO
+    //O TIPO DE DESPESA PRECISA SER DO PRÓPRIO USUÁRIO; O RESERVADO ("Fixa") SÓ VALE PARA A OCORRÊNCIA DE UMA DESPESA FIXA
     private function tipoDoUsuario(){
-        return Rule::exists('despesas_tipos', 'id')->where('user_id', $this->user()->id);
+        $rule = Rule::exists('despesas_tipos', 'id')->where('user_id', $this->user()->id);
+
+        $ocorrencia = $this->route()->getName() === 'despesas.update'
+            && !empty((new Despesa)->doUsuario($this->route('id'), $this->user())->despesa_fixa_id);
+
+        return $ocorrencia ? $rule : $rule->where('reservado', 0);
     }
 
     public function messages(){

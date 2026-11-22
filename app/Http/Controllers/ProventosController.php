@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests\ProventosRequest;
 //MODEL
 use App\Models\Proventos;
+use App\Models\ProventoFixo;
 use Auth;
 
 class ProventosController extends Controller
@@ -18,6 +19,9 @@ class ProventosController extends Controller
     {
         $proventos = new Proventos;
         $user = Auth::user(); 
+
+        //COMPLETA A JANELA DE OCORRÊNCIAS DOS PROVENTOS FIXOS (ADR-0001)
+        (new ProventoFixo)->completarJanela($user);
 
         $query = $proventos->getProventos($request->all(), $user);
 
@@ -59,7 +63,7 @@ class ProventosController extends Controller
     {
         $proventos = new Proventos;
 
-        $data = $proventos->find($id);
+        $data = $proventos->doUsuario($id, Auth::user());
         return view('proventos.edit')   
             ->with('provento', $data);
     }
@@ -73,7 +77,7 @@ class ProventosController extends Controller
     {
         $proventos = new Proventos;
 
-        $data = $proventos->updateProvento($id, $request->all());
+        $data = $proventos->updateProvento($id, $request->all(), Auth::user());
         return response()->json($data);
     }
 
@@ -86,7 +90,7 @@ class ProventosController extends Controller
     {
         $proventos = new Proventos;
 
-        $data = $proventos->deleteProvento($id, $request->all());
+        $data = $proventos->deleteProvento($id, $request->all(), Auth::user());
         return response()->json($data);
     }
 

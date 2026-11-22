@@ -30,9 +30,6 @@ const togglePeriodoFields = value => {
     if(value === 'especifico'){
         $("#rowDataProvento").hide();
         $("#rowPeriodoEspecifico").show();
-    } else if(value === 'anual'){
-        $("#rowDataProvento").hide();
-        $("#rowPeriodoEspecifico").hide();
     } else {
         $("#rowDataProvento").show();
         $("#rowPeriodoEspecifico").hide();

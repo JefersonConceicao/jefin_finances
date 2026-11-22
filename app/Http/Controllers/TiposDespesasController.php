@@ -54,7 +54,7 @@ class TiposDespesasController extends Controller
     {
         $tiposDespesa = new TiposDespesa;
 
-        $data = $tiposDespesa->find($id);
+        $data = $tiposDespesa->doUsuario($id, Auth::user());
 
         return view('tipo_despesa.edit')
             ->with('tipoDespesa', $data);
@@ -69,7 +69,7 @@ class TiposDespesasController extends Controller
     {
         $tiposDespesa = new TiposDespesa;
 
-        $data = $tiposDespesa->updateTiposDespesa($id, $request->all());
+        $data = $tiposDespesa->updateTiposDespesa($id, $request->all(), Auth::user());
         return response()->json($data);
     }
 
@@ -81,14 +81,17 @@ class TiposDespesasController extends Controller
     {
         $tiposDespesa = new TiposDespesa;
 
-        $data = $tiposDespesa->deleteTipoDespesa($id);
+        $data = $tiposDespesa->deleteTipoDespesa($id, Auth::user());
         return response()->json($data);
     }
 
     public function optionsDespesasJSON(){
         $tiposDespesa = new TiposDespesa;
 
-        $data = $tiposDespesa->get(['nome','id']);
+        //OPÇÕES DO CADASTRO DE DESPESA VARIÁVEL: SÓ OS TIPOS DO USUÁRIO, SEM O RESERVADO
+        $data = $tiposDespesa->opcoesDespesaVariavel(Auth::user())
+            ->map(function($nome, $id){ return ['nome' => $nome, 'id' => $id]; })
+            ->values();
         return response()->json($data);
     }
 }

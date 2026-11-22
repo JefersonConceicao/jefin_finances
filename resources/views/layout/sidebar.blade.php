@@ -31,6 +31,13 @@
                 </a>
             </li>
             <li class="submenu-item">
+                <a href="/proventosFixos">
+                    <i class="fas fa-angle-right"></i>
+                    &nbsp;
+                    Proventos Fixos
+                </a>
+            </li>
+            <li class="submenu-item">
                 <a href="/projecao">
                     <i class="fas fa-angle-right"></i>
                     &nbsp;

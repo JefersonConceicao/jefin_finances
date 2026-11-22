@@ -62488,11 +62488,23 @@ var habilitaBotoes = function habilitaBotoes() {
     });
   });
   $(".btnDeleteDespesa").on("click", function () {
-    var id = $(this).parents('tr').attr("id");
-    var url = '/despesas/delete/' + id;
-    Swal.fire(optionsSwalDelete).then(function (result) {
+    var row = $(this).parents('tr');
+    var url = '/despesas/delete/' + row.attr("id");
+
+    //OCORRÊNCIA DE DESPESA FIXA: ESCOLHE "SÓ ESTA" OU "ESTA E AS SEGUINTES" (ENCERRAMENTO)
+    var options = row.data('ocorrencia') == 1 ? Object.assign({}, optionsSwalDelete, {
+      text: 'Esta é uma Ocorrência de Despesa Fixa.',
+      input: 'radio',
+      inputOptions: {
+        so_esta: 'Só esta',
+        seguintes: 'Esta e as seguintes (encerra a Despesa Fixa)'
+      },
+      inputValue: 'so_esta'
+    }) : optionsSwalDelete;
+    Swal.fire(options).then(function (result) {
       if (result.isConfirmed) {
-        deleteRowForGrid(url, function () {
+        var escopo = result.value === 'seguintes' ? '?escopo=seguintes' : '';
+        deleteRowForGrid(url + escopo, function () {
           getFilterDespesas();
         });
       }
@@ -62679,6 +62691,21 @@ var habilitaBotoes = function habilitaBotoes() {
         e.preventDefault();
         formDespesasFixas(id);
       });
+      $("#btnReajustarDespesaFixa").on("click", function () {
+        acaoDespesaFixa('/despesasFixas/reajustar/' + id, '#reajusteDespesaFixa', $(this));
+      });
+      $("#btnEncerrarDespesaFixa").on("click", function () {
+        var button = $(this);
+        Swal.fire(Object.assign({}, optionsSwalDelete, {
+          title: 'Encerrar a Despesa Fixa?',
+          text: 'As Ocorrências depois do mês escolhido serão excluídas.',
+          confirmButtonText: 'Sim, encerrar'
+        })).then(function (result) {
+          if (result.isConfirmed) {
+            acaoDespesaFixa('/despesasFixas/encerrar/' + id, '#encerramentoDespesaFixa', button);
+          }
+        });
+      });
     });
   });
   $(".btnDeleteDespesaFixa").on("click", function () {
@@ -62731,6 +62758,45 @@ var formDespesasFixas = function formDespesasFixas(id) {
     },
     complete: function complete() {
       $(form + " .btnSubmit").prop("disabled", false).html("Salvar");
+    }
+  });
+};
+
+//REAJUSTAR E ENCERRAR ENVIAM SÓ OS CAMPOS DA PRÓPRIA SEÇÃO DO MODAL
+var acaoDespesaFixa = function acaoDespesaFixa(url, secao, button) {
+  var form = '#formEditDespesaFixa';
+  var textoBotao = button.html();
+  $.ajax({
+    type: 'PUT',
+    url: url,
+    data: $(secao + ' :input').serialize(),
+    dataType: "JSON",
+    beforeSend: function beforeSend() {
+      button.prop("disabled", true).html(htmlLoading);
+    },
+    success: function success(response) {
+      Swal.fire({
+        toast: true,
+        position: 'bottom-left',
+        title: "<h5 style=\"color:white\"> ".concat(response.msg, " </h5>"),
+        icon: !response.error ? 'success' : 'error',
+        showConfirmButton: false,
+        timer: 3000,
+        background: response.error ? 'red' : color()["default"],
+        didOpen: function didOpen() {
+          if (!response.error) $(modalObject).modal('hide');
+        }
+      });
+      getFilterDespesasFixas();
+    },
+    error: function error(jqXHR) {
+      var errors = jqXHR.responseJSON ? jqXHR.responseJSON.errors : null;
+      if (!!errors) {
+        AppUsage.showMessagesValidator(form, errors);
+      }
+    },
+    complete: function complete() {
+      button.prop("disabled", false).html(textoBotao);
     }
   });
 };
@@ -63170,9 +63236,6 @@ var togglePeriodoFields = function togglePeriodoFields(value) {
   if (value === 'especifico') {
     $("#rowDataProvento").hide();
     $("#rowPeriodoEspecifico").show();
-  } else if (value === 'anual') {
-    $("#rowDataProvento").hide();
-    $("#rowPeriodoEspecifico").hide();
   } else {
     $("#rowDataProvento").show();
     $("#rowPeriodoEspecifico").hide();
@@ -63379,6 +63442,183 @@ var getFilterProventos = function getFilterProventos(urlPaginate) {
 module.exports = {
   habilitaEventos: habilitaEventos,
   habilitaBotoes: habilitaBotoes
+};
+
+/***/ }),
+
+/***/ "./resources/js/Logged/AppProventosFixos.js":
+/*!**************************************************!*\
+  !*** ./resources/js/Logged/AppProventosFixos.js ***!
+  \**************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+var _require = __webpack_require__(/*! sweetalert2 */ "./node_modules/sweetalert2/dist/sweetalert2.all.js"),
+  Swal = _require["default"];
+var _require2 = __webpack_require__(/*! ../Core/AppUsage */ "./resources/js/Core/AppUsage.js"),
+  loadingContent = _require2.loadingContent,
+  loadModal = _require2.loadModal,
+  htmlLoading = _require2.htmlLoading,
+  color = _require2.color,
+  optionsSwalDelete = _require2.optionsSwalDelete,
+  deleteRowForGrid = _require2.deleteRowForGrid;
+var modalObject = "#nivel1";
+var grid = "#gridProventosFixos";
+var searchForm = "#searchFormProventosFixos";
+$(function () {
+  if ($(grid).length == 0) return;
+  habilitaBotoes();
+  habilitaEventos();
+});
+var habilitaEventos = function habilitaEventos() {
+  $(searchForm).on("submit", function (e) {
+    e.preventDefault();
+    getFilterProventosFixos();
+  });
+};
+var habilitaBotoes = function habilitaBotoes() {
+  $("#addProventoFixo").on("click", function () {
+    loadModal('/proventosFixos/create', function () {
+      $("#formAddProventoFixo").on("submit", function (e) {
+        e.preventDefault();
+        formProventosFixos();
+      });
+    });
+  });
+  $(".btnEditProventoFixo").on("click", function () {
+    var id = $(this).parents('tr').attr("id");
+    loadModal('/proventosFixos/edit/' + id, function () {
+      $("#formEditProventoFixo").on("submit", function (e) {
+        e.preventDefault();
+        formProventosFixos(id);
+      });
+      $("#btnReajustarProventoFixo").on("click", function () {
+        acaoProventoFixo('/proventosFixos/reajustar/' + id, '#reajusteProventoFixo', $(this));
+      });
+      $("#btnEncerrarProventoFixo").on("click", function () {
+        var button = $(this);
+        Swal.fire(Object.assign({}, optionsSwalDelete, {
+          title: 'Encerrar o Provento Fixo?',
+          text: 'As Ocorrências depois do mês escolhido serão excluídas.',
+          confirmButtonText: 'Sim, encerrar'
+        })).then(function (result) {
+          if (result.isConfirmed) {
+            acaoProventoFixo('/proventosFixos/encerrar/' + id, '#encerramentoProventoFixo', button);
+          }
+        });
+      });
+    });
+  });
+  $(".btnDeleteProventoFixo").on("click", function () {
+    var id = $(this).parents('tr').attr("id");
+    var url = '/proventosFixos/delete/' + id;
+    Swal.fire(Object.assign({}, optionsSwalDelete, {
+      text: 'Esta ação é irreversível!'
+    })).then(function (result) {
+      if (result.isConfirmed) {
+        deleteRowForGrid(url, function () {
+          getFilterProventosFixos();
+        });
+      }
+    });
+  });
+};
+var formProventosFixos = function formProventosFixos(id) {
+  var isNew = typeof id === "undefined";
+  var url = isNew ? '/proventosFixos/store' : '/proventosFixos/update/' + id;
+  var form = isNew ? '#formAddProventoFixo' : '#formEditProventoFixo';
+  var type = isNew ? 'POST' : 'PUT';
+  $.ajax({
+    type: type,
+    url: url,
+    data: $(form).serialize(),
+    dataType: "JSON",
+    beforeSend: function beforeSend() {
+      $(form + " .btnSubmit").prop("disabled", true).html(htmlLoading);
+    },
+    success: function success(response) {
+      Swal.fire({
+        toast: true,
+        position: 'bottom-left',
+        title: "<h5 style=\"color:white\"> ".concat(response.msg, " </h5>"),
+        icon: !response.error ? 'success' : 'error',
+        showConfirmButton: false,
+        timer: 3000,
+        background: response.error ? 'red' : color()["default"],
+        didOpen: function didOpen() {
+          if (!response.error) $(modalObject).modal('hide');
+        }
+      });
+      getFilterProventosFixos();
+    },
+    error: function error(jqXHR) {
+      var errors = jqXHR.responseJSON ? jqXHR.responseJSON.errors : null;
+      if (!!errors) {
+        AppUsage.showMessagesValidator(form, errors);
+      }
+    },
+    complete: function complete() {
+      $(form + " .btnSubmit").prop("disabled", false).html("Salvar");
+    }
+  });
+};
+
+//REAJUSTAR E ENCERRAR ENVIAM SÓ OS CAMPOS DA PRÓPRIA SEÇÃO DO MODAL
+var acaoProventoFixo = function acaoProventoFixo(url, secao, button) {
+  var form = '#formEditProventoFixo';
+  var textoBotao = button.html();
+  $.ajax({
+    type: 'PUT',
+    url: url,
+    data: $(secao + ' :input').serialize(),
+    dataType: "JSON",
+    beforeSend: function beforeSend() {
+      button.prop("disabled", true).html(htmlLoading);
+    },
+    success: function success(response) {
+      Swal.fire({
+        toast: true,
+        position: 'bottom-left',
+        title: "<h5 style=\"color:white\"> ".concat(response.msg, " </h5>"),
+        icon: !response.error ? 'success' : 'error',
+        showConfirmButton: false,
+        timer: 3000,
+        background: response.error ? 'red' : color()["default"],
+        didOpen: function didOpen() {
+          if (!response.error) $(modalObject).modal('hide');
+        }
+      });
+      getFilterProventosFixos();
+    },
+    error: function error(jqXHR) {
+      var errors = jqXHR.responseJSON ? jqXHR.responseJSON.errors : null;
+      if (!!errors) {
+        AppUsage.showMessagesValidator(form, errors);
+      }
+    },
+    complete: function complete() {
+      button.prop("disabled", false).html(textoBotao);
+    }
+  });
+};
+var getFilterProventosFixos = function getFilterProventosFixos() {
+  $.ajax({
+    type: "GET",
+    url: '/proventosFixos/',
+    data: $(searchForm).serialize(),
+    dataType: "HTML",
+    beforeSend: function beforeSend() {
+      loadingContent(grid);
+    },
+    success: function success(response) {
+      $(grid).html($(response).find(grid + " >"));
+      habilitaBotoes();
+    }
+  });
+};
+module.exports = {
+  habilitaBotoes: habilitaBotoes,
+  habilitaEventos: habilitaEventos
 };
 
 /***/ }),
@@ -63646,6 +63886,7 @@ window.AppUsers = __webpack_require__(/*! ./Logged/AppUsers */ "./resources/js/L
 window.AppProventos = __webpack_require__(/*! ./Logged/AppProventos */ "./resources/js/Logged/AppProventos.js");
 window.AppDespesas = __webpack_require__(/*! ./Logged/AppDespesas */ "./resources/js/Logged/AppDespesas.js");
 window.AppDespesasFixas = __webpack_require__(/*! ./Logged/AppDespesasFixas */ "./resources/js/Logged/AppDespesasFixas.js");
+window.AppProventosFixos = __webpack_require__(/*! ./Logged/AppProventosFixos */ "./resources/js/Logged/AppProventosFixos.js");
 window.AppTipoDespesas = __webpack_require__(/*! ./Logged/AppTipoDespesas */ "./resources/js/Logged/AppTipoDespesas.js");
 window.AppLancamentos = __webpack_require__(/*! ./Logged/AppLancamentos */ "./resources/js/Logged/AppLancamentos.js");
 window.AppDashboard = __webpack_require__(/*! ./Logged/AppDashboard */ "./resources/js/Logged/AppDashboard.js");

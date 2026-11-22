@@ -20,6 +20,22 @@ class Proventos extends Model
 
     public $timestamps = true;
 
+    public function proventoFixo(){
+        return $this->belongsTo(ProventoFixo::class, 'provento_fixo_id', 'id');
+    }
+
+    //MÊS EM QUE O PROVENTO CONTA
+    public function competencia(){
+        return Carbon::parse($this->data_provento)->startOfMonth();
+    }
+
+    const MSG_SEGUINTES_NO_PASSADO = '"Este e os seguintes" vale só a partir do mês atual';
+
+    //"ESTE E OS SEGUINTES" (REAJUSTE OU ENCERRAMENTO) SÓ VALE NO MÊS ATUAL OU NUM MÊS FUTURO
+    private function seguintesNoPassado(){
+        return $this->competencia()->lt(Carbon::now()->startOfMonth());
+    }
+
     public function getProventos($request = [], $user){
         $conditions = [];
         $conditions[] = ['user_id', '=', $user->id];
@@ -63,41 +79,6 @@ class Proventos extends Model
 
             if(isset($request['data_provento']) && !empty($request['data_provento'])){
                 $request['data_provento'] = converteData(str_replace('/','-', $request['data_provento']), 'Y-m-d');
-            }
-
-            if(isset($request['period_type']) && $request['period_type'] === 'anual'){
-                $year = !empty($request['data_provento']) ? Carbon::createFromFormat('Y-m-d', $request['data_provento'])->year : date('Y');
-
-                DB::beginTransaction();
-                $lastCreated = null;
-                for($month = 1; $month <= 12; $month++){
-                    $exists = $this->where('user_id', $user->id)
-                        ->where('descricao_provento', $request['descricao_provento'])
-                        ->whereMonth('data_provento', $month)
-                        ->whereYear('data_provento', $year)
-                        ->first();
-
-                    if($exists){
-                        $exists->valor_provento += $request['valor_provento'];
-                        $exists->save();
-                        $lastCreated = $exists;
-                    } else {
-                        $item = self::create([
-                            'user_id' => $user->id,
-                            'descricao_provento' => $request['descricao_provento'],
-                            'valor_provento' => $request['valor_provento'],
-                            'data_provento' => sprintf('%04d-%02d-01', $year, $month)
-                        ]);
-                        $lastCreated = $item;
-                    }
-                }
-                DB::commit();
-
-                return [
-                    'error' => false,
-                    'msg' => 'Provento anual adicionado!',
-                    'dataAdded' => $lastCreated
-                ];
             }
 
             if(isset($request['period_type']) && $request['period_type'] === 'especifico'){
@@ -177,7 +158,17 @@ class Proventos extends Model
         }
     }
 
-    public function updateProvento($id, $request = []){
+    /**
+     * Busca o Provento só entre os do usuário: o de outro usuário é tratado como inexistente (404).
+     */
+    public function doUsuario($id, $user){
+        return $this->where('user_id', $user->id)->findOrFail($id);
+    }
+
+    public function updateProvento($id, $request = [], $user = null){
+        //FORA DO try: PROVENTO DE OUTRO USUÁRIO VIRA 404, E NÃO UM ERRO GENÉRICO
+        $provento = $this->doUsuario($id, $user);
+
         try{
             if(isset($request['valor_provento']) && !empty($request['valor_provento'])){
                 $request['valor_provento'] = setToDecimal($request['valor_provento']);
@@ -187,9 +178,31 @@ class Proventos extends Model
                 $request['data_provento'] = converteData(str_replace('/','-', $request['data_provento']), 'Y-m-d');
             }
 
-            $provento = $this->find($id);
+            $seguintes = isset($request['update_subsequent']) && $request['update_subsequent'] == 'true';
 
-            if(isset($request['update_subsequent']) && $request['update_subsequent'] == 'true'){
+            if($seguintes && $provento->proventoFixo && $provento->seguintesNoPassado()){
+                return ['error' => true, 'msg' => self::MSG_SEGUINTES_NO_PASSADO];
+            }
+
+            if($seguintes && $provento->proventoFixo){
+                //O REAJUSTE MUDA O VALOR, NÃO O MÊS: MOVER A OCORRÊNCIA DE MÊS É "APENAS ESTE"
+                if(!empty($request['data_provento']) && Carbon::parse($request['data_provento'])->format('Y-m') !== $provento->competencia()->format('Y-m')){
+                    return ['error' => true, 'msg' => 'Para mudar o mês, use "Apenas este"'];
+                }
+
+                DB::transaction(function() use ($provento, $request){
+                    //OCORRÊNCIA DE PROVENTO FIXO: "ESTE E OS SUBSEQUENTES" É O REAJUSTE, A PARTIR DO MÊS DELA
+                    $provento->proventoFixo->reajustar($provento->competencia(), $request['valor_provento']);
+
+                    //A DESCRIÇÃO NOVA VALE SÓ PARA ESTE MÊS
+                    if(!empty($request['descricao_provento'])){
+                        $provento->refresh();
+                        $provento->descricao_provento = $request['descricao_provento'];
+                        $provento->save();
+                    }
+                });
+                $msg = 'Reajuste aplicado a este mês e aos seguintes!';
+            }elseif($seguintes){
                 $originalDescription = $provento->descricao_provento;
                 $originalUserId = $provento->user_id;
                 $originalDate = $provento->data_provento;
@@ -214,6 +227,7 @@ class Proventos extends Model
                 'dataUpdated' => $provento
             ];
         }catch(\Exception $error){
+            \Log::error($error->getMessage(), ['exception' => $error]);
             return [
                 'error' => true,
                 'msg' => 'Não foi possível alterar o registro.',
@@ -221,12 +235,22 @@ class Proventos extends Model
         }
     }
 
-    public function deleteProvento($id, $request = []){
-        try {
-            $provento = $this->find($id);
-            if(!$provento) return ['error' => true, 'msg' => 'Registro não encontrado'];
+    public function deleteProvento($id, $request = [], $user = null){
+        //FORA DO try: PROVENTO DE OUTRO USUÁRIO VIRA 404, E NÃO UM ERRO GENÉRICO
+        $provento = $this->doUsuario($id, $user);
 
-            if(isset($request['delete_subsequent']) && $request['delete_subsequent'] == 'true'){
+        try {
+            $seguintes = isset($request['delete_subsequent']) && $request['delete_subsequent'] == 'true';
+
+            if($seguintes && $provento->proventoFixo && $provento->seguintesNoPassado()){
+                return ['error' => true, 'msg' => self::MSG_SEGUINTES_NO_PASSADO];
+            }
+
+            if($seguintes && $provento->proventoFixo){
+                //OCORRÊNCIA DE PROVENTO FIXO: "ESTE E OS SUBSEQUENTES" É O ENCERRAMENTO NO MÊS ANTERIOR
+                $provento->proventoFixo->encerrar($provento->competencia()->subMonthNoOverflow());
+                $msg = 'Provento fixo encerrado no mês anterior!';
+            }elseif($seguintes){
                 $this->where('user_id', $provento->user_id)
                     ->where('descricao_provento', $provento->descricao_provento)
                     ->whereDate('data_provento', '>=', $provento->data_provento)
@@ -242,6 +266,7 @@ class Proventos extends Model
                 'msg' => $msg,
             ];
         } catch (\Exception $e) {
+            \Log::error($e->getMessage(), ['exception' => $e]);
             return [
                 'error' => true,
                 'msg' => 'Não foi possível excluír o registro, tente de novo',

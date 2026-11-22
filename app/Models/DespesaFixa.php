@@ -5,9 +5,14 @@ namespace App\Models;
 use Carbon\Carbon;
 use DB;
 use Illuminate\Database\Eloquent\Model;
+use App\Recorrencia\Ocorrencia;
+use App\Recorrencia\Recorrente;
+use App\Recorrencia\Vigencia;
 
 class DespesaFixa extends Model
 {
+    use Recorrente;
+
     protected $table = 'despesas_fixas';
     protected $fillable = [
         'user_id',
@@ -15,6 +20,15 @@ class DespesaFixa extends Model
         'despesa_tipo_id',
         'valor',
         'ativo',
+        'mes_inicio',
+        'mes_fim',
+        'dia_vencimento',
+    ];
+
+    protected $casts = [
+        'mes_inicio' => 'date',
+        'mes_fim' => 'date',
+        'ocorrencias_ate' => 'date',
     ];
 
     public function despesaTipo(){
@@ -44,19 +58,36 @@ class DespesaFixa extends Model
         return $this
             ->where($conditions)
             ->with('despesaTipo')
-            ->withCount('despesas')
+            ->withCount('ocorrencias')
             ->orderBy('ativo', 'DESC')
             ->orderBy('valor', 'DESC');
     }
 
     public function saveDespesaFixa($request = [], $user){
         try{
-            $request['user_id'] = $user->id;
-            $request['valor'] = setToDecimal($request['valor']);
-            $request['despesa_tipo_id'] = (new TiposDespesa)->idTipoFixaDoUsuario($user);
+            //A FIXA E TODAS AS OCORRÊNCIAS DELA SÃO GRAVADAS JUNTAS: SE UMA FALHAR, NADA FICA
+            DB::transaction(function() use ($request, $user){
+                $inicio = Carbon::createFromFormat('!Y-m', $request['mes_inicio']);
 
-            $this->fill($request)->save();
-            $this->gerarParaMes($user, date('m'), date('Y'));
+                if(!empty($request['parcelas'])){
+                    $fim = Vigencia::fimPorParcelas($inicio, (int) $request['parcelas']);
+                }else{
+                    $fim = !empty($request['mes_fim']) ? Carbon::createFromFormat('!Y-m', $request['mes_fim']) : null;
+                }
+
+                $this->fill([
+                    'user_id' => $user->id,
+                    'nome_despesa' => $request['nome_despesa'],
+                    'valor' => setToDecimal($request['valor']),
+                    'ativo' => $request['ativo'] ?? 1,
+                    'despesa_tipo_id' => (new TiposDespesa)->idTipoFixaDoUsuario($user),
+                    'mes_inicio' => $inicio->format('Y-m-d'),
+                    'mes_fim' => $fim ? $fim->format('Y-m-d') : null,
+                    'dia_vencimento' => (int) $request['dia_vencimento'],
+                ])->save();
+
+                $this->gravarOcorrencias();
+            });
 
             return [
                 'error' => false,
@@ -71,121 +102,144 @@ class DespesaFixa extends Model
         }
     }
 
-    /**
-     * Fixa que já gerou despesa fica travada: só pode ser inativada/reativada.
-     */
-    public function isTravada(){
-        return isset($this->despesas_count)
-            ? $this->despesas_count > 0
-            : $this->despesas()->exists();
+    public function ocorrencias(){
+        return $this->despesas();
     }
 
-    public function updateDespesaFixa($id, $request = [], $user){
+    //COMPETÊNCIA É O MÊS DO VENCIMENTO; REGISTROS ANTIGOS SEM VENCIMENTO USAM A DATA DE CADASTRO (ADR-0002)
+    protected function colunaCompetencia(){
+        return 'COALESCE(data_vencimento, created_at)';
+    }
+
+    protected function diaDaOcorrencia(){
+        return $this->dia_vencimento;
+    }
+
+    protected function criarOcorrencia(Ocorrencia $ocorrencia){
+        Despesa::create([
+            'user_id' => $this->user_id,
+            'nome_despesa' => $ocorrencia->nome($this->nome_despesa),
+            'despesa_tipo_id' => $this->despesa_tipo_id,
+            'despesa_fixa_id' => $this->id,
+            'valor_total' => $this->valor,
+            'data_vencimento' => $ocorrencia->vencimento->format('Y-m-d'),
+            'ativo' => 1,
+            'pago' => 0,
+        ]);
+    }
+
+    protected function reajustarOcorrencia($despesa, Ocorrencia $noMes){
+        $despesa->valor_total = $this->valor;
+        $despesa->data_vencimento = $noMes->vencimento->format('Y-m-d');
+    }
+
+    //A OCORRÊNCIA JÁ PAGA É HISTÓRICO: TEM LANÇAMENTO COM O VALOR PAGO
+    protected function ocorrenciaPreservada($despesa){
+        return $despesa->paga();
+    }
+
+    protected function excluirOcorrencia($despesa){
+        $despesa->excluirComLancamentos();
+    }
+
+    private function resposta(callable $operacao, $sucesso, $falha){
         try{
-            $despesaFixa = $this->where('user_id', $user->id)->findOrFail($id);
-
-            if($despesaFixa->isTravada()){
-                //PRESERVA O HISTÓRICO: APENAS ATIVA/INATIVA
-                $despesaFixa->ativo = $request['ativo'];
-                $despesaFixa->save();
-            }else{
-                $request['valor'] = setToDecimal($request['valor']);
-                unset($request['user_id'], $request['despesa_tipo_id']);
-                $despesaFixa->fill($request)->save();
-            }
-
-            $this->gerarParaMes($user, date('m'), date('Y'));
+            $operacao();
 
             return [
                 'error' => false,
-                'msg' => $despesaFixa->ativo ? 'Despesa fixa alterada com sucesso!' : 'Despesa fixa inativada!'
+                'msg' => $sucesso
             ];
         }catch(\Exception $error){
             \Log::error($error->getMessage(), ['exception' => $error]);
             return [
                 'error' => true,
-                'msg' => 'Não foi possível alterar o registro, tente de novo.'
+                'msg' => $falha
             ];
         }
+    }
+
+    /**
+     * Renomeia a fixa. O nome novo vale para as Ocorrências do mês atual em diante; as anteriores ficam como estão.
+     */
+    public function updateDespesaFixa($id, $request = [], $user){
+        $despesaFixa = $this->where('user_id', $user->id)->findOrFail($id);
+
+        return $this->resposta(function() use ($despesaFixa, $request){
+            DB::transaction(function() use ($despesaFixa, $request){
+                $despesaFixa->nome_despesa = $request['nome_despesa'];
+                $despesaFixa->save();
+
+                $vigencia = $despesaFixa->vigencia();
+                foreach($despesaFixa->ocorrenciasAPartirDe(Carbon::now())->get() as $ocorrencia){
+                    //A OCORRÊNCIA PAGA É HISTÓRICO: FICA COM O NOME QUE TINHA
+                    if($despesaFixa->ocorrenciaPreservada($ocorrencia)){
+                        continue;
+                    }
+                    $ocorrencia->nome_despesa = $vigencia->ocorrenciaNoMes($ocorrencia->competencia())->nome($despesaFixa->nome_despesa);
+                    $ocorrencia->save();
+                }
+            });
+        }, 'Despesa fixa alterada com sucesso!', 'Não foi possível alterar o registro, tente de novo.');
+    }
+
+    public function reajustarDespesaFixa($id, $request, $user){
+        $despesaFixa = $this->where('user_id', $user->id)->findOrFail($id);
+
+        return $this->resposta(function() use ($despesaFixa, $request){
+            $despesaFixa->reajustar(
+                Carbon::createFromFormat('!Y-m', $request['a_partir_de']),
+                setToDecimal($request['valor']),
+                (int) $request['dia_vencimento']
+            );
+        }, 'Reajuste aplicado!', 'Não foi possível reajustar, tente de novo.');
+    }
+
+    public function encerrarDespesaFixa($id, $request, $user){
+        $despesaFixa = $this->where('user_id', $user->id)->findOrFail($id);
+
+        $fim = Carbon::createFromFormat('!Y-m', $request['mes_fim']);
+        if($despesaFixa->fimDepoisDoAtual($fim)){
+            return [
+                'error' => true,
+                'msg' => 'A Vigência já termina em ' . $despesaFixa->mes_fim->format('m/Y') . '. Para estender, cadastre uma nova Despesa Fixa.'
+            ];
+        }
+
+        return $this->resposta(function() use ($despesaFixa, $request){
+            $despesaFixa->encerrar(Carbon::createFromFormat('!Y-m', $request['mes_fim']));
+        }, 'Despesa fixa encerrada!', 'Não foi possível encerrar, tente de novo.');
     }
 
     public function deleteDespesaFixa($id, $user){
-        try{
-            $despesaFixa = $this->where('user_id', $user->id)->findOrFail($id);
+        $despesaFixa = $this->where('user_id', $user->id)->findOrFail($id);
 
-            if($despesaFixa->isTravada()){
-                return [
-                    'error' => true,
-                    'msg' => 'Esta despesa fixa já gerou despesas e não pode ser excluída. Inative-a para preservar o histórico.'
-                ];
-            }
-
-            $despesaFixa->delete();
-
-            return [
-                'error' => false,
-                'msg' => 'Registro excluído com sucesso!'
-            ];
-        }catch(\Exception $error){
-            \Log::error($error->getMessage(), ['exception' => $error]);
+        //COM OCORRÊNCIAS, EXCLUIR APAGARIA O HISTÓRICO: O CAMINHO É O ENCERRAMENTO
+        if($despesaFixa->temOcorrencias()){
             return [
                 'error' => true,
-                'msg' => 'Não foi possível excluír o registro, tente de novo'
+                'msg' => 'Esta despesa fixa já tem Ocorrências. Use "Encerrar" para terminar a Vigência.'
             ];
         }
-    }
 
-    public function totalAtivas($user){
-        return $this
-            ->where('user_id', $user->id)
-            ->where('ativo', 1)
-            ->sum('valor');
+        return $this->resposta(function() use ($despesaFixa){
+            $despesaFixa->delete();
+        }, 'Registro excluído com sucesso!', 'Não foi possível excluír o registro, tente de novo');
     }
 
     /**
-     * Cria as despesas do mês a partir das despesas fixas ativas.
-     * Meses futuros não são gravados (apenas projetados).
+     * Soma do Valor Previsto das Despesas Fixas cuja Vigência inclui o mês atual.
      */
-    public function gerarParaMes($user, $mes, $ano){
-        if(empty($mes) || empty($ano) || !is_numeric($mes) || !is_numeric($ano)){
-            return 0;
-        }
+    public function totalVigentes($user){
+        $mesAtual = Carbon::now()->startOfMonth()->format('Y-m-d');
 
-        $inicioMes = Carbon::create((int) $ano, (int) $mes, 1)->startOfDay();
-        if($inicioMes->gt(Carbon::now()->startOfMonth())){
-            return 0;
-        }
-
-        $fimMes = $inicioMes->copy()->endOfMonth();
-
-        $fixasPendentes = $this
+        return $this
             ->where('user_id', $user->id)
             ->where('ativo', 1)
-            ->where('created_at', '<=', $fimMes)
-            ->whereDoesntHave('despesas', function($query) use ($inicioMes, $fimMes){
-                $query->whereBetween('created_at', [$inicioMes, $fimMes]);
+            ->where('mes_inicio', '<=', $mesAtual)
+            ->where(function($query) use ($mesAtual){
+                $query->whereNull('mes_fim')->orWhere('mes_fim', '>=', $mesAtual);
             })
-            ->get();
-
-        if($fixasPendentes->isEmpty()){
-            return 0;
-        }
-
-        DB::transaction(function() use ($fixasPendentes, $user, $inicioMes){
-            foreach($fixasPendentes as $fixa){
-                Despesa::create([
-                    'user_id' => $user->id,
-                    'nome_despesa' => $fixa->nome_despesa,
-                    'despesa_tipo_id' => $fixa->despesa_tipo_id,
-                    'despesa_fixa_id' => $fixa->id,
-                    'valor_total' => $fixa->valor,
-                    'ativo' => 1,
-                    'pago' => 0,
-                    'created_at' => $inicioMes->format('Y-m-d H:i:s'),
-                ]);
-            }
-        });
-
-        return $fixasPendentes->count();
+            ->sum('valor');
     }
 }
