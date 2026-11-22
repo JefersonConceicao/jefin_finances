@@ -11,11 +11,11 @@ class GuiaDoUsuarioTest extends TestCase
     use RefreshDatabase;
 
     /** @test */
-    public function a_tela_de_login_tem_o_link_para_o_guia_do_usuario()
+    public function a_tela_de_login_tem_o_link_para_o_guia_do_usuario_em_nova_aba()
     {
         $this->get(route('auth.renderViewLogin'))
             ->assertOk()
-            ->assertSee('href="' . route('guia.index') . '"', false)
+            ->assertSee('href="' . route('guia.index') . '" target="_blank" rel="noopener"', false)
             ->assertSee('Guia do usuário');
     }
 

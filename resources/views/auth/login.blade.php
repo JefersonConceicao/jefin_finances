@@ -62,7 +62,7 @@
                         </p>
                         <p><a class="font-bold" href="/forgotPassword"> Esqueci minha senha</a>.</p>
                         <p>
-                            <a class="font-bold" href="{{ route('guia.index') }}">
+                            <a class="font-bold" href="{{ route('guia.index') }}" target="_blank" rel="noopener">
                                 <i class="bi bi-book"></i> Guia do usuário
                             </a>
                         </p>
