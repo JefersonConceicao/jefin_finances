@@ -182,7 +182,7 @@ classDiagram
 
 ## 5. Gravação de Ocorrências
 
-Implementa o ADR-0001. É chamada pelo `index` de Despesas, Despesas Fixas, Proventos, Proventos Fixos e Projeção, e no cadastro da fixa. É idempotente: abrir a tela de novo no mesmo mês não grava nada. Cada recorrência é travada na sua própria transação, para que duas abas abertas não gravem o mesmo mês duas vezes.
+É chamada pelo `index` de Despesas, Despesas Fixas, Proventos, Proventos Fixos e Projeção, e no cadastro da fixa. É idempotente: abrir a tela de novo no mesmo mês não grava nada. Cada recorrência é travada na sua própria transação, para que duas abas abertas não gravem o mesmo mês duas vezes.
 
 ```mermaid
 flowchart TD
@@ -323,8 +323,8 @@ Cada regra tem um id estável para ser citado em issues e PRs. "Garantida em" ap
 | Id | Regra | Garantida em | Teste |
 |---|---|---|---|
 | RN-01 | Todo registro é do seu usuário. Ler, alterar, excluir ou pagar um registro de outro usuário responde 404. | `Model::doUsuario (Despesa, Proventos, TiposDespesa, Lancamento, fixas)` | DonoDaDespesaTest, DonoDoLancamentoTest, OcorrenciaProventoFixoEscopoTest |
-| RN-02 | A Competência de uma Despesa é o mês do Vencimento; sem Vencimento, o mês de cadastro (ADR-0002). | `Despesa::getDespesas, Despesa::competencia` | VencimentoDespesaTest |
-| RN-03 | Ocorrências são gravadas antecipadamente até o mês atual + 12, só depois da última gravada e nunca em meses passados (ADR-0001). | `Vigencia::ocorrenciasAGravar, Recorrente::completarJanela` | DespesaFixaVigenciaTest, ProventoFixoTest, ProjecaoTest |
+| RN-02 | A Competência de uma Despesa é o mês do Vencimento; sem Vencimento, o mês de cadastro. | `Despesa::getDespesas, Despesa::competencia` | VencimentoDespesaTest |
+| RN-03 | Ocorrências são gravadas antecipadamente até o mês atual + 12, só depois da última gravada e nunca em meses passados. | `Vigencia::ocorrenciasAGravar, Recorrente::completarJanela` | DespesaFixaVigenciaTest, ProventoFixoTest, ProjecaoTest |
 | RN-04 | O Vencimento de cada mês é o dia da fixa, ou o último dia do mês quando ele é mais curto. | `Vigencia::vencimentoNoMes` | DespesaFixaVigenciaTest |
 | RN-05 | Parcelas: fim = início + N − 1; cada Ocorrência recebe o nome "Nome (k/N)". Informar parcelas e mês de fim juntos responde 422. | `Vigencia::fimPorParcelas, Ocorrencia::nome, DespesasFixasRequest` | DespesaFixaVigenciaTest |
 | RN-06 | O Tipo de Despesa "Fixa" é reservado (`reservado = 1`): não pode ser excluído nem renomeado, não aparece para Despesa Variável e é atribuído a toda fixa e Ocorrência. | `TiposDespesa, DespesasRequest` | TipoDespesaReservadoTest |
