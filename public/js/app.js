@@ -3869,6 +3869,17 @@ var habilitaBotoes = function habilitaBotoes() {
             background: response.error ? 'red' : color()["default"]
           });
           getFilterDespesasFixas();
+        },
+        error: function error() {
+          Swal.fire({
+            toast: true,
+            position: 'bottom-left',
+            title: "<h5 style=\"color:white\"> N\xE3o foi poss\xEDvel concluir. Recarregue a p\xE1gina e tente de novo. </h5>",
+            icon: 'error',
+            showConfirmButton: false,
+            timer: 3500,
+            background: 'red'
+          });
         }
       });
     };
@@ -4552,6 +4563,17 @@ var habilitaBotoes = function habilitaBotoes() {
             background: response.error ? 'red' : color()["default"]
           });
           getFilterProventosFixos();
+        },
+        error: function error() {
+          Swal.fire({
+            toast: true,
+            position: 'bottom-left',
+            title: "<h5 style=\"color:white\"> N\xE3o foi poss\xEDvel concluir. Recarregue a p\xE1gina e tente de novo. </h5>",
+            icon: 'error',
+            showConfirmButton: false,
+            timer: 3500,
+            background: 'red'
+          });
         }
       });
     };

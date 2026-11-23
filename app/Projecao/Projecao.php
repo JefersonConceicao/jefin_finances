@@ -7,6 +7,7 @@ use App\Models\Despesa;
 use App\Models\DespesaFixa;
 use App\Models\Proventos;
 use App\Models\ProventoFixo;
+use App\Recorrencia\Vigencia;
 
 /**
  * A Projeção mês a mês, do mês atual até o Horizonte. Só lê o que está gravado
@@ -284,14 +285,30 @@ class Projecao
         $chave = $mes->format('Y-m');
 
         if(!isset($this->totaisPorMes[$chave])){
-            $filtro = ['mes' => $mes->format('m'), 'ano' => $mes->format('Y')];
-            $this->totaisPorMes[$chave] = [
-                'fixas' => (float) (new Despesa)->getDespesas($filtro, $this->user)->whereNotNull('despesa_fixa_id')->sum('valor_total'),
-                'proventos' => (float) (new Proventos)->getProventos($filtro, $this->user)->sum('valor_provento'),
-            ];
+            //ALÉM DA JANELA DE OCORRÊNCIAS GRAVADAS (ADR-0001), AS FIXAS SEM FIM AINDA NÃO TÊM LINHA NAQUELE MÊS:
+            //O TOTAL VEM DO VALOR PREVISTO DAS RECORRÊNCIAS VIGENTES
+            if($mes->gt($this->mesAtual->copy()->addMonthsNoOverflow(Vigencia::JANELA_MESES))){
+                $this->totaisPorMes[$chave] = [
+                    'fixas' => $this->valorPrevistoVigente($this->despesasFixas(), $mes),
+                    'proventos' => $this->valorPrevistoVigente($this->proventosFixos(), $mes),
+                ];
+            }else{
+                $filtro = ['mes' => $mes->format('m'), 'ano' => $mes->format('Y')];
+                $this->totaisPorMes[$chave] = [
+                    'fixas' => (float) (new Despesa)->getDespesas($filtro, $this->user)->whereNotNull('despesa_fixa_id')->sum('valor_total'),
+                    'proventos' => (float) (new Proventos)->getProventos($filtro, $this->user)->sum('valor_provento'),
+                ];
+            }
         }
 
         return $this->totaisPorMes[$chave];
+    }
+
+    private function valorPrevistoVigente($recorrencias, Carbon $mes)
+    {
+        return (float) $recorrencias->filter(function($recorrencia) use ($mes){
+            return $recorrencia->mes_inicio->lte($mes) && (!$recorrencia->mes_fim || $recorrencia->mes_fim->gte($mes));
+        })->sum('valor');
     }
 
     /**

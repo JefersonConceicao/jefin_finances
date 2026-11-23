@@ -10,6 +10,7 @@ use App\Models\Despesa;
 use App\Models\DespesaFixa;
 use App\Models\Proventos;
 use App\Models\ProventoFixo;
+use App\Models\Lancamento;
 
 /**
  * Ocultação (issue #31): a Despesa Fixa ou o Provento Fixo oculto some de todo o app, com todas as
@@ -249,5 +250,26 @@ class OcultacaoTest extends TestCase
             ->assertJsonFragment(['error' => false]);
 
         $this->assertSame(2, Despesa::withoutGlobalScopes()->where('despesa_fixa_id', $claro->id)->count());
+    }
+
+    /** @test */
+    public function pagamento_de_ocorrencia_oculta_some_dos_lancamentos_e_volta_ligado_a_ela()
+    {
+        $aluguel = $this->cadastrarDespesaFixa('Aluguel', '1.000,00');
+        $novembro = Despesa::where('despesa_fixa_id', $aluguel->id)->orderBy('data_vencimento')->firstOrFail();
+        $this->actingAs($this->user)->putJson(route('despesa.pay', $novembro->id))->assertJsonFragment(['error' => false]);
+        $filtro = ['mes' => now()->format('m'), 'ano' => now()->format('Y')];
+
+        $this->ocultarDespesaFixa($aluguel);
+
+        $this->assertCount(0, (new Lancamento)->getLancamentosDespesa($filtro, $this->user));
+        $this->assertCount(0, (new Lancamento)->getOutrosLancamentos($filtro, $this->user));
+        $this->assertEquals(0, (new Lancamento)->getTotalLancamentosByMonth($filtro, $this->user));
+
+        $this->ocultarDespesaFixa($aluguel, 0);
+
+        $lancamentos = (new Lancamento)->getLancamentosDespesa($filtro, $this->user);
+        $this->assertCount(1, $lancamentos);
+        $this->assertSame($novembro->id, $lancamentos->first()->despesa->id);
     }
 }

@@ -140,7 +140,8 @@ trait Recorrente
      * Completa a janela de Ocorrências das recorrências do usuário. Idempotente: abrir a tela de novo não grava nada.
      */
     public function completarJanela($user){
-        //A OCULTA NÃO GRAVA NADA ENQUANTO ESTIVER OCULTA; AO DESOCULTAR, A JANELA SE COMPLETA NORMALMENTE
+        //A OCULTA NÃO GRAVA NADA ENQUANTO ESTIVER OCULTA; AO DESOCULTAR, A JANELA SE COMPLETA DO MÊS ATUAL EM DIANTE
+        //(SEM GERAÇÃO RETROATIVA: MESES QUE PASSARAM ENQUANTO ELA ESTAVA OCULTA E FORA DA JANELA NÃO SÃO GRAVADOS)
         $ids = $this
             ->where('user_id', $user->id)
             ->where('ativo', 1)

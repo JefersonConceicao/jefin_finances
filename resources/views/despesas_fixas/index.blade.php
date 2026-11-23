@@ -87,7 +87,8 @@
                                     </td>
                                     <td> {{ convertValorReal($fixa->valor) }} </td>
                                     <td>
-                                        @if ($proventosDoMes > 0)
+                                        {{-- SÓ AS QUE ENTRAM NO COMPROMETIMENTO DO TOPO: ATIVAS, VISÍVEIS E VIGENTES NO MÊS ATUAL --}}
+                                        @if ($proventosDoMes > 0 && $fixa->vigenteNoMesAtual())
                                             {{ number_format(($fixa->valor / $proventosDoMes) * 100, 1, ',', '.') }}%
                                         @else
                                             <span class="text-muted"> &ndash; </span>

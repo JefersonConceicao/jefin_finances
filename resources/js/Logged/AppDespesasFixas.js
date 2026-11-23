@@ -52,6 +52,17 @@ const habilitaBotoes = () => {
                 });
 
                 getFilterDespesasFixas();
+            },
+            error: function () {
+                Swal.fire({
+                    toast:true,
+                    position: 'bottom-left',
+                    title: `<h5 style="color:white"> Não foi possível concluir. Recarregue a página e tente de novo. </h5>`,
+                    icon: 'error',
+                    showConfirmButton: false,
+                    timer:3500,
+                    background: 'red',
+                });
             }
         });
 

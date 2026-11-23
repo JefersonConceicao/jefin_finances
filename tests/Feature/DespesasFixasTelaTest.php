@@ -129,4 +129,20 @@ class DespesasFixasTelaTest extends TestCase
         $this->actingAs(factory(User::class)->create())->deleteJson(route('despesasFixas.delete', $aluguel->id))->assertNotFound();
         $this->assertNotNull(DespesaFixa::find($aluguel->id));
     }
+
+    /** @test */
+    public function percentual_por_linha_so_para_as_vigentes_no_mes_atual()
+    {
+        $this->provento(4000);
+        $this->cadastrarDespesaFixa('Aluguel', '1.000,00');
+        $this->cadastrarDespesaFixa('Seguro', '400,00', ['mes_inicio' => '2027-01']);
+        DespesaFixa::create(['user_id' => $this->user->id, 'nome_despesa' => 'Curso', 'valor' => 800, 'ativo' => 1,
+            'mes_inicio' => '2026-01-01', 'mes_fim' => '2026-03-01', 'dia_vencimento' => 5]);
+
+        $this->tela()
+            ->assertSee('Comprometimento da Renda com Despesas Fixas (25,0%)')
+            ->assertSeeInOrder(['Aluguel', '25,0%'])
+            ->assertDontSee('10,0%')
+            ->assertDontSee('20,0%');
+    }
 }

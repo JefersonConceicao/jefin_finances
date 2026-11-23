@@ -283,6 +283,18 @@ class ProjecaoTest extends TestCase
     }
 
     /** @test */
+    public function total_atualizado_de_um_termino_alem_da_janela_gravada_vem_do_valor_previsto()
+    {
+        $this->cadastrarDespesaFixa(['nome_despesa' => 'Aluguel', 'valor' => '2.000,00']);
+        //13 PARCELAS: A ÚLTIMA EM NOVEMBRO/2027 (MÊS ATUAL + 12); O EFEITO É EM DEZEMBRO/2027, FORA DA JANELA
+        $this->cadastrarDespesaFixa(['nome_despesa' => 'Cartão', 'valor' => '300,00', 'parcelas' => 13]);
+
+        $alerta = $this->alertas($this->projecao(['horizonte' => 12]))->firstWhere('mes', '2027-11');
+
+        $this->assertSame('Termina Cartão (13/13): seu fluxo melhora em R$ 300,00 · em Dezembro/2027, Despesas Fixas passam a R$ 2.000,00', $alerta['descricao']);
+    }
+
+    /** @test */
     public function marcos_e_alertas_fora_do_horizonte_nao_aparecem()
     {
         $this->cadastrarDespesaFixa(['nome_despesa' => 'Escola', 'valor' => '900,00', 'mes_inicio' => '2027-09']);

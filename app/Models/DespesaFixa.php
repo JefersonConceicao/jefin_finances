@@ -234,12 +234,14 @@ class DespesaFixa extends Model
             DB::transaction(function() use ($despesaFixa){
                 $fixa = static::lockForUpdate()->findOrFail($despesaFixa->id);
 
-                //UM PAGAMENTO FEITO ENTRE A CONFERÊNCIA ACIMA E A TRAVA CANCELA A EXCLUSÃO
-                if($fixa->temOcorrenciaPaga()){
+                //TRAVA AS OCORRÊNCIAS COMO O PAGAMENTO FAZ: UM PAGAMENTO FEITO ENTRE A CONFERÊNCIA ACIMA E A TRAVA
+                //ESPERA OU É VISTO AQUI, E CANCELA A EXCLUSÃO
+                $ocorrencias = $fixa->ocorrencias()->lockForUpdate()->get();
+                if($ocorrencias->contains(function($ocorrencia){ return $ocorrencia->paga(); })){
                     throw new \RuntimeException('Ocorrência paga durante a exclusão da Despesa Fixa ' . $fixa->id);
                 }
 
-                foreach($fixa->ocorrencias()->get() as $ocorrencia){
+                foreach($ocorrencias as $ocorrencia){
                     $ocorrencia->excluirComLancamentos();
                 }
                 $fixa->delete();
@@ -251,6 +253,16 @@ class DespesaFixa extends Model
         return $this->ocorrencias()->get()->contains(function($ocorrencia){
             return $ocorrencia->paga();
         });
+    }
+
+    //MESMO CRITÉRIO DE totalVigentes, PARA O PERCENTUAL DE CADA LINHA SOMAR O DO TOPO
+    public function vigenteNoMesAtual(){
+        $mesAtual = Carbon::now()->startOfMonth();
+
+        return (int) $this->ativo === 1
+            && (int) $this->oculta === 0
+            && $this->mes_inicio->lte($mesAtual)
+            && (!$this->mes_fim || $this->mes_fim->gte($mesAtual));
     }
 
     /**
