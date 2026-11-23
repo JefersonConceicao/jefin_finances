@@ -109,9 +109,13 @@ const habilitaBotoes = () => {
     $(".btnDeleteDespesaFixa").on("click", function(){
         const id = $(this).parents('tr').attr("id");
         const url = '/despesasFixas/delete/' + id;
+        const ocorrencias = parseInt($(this).data("ocorrencias"), 10) || 0;
 
         Swal.fire(Object.assign({}, optionsSwalDelete, {
-            text: 'Esta ação é irreversível!',
+            title: 'Excluir a Despesa Fixa?',
+            text: ocorrencias > 0
+                ? `A Despesa Fixa e todas as ${ocorrencias} Ocorrências dela serão excluídas. Esta ação é irreversível! (Com alguma Ocorrência paga, use "Encerrar".)`
+                : 'Esta ação é irreversível!',
         })).then(result => {
             if(result.isConfirmed){
                 deleteRowForGrid(url, function(){

@@ -10,6 +10,8 @@ use App\Http\Requests\DespesasFixasRequest;
 
 //MODELS
 use App\Models\DespesaFixa;
+use App\Models\Proventos;
+use Carbon\Carbon;
 
 class DespesasFixasController extends Controller
 {
@@ -20,10 +22,19 @@ class DespesasFixasController extends Controller
 
         $despesaFixa->completarJanela($user);
         $data = $despesaFixa->getDespesasFixas($request->all(), $user)->get();
+        $totalVigentes = (float) $despesaFixa->totalVigentes($user);
+
+        //COMPROMETIMENTO DA RENDA COM DESPESAS FIXAS: A MESMA BASE DE PROVENTOS DO CARD DO MÊS ATUAL NA PROJEÇÃO
+        $hoje = Carbon::now();
+        $proventosDoMes = (float) (new Proventos)
+            ->getProventos(['mes' => $hoje->format('m'), 'ano' => $hoje->format('Y')], $user)
+            ->sum('valor_provento');
 
         return view('despesas_fixas.index')
             ->with('dataDespesasFixas', $data)
-            ->with('totalVigentes', $despesaFixa->totalVigentes($user));
+            ->with('totalVigentes', $totalVigentes)
+            ->with('proventosDoMes', $proventosDoMes)
+            ->with('comprometimento', $proventosDoMes > 0 ? ($totalVigentes / $proventosDoMes) * 100 : null);
     }
 
     public function create()

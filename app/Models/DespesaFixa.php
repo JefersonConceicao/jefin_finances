@@ -214,20 +214,43 @@ class DespesaFixa extends Model
         }, 'Despesa fixa encerrada!', 'Não foi possível encerrar, tente de novo.');
     }
 
-    public function deleteDespesaFixa($id, $user){
-        $despesaFixa = $this->where('user_id', $user->id)->findOrFail($id);
+    const MSG_EXCLUIR_COM_PAGA = 'Esta despesa fixa já tem Ocorrência paga. Use "Encerrar" para terminar a Vigência.';
 
-        //COM OCORRÊNCIAS, EXCLUIR APAGARIA O HISTÓRICO: O CAMINHO É O ENCERRAMENTO
-        if($despesaFixa->temOcorrencias()){
+    /**
+     * Exclui a Despesa Fixa junto com todas as Ocorrências dela, enquanto nenhuma foi paga (corrige um cadastro
+     * errado sem apagar pagamento real). Com alguma paga, o caminho é o Encerramento.
+     */
+    public function deleteDespesaFixa($id, $user){
+        $despesaFixa = $this->doUsuario($id, $user);
+
+        if($despesaFixa->temOcorrenciaPaga()){
             return [
                 'error' => true,
-                'msg' => 'Esta despesa fixa já tem Ocorrências. Use "Encerrar" para terminar a Vigência.'
+                'msg' => self::MSG_EXCLUIR_COM_PAGA
             ];
         }
 
         return $this->resposta(function() use ($despesaFixa){
-            $despesaFixa->delete();
-        }, 'Registro excluído com sucesso!', 'Não foi possível excluír o registro, tente de novo');
+            DB::transaction(function() use ($despesaFixa){
+                $fixa = static::lockForUpdate()->findOrFail($despesaFixa->id);
+
+                //UM PAGAMENTO FEITO ENTRE A CONFERÊNCIA ACIMA E A TRAVA CANCELA A EXCLUSÃO
+                if($fixa->temOcorrenciaPaga()){
+                    throw new \RuntimeException('Ocorrência paga durante a exclusão da Despesa Fixa ' . $fixa->id);
+                }
+
+                foreach($fixa->ocorrencias()->get() as $ocorrencia){
+                    $ocorrencia->excluirComLancamentos();
+                }
+                $fixa->delete();
+            });
+        }, 'Despesa fixa e Ocorrências excluídas!', 'Não foi possível excluír o registro, tente de novo');
+    }
+
+    public function temOcorrenciaPaga(){
+        return $this->ocorrencias()->get()->contains(function($ocorrencia){
+            return $ocorrencia->paga();
+        });
     }
 
     /**
