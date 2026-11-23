@@ -105,12 +105,44 @@
                             </tr>
                         </table>
 
-                        @if (count($mes['marcos']) > 0)
+                        @if (count($mes['gruposDeMarcos']) > 0)
                             <div class="mb-2">
-                                @foreach ($mes['marcos'] as $marco)
-                                    <span class="badge {{ $marco['efeito'] === 'ganho' ? 'bg-light-success' : 'bg-light-warning' }} mb-1">
-                                        {{ $marco['descricao'] }}
-                                    </span>
+                                @foreach ($mes['gruposDeMarcos'] as $grupo)
+                                    @if ($grupo['agrupado'])
+                                        {{-- MAIS DE 3 MARCOS DO MESMO LADO E TIPO: UM LINK COM A CONTAGEM ABRE A LISTA --}}
+                                        <a href="#" class="badge {{ $grupo['efeito'] === 'ganho' ? 'bg-light-success' : 'bg-light-warning' }} mb-1 text-decoration-underline"
+                                            data-bs-toggle="modal" data-bs-target="#marcos-{{ $grupo['chave'] }}">
+                                            {{ $grupo['rotulo'] }}
+                                        </a>
+                                        <div class="modal fade" id="marcos-{{ $grupo['chave'] }}" tabindex="-1" aria-hidden="true">
+                                            <div class="modal-dialog modal-dialog-scrollable">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title"> {{ $mes['label'] }}: {{ $grupo['rotulo'] }} </h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <table class="table table-sm mb-0">
+                                                            <tbody>
+                                                                @foreach ($grupo['itens'] as $item)
+                                                                    <tr>
+                                                                        <td> {{ $item['nome'] }} </td>
+                                                                        <td class="text-end"> {{ "R$ " .convertValorReal($item['valor']) }} </td>
+                                                                    </tr>
+                                                                @endforeach
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @else
+                                        @foreach ($grupo['itens'] as $item)
+                                            <span class="badge {{ $grupo['efeito'] === 'ganho' ? 'bg-light-success' : 'bg-light-warning' }} mb-1">
+                                                {{ $item['descricao'] }}
+                                            </span>
+                                        @endforeach
+                                    @endif
                                 @endforeach
                             </div>
                         @endif

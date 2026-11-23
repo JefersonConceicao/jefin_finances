@@ -243,6 +243,34 @@ class ProjecaoTest extends TestCase
     }
 
     /** @test */
+    public function ate_3_marcos_viram_badges_e_mais_de_3_viram_link_com_a_lista()
+    {
+        foreach (['Água', 'Luz', 'Gás', 'Internet'] as $nome) {
+            $this->cadastrarDespesaFixa(['nome_despesa' => $nome, 'valor' => '100,00']);
+        }
+        $this->cadastrarProventoFixo(['descricao' => 'Salário', 'valor' => '5.000,00']);
+        $this->cadastrarDespesaFixa(['nome_despesa' => 'Seguro', 'valor' => '180,00', 'mes_inicio' => '2027-01']);
+
+        $resposta = $this->projecao();
+        $novembro = collect($this->meses($resposta)[0]['gruposDeMarcos'])->keyBy(function ($g) { return $g['lado'] . '-' . $g['tipo']; });
+
+        $this->assertTrue($novembro['despesa-comeca']['agrupado']);
+        $this->assertSame('4 despesas começam', $novembro['despesa-comeca']['rotulo']);
+        $this->assertSame(['Água', 'Luz', 'Gás', 'Internet'], array_column($novembro['despesa-comeca']['itens'], 'nome'));
+        $this->assertFalse($novembro['provento-comeca']['agrupado']);
+
+        $janeiro = $this->meses($resposta)[2]['gruposDeMarcos'];
+        $this->assertFalse($janeiro[0]['agrupado']);
+
+        $resposta
+            ->assertSee('data-bs-target="#marcos-2026-11-despesa-comeca"', false)
+            ->assertSee('Novembro/2026: 4 despesas começam')
+            ->assertDontSee('Água começa')
+            ->assertSee('Salário começa')
+            ->assertSee('Seguro começa');
+    }
+
+    /** @test */
     public function marcos_e_alertas_fora_do_horizonte_nao_aparecem()
     {
         $this->cadastrarDespesaFixa(['nome_despesa' => 'Escola', 'valor' => '900,00', 'mes_inicio' => '2027-09']);

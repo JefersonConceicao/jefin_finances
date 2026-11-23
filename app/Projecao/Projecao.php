@@ -94,7 +94,8 @@ class Projecao
                 'percentual' => $totalProventos > 0 ? ($totalDespesas / $totalProventos) * 100 : null,
             ];
 
-            $mes['marcos'] = $this->marcosDoMes($data);
+            $mes['gruposDeMarcos'] = $this->gruposDeMarcos($data);
+            $mes['marcos'] = self::marcosDosGrupos($mes['gruposDeMarcos']);
 
             if($isMesAtual){
                 $mes['aPagar'] = (float) $despesa->getDespesas($filtro, $this->user)->where('pago', 0)->sum('valor_total');
@@ -196,29 +197,67 @@ class Projecao
         return $ultima ?: $fixa->vigencia()->ocorrenciaNoMes($fixa->mes_fim)->nome($fixa->nome_despesa);
     }
 
-    private function marcosDoMes(Carbon $mes)
+    //OS MARCOS DO MÊS, UM A UM
+    private static function marcosDosGrupos(array $grupos)
     {
         $marcos = [];
 
-        foreach($this->recorrencias() as $recorrencia){
-            //EFEITO NO FLUXO: DESPESA QUE COMEÇA OU PROVENTO QUE TERMINA PEDE ATENÇÃO; O CONTRÁRIO É GANHO
-            if($recorrencia['inicio']->format('Y-m') === $mes->format('Y-m')){
-                $marcos[] = [
-                    'tipo' => 'comeca',
-                    'descricao' => "{$recorrencia['nome']} começa",
-                    'efeito' => $recorrencia['despesa'] ? 'atencao' : 'ganho',
-                ];
-            }
-            if($recorrencia['fim'] && $recorrencia['fim']->format('Y-m') === $mes->format('Y-m')){
-                $marcos[] = [
-                    'tipo' => 'termina',
-                    'descricao' => "{$recorrencia['nomeNoFim']} termina",
-                    'efeito' => $recorrencia['despesa'] ? 'ganho' : 'atencao',
-                ];
+        foreach($grupos as $grupo){
+            foreach($grupo['itens'] as $item){
+                $marcos[] = ['tipo' => $grupo['tipo'], 'descricao' => $item['descricao'], 'efeito' => $grupo['efeito']];
             }
         }
 
         return $marcos;
+    }
+
+    const MAXIMO_DE_BADGES = 3;
+
+    /**
+     * Os Marcos do mês separados por lado (Despesas / Proventos) e por tipo (começa / termina), para o card:
+     * até 3 viram badges; mais que isso, um link com a contagem que abre a lista.
+     */
+    private function gruposDeMarcos(Carbon $mes)
+    {
+        $grupos = [];
+
+        foreach($this->recorrencias() as $r){
+            $lado = $r['despesa'] ? 'despesa' : 'provento';
+
+            foreach(['comeca' => $r['inicio'], 'termina' => $r['fim']] as $tipo => $data){
+                if(!$data || $data->format('Y-m') !== $mes->format('Y-m')){
+                    continue;
+                }
+
+                $chave = "{$lado}-{$tipo}";
+                if(!isset($grupos[$chave])){
+                    $grupos[$chave] = [
+                        'chave' => $mes->format('Y-m') . "-{$chave}",
+                        'lado' => $lado,
+                        'tipo' => $tipo,
+                        //DESPESA QUE COMEÇA OU PROVENTO QUE TERMINA PEDE ATENÇÃO; O CONTRÁRIO É GANHO
+                        'efeito' => ($lado === 'despesa') === ($tipo === 'comeca') ? 'atencao' : 'ganho',
+                        'itens' => [],
+                    ];
+                }
+
+                $nome = $tipo === 'comeca' ? $r['nome'] : $r['nomeNoFim'];
+                $grupos[$chave]['itens'][] = [
+                    'nome' => $nome,
+                    'descricao' => $nome . ($tipo === 'comeca' ? ' começa' : ' termina'),
+                    'valor' => $r['valor'],
+                ];
+            }
+        }
+
+        return array_values(array_map(function($grupo){
+            $quantos = count($grupo['itens']);
+            $grupo['agrupado'] = $quantos > self::MAXIMO_DE_BADGES;
+            $grupo['rotulo'] = $quantos . ' ' . ($grupo['lado'] === 'despesa' ? 'despesas' : 'proventos') . ' '
+                . ($grupo['tipo'] === 'comeca' ? 'começam' : 'terminam');
+
+            return $grupo;
+        }, $grupos));
     }
 
     private static function emMeses($distancia)
