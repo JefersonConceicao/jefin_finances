@@ -27,7 +27,7 @@ flowchart TD
   RT["routes/web.php<br/>middleware auth (sessão)"] --> FR["FormRequest<br/>valida, 422 com errors"]
   FR --> CT["Controller<br/>monta filtros, chama o model,<br/>devolve view ou JSON {error, msg}"]
   CT -->|"index"| CJ["completarJanela(user)<br/>DespesaFixa e ProventoFixo"]
-  CT --> MD["Models Eloquent<br/>Despesa, DespesaFixa, Proventos, ProventoFixo,<br/>Lancamento, TiposDespesa"]
+  CT --> MD["Models Eloquent<br/>Despesa, DespesaFixa, Proventos, ProventoFixo,<br/>Lancamento"]
   CJ --> RC
   MD --> RC["app/Recorrencia<br/>trait Recorrente, Vigencia, Ocorrencia"]
   CT --> PJ["app/Projecao/Projecao<br/>somente leitura"]
@@ -41,17 +41,15 @@ flowchart TD
 
 Toda tabela de domínio pertence a um `user_id`. Ocorrências são linhas comuns de `despesas` e `proventos` com a chave da recorrência preenchida (`despesa_fixa_id`, `provento_fixo_id`); Despesas Variáveis e Proventos avulsos têm essa chave nula.
 
+Uma Despesa é só Fixa ou Variável: `despesas_tipos`, `despesa_tipo_id` (agora nulo) e `dividas` continuam no banco, mas as telas não os usam mais (só a API ainda expõe os Tipos de Despesa).
+
 ```mermaid
 erDiagram
-  users ||--o{ despesas_tipos : "cria"
   users ||--o{ despesas_fixas : "tem"
   users ||--o{ despesas : "tem"
   users ||--o{ proventos_fixos : "tem"
   users ||--o{ proventos : "tem"
   users ||--o{ lancamentos : "tem"
-  users ||--o{ dividas : "tem"
-  despesas_tipos ||--o{ despesas : "classifica"
-  despesas_tipos ||--o{ despesas_fixas : "Fixa (reservado)"
   despesas_fixas |o--o{ despesas : "Ocorrências"
   proventos_fixos |o--o{ proventos : "Ocorrências"
   despesas |o--o{ lancamentos : "pagamento"
@@ -59,7 +57,6 @@ erDiagram
   despesas_fixas {
     int id PK
     int user_id FK
-    int despesa_tipo_id FK
     varchar nome_despesa
     decimal valor "Valor Previsto, 10,2"
     date mes_inicio "dia 1"
@@ -67,11 +64,11 @@ erDiagram
     tinyint dia_vencimento "1 a 31"
     date ocorrencias_ate "último mês gravado"
     tinyint ativo
+    tinyint oculta "1 = Ocultação"
   }
   despesas {
     int id PK
     int user_id FK
-    int despesa_tipo_id FK
     int despesa_fixa_id FK "null = Variável"
     varchar nome_despesa "Nome (k/N)"
     decimal valor_total
@@ -89,6 +86,7 @@ erDiagram
     date mes_fim
     date ocorrencias_ate
     tinyint ativo
+    tinyint oculta "1 = Ocultação"
   }
   proventos {
     int id PK
@@ -106,26 +104,11 @@ erDiagram
     decimal valor
     varchar descricao
   }
-  despesas_tipos {
-    int id PK
-    int user_id FK
-    varchar nome
-    tinyint reservado "1 = Fixa"
-    int ativo
-  }
-  dividas {
-    int id PK
-    int user_id FK
-    varchar descricao_divida
-    int qtd_parcela_total
-    int qtd_parcela_parcial
-    float valor_total
-    float valor_parcela
-    int pago
-  }
 ```
 
-Valores monetários em `DECIMAL(10,2)`, exceto `dividas`, que ainda usa `FLOAT`. A tabela `valor_hora` existe no banco mas não é usada pelo código.
+Valores monetários em `DECIMAL(10,2)`. As tabelas `valor_hora` e `dividas` existem no banco mas não são usadas pelo código.
+
+**Ocultação.** `oculta = 1` numa fixa esconde ela e todas as suas Ocorrências de todo o app. Um global scope (`App\Recorrencia\SemOcorrenciasOcultas`) em `Despesa` e `Proventos` tira das consultas as linhas cuja recorrência está oculta; só a relação `ocorrencias()` da própria fixa o ignora, para Encerrar e Excluir continuarem funcionando. Fixa oculta não grava Ocorrências novas; ao desocultar, a janela se completa.
 
 ## 4. Módulo Recorrência
 
@@ -199,7 +182,7 @@ flowchart TD
   H -->|não| J["até = mês atual + 12"]
   I --> K["para cada mês de de até até:<br/>Vencimento = min(dia, dias do mês)<br/>parcela k/N quando há fim"]
   J --> K
-  K --> L["criarOcorrencia<br/>Despesa: tipo Fixa, pago 0<br/>Provento: dia 1"]
+  K --> L["criarOcorrencia<br/>Despesa: pago 0<br/>Provento: dia 1"]
   L --> M["ocorrencias_ate = último mês gravado"]
 ```
 
@@ -207,7 +190,7 @@ Como a gravação parte de `ocorrencias_ate` e não dos meses existentes, uma Oc
 
 ## 6. Alteração de Ocorrência com escopo
 
-Na Despesa o escopo vem do campo `escopo` (`so_esta` ou `seguintes`); no Provento, de `update_subsequent`. "Esta e as seguintes" vira um Reajuste da fixa a partir da Competência da Ocorrência. Nome, tipo e ativo continuam valendo só para a Ocorrência editada.
+Na Despesa o escopo vem do campo `escopo` (`so_esta` ou `seguintes`); no Provento, de `update_subsequent`. "Esta e as seguintes" vira um Reajuste da fixa a partir da Competência da Ocorrência. Nome e ativo continuam valendo só para a Ocorrência editada.
 
 ```mermaid
 sequenceDiagram
@@ -218,11 +201,11 @@ sequenceDiagram
   participant F as DespesaFixa (Recorrente)
   participant DB as MySQL
   U->>C: PUT /despesas/update/:id com escopo
-  C->>R: valida escopo e tipo (reservado só em Ocorrência)
+  C->>R: valida escopo
   C->>D: updateDespesa(id, dados, user)
   D->>DB: doUsuario: 404 se for de outro usuário
   alt so_esta, ou Despesa Variável
-    D->>DB: grava nome, tipo, valor, ativo e vencimento
+    D->>DB: grava nome, valor, ativo e vencimento
   else seguintes
     D->>D: recusaSeguintes: mês passado ou paga
     D->>D: recusa se o mês do Vencimento mudou
@@ -233,7 +216,7 @@ sequenceDiagram
     loop Ocorrências com Competência a partir do mês
       F->>DB: pula as pagas, reescreve valor e Vencimento das demais
     end
-    D->>DB: nome, tipo e ativo só nesta Ocorrência
+    D->>DB: nome e ativo só nesta Ocorrência
     F->>DB: COMMIT
   end
   C-->>U: JSON error e msg
@@ -310,11 +293,14 @@ flowchart LR
   DF --> SM
   DV --> SM
   SM --> SA["Saldo Acumulado<br/>começa em 0 no mês atual"]
-  LOOP --> MC["Marcos: mes_inicio ou mes_fim<br/>de fixas ativas = este mês"]
-  CJ --> AL["Alertas: Marcos e Variáveis<br/>com distância de 1 a N<br/>ordenados pela distância"]
+  LOOP --> MC["Marcos: mes_inicio ou mes_fim<br/>de fixas ativas e não ocultas = este mês<br/>agrupados por lado e tipo; mais de 3 viram link"]
+  LOOP --> DC["Datas Comemorativas do mês<br/>lista fixa, Carnaval e Páscoa calculados"]
+  CJ --> AL["Alertas: Marcos e Variáveis<br/>com distância de 1 a N<br/>agrupados por mês, com total atualizado<br/>e resumo quando há mais de um"]
 ```
 
 Competência das Despesas: `COALESCE(data_vencimento, created_at)`. O nome no Marco de término é o da Ocorrência gravada no mês de fim, por exemplo "Cartão (4/10)" após um Encerramento antecipado.
+
+No Alerta de um Marco, o total atualizado é o de Despesas Fixas (ou de Proventos) gravado no mês em que o Marco faz efeito: o próprio mês, quando começa; o mês seguinte, quando termina (o mês de fim ainda conta a última Ocorrência). O resumo do mês soma os Alertas de ganho (entra) e de atenção (sai).
 
 ## 10. Regras de negócio
 
@@ -322,20 +308,23 @@ Cada regra tem um id estável para ser citado em issues e PRs. "Garantida em" ap
 
 | Id | Regra | Garantida em | Teste |
 |---|---|---|---|
-| RN-01 | Todo registro é do seu usuário. Ler, alterar, excluir ou pagar um registro de outro usuário responde 404. | `Model::doUsuario (Despesa, Proventos, TiposDespesa, Lancamento, fixas)` | DonoDaDespesaTest, DonoDoLancamentoTest, OcorrenciaProventoFixoEscopoTest |
+| RN-01 | Todo registro é do seu usuário. Ler, alterar, excluir, ocultar ou pagar um registro de outro usuário responde 404. | `Model::doUsuario (Despesa, Proventos, Lancamento, fixas)` | DonoDaDespesaTest, DonoDoLancamentoTest, OcorrenciaProventoFixoEscopoTest, OcultacaoTest |
 | RN-02 | A Competência de uma Despesa é o mês do Vencimento; sem Vencimento, o mês de cadastro. | `Despesa::getDespesas, Despesa::competencia` | VencimentoDespesaTest |
 | RN-03 | Ocorrências são gravadas antecipadamente até o mês atual + 12, só depois da última gravada e nunca em meses passados. | `Vigencia::ocorrenciasAGravar, Recorrente::completarJanela` | DespesaFixaVigenciaTest, ProventoFixoTest, ProjecaoTest |
 | RN-04 | O Vencimento de cada mês é o dia da fixa, ou o último dia do mês quando ele é mais curto. | `Vigencia::vencimentoNoMes` | DespesaFixaVigenciaTest |
 | RN-05 | Parcelas: fim = início + N − 1; cada Ocorrência recebe o nome "Nome (k/N)". Informar parcelas e mês de fim juntos responde 422. | `Vigencia::fimPorParcelas, Ocorrencia::nome, DespesasFixasRequest` | DespesaFixaVigenciaTest |
-| RN-06 | O Tipo de Despesa "Fixa" é reservado (`reservado = 1`): não pode ser excluído nem renomeado, não aparece para Despesa Variável e é atribuído a toda fixa e Ocorrência. | `TiposDespesa, DespesasRequest` | TipoDespesaReservadoTest |
+| RN-06 | Uma Despesa é só Fixa ou Variável: não há Tipo de Despesa nas telas, e Despesas e fixas são gravadas sem tipo. | `DespesasRequest, Despesa, DespesaFixa` | DespesaSemTipoTest |
 | RN-07 | "Esta e as seguintes" é recusado num mês passado, numa Ocorrência paga e quando o mês do Vencimento muda. | `Despesa::recusaSeguintes, Despesa::updateDespesa, Proventos::updateProvento` | OcorrenciaDespesaFixaEscopoTest, OcorrenciaProventoFixoEscopoTest |
 | RN-08 | Reajuste: os meses anteriores ainda não gravados ficam com o valor antigo; do mês em diante, sobrescreve também os ajustados à mão, menos os pagos. | `Recorrente::reajustar` | OcorrenciaDespesaFixaEscopoTest |
 | RN-09 | Encerramento só encurta e não aceita mês passado. Ocorrências pagas são preservadas e estendem o fim até elas; fim antes do início exclui a recorrência. | `Recorrente::encerrar, fimDepoisDoAtual, requests das fixas` | OcorrenciaDespesaFixaEscopoTest, ProjecaoTest |
-| RN-10 | Uma Despesa Fixa que já tem Ocorrências não pode ser excluída; use Encerrar. | `DespesaFixa::deleteDespesaFixa` | sem teste |
+| RN-10 | Excluir uma Despesa Fixa apaga ela e todas as Ocorrências, só enquanto nenhuma foi paga; com alguma paga, use Encerrar. | `DespesaFixa::deleteDespesaFixa` | DespesasFixasTelaTest |
 | RN-11 | Pagamento é atômico: `pago` e Lançamento mudam juntos. Excluir Despesa paga apaga os Lançamentos do dono. | `Despesa::pagamentoDespesa, Lancamento::lancar, excluirComLancamentos` | ConsistenciaDespesaLancamentoTest |
 | RN-12 | Projeção: Horizonte em {3, 6, 12} (outro valor vira 6); Saldo Acumulado parte de zero; Marcos incluem o mês atual; Alertas só para distância ≥ 1. | `Projecao::horizonteValido, meses, alertas` | ProjecaoTest |
 | RN-13 | Valores de Despesa, fixas, Lançamento e Provento até `DECIMAL(10,2)` (R$ 99.999.999,99). | `DDL valores_ate_99_milhoes.sql, provento_fixo.sql` | smoke no MySQL (PR #20) |
 | RN-14 | O guia do usuário é público em `/guia` e tem link na tela de login. | `routes/web.php, auth/login.blade.php` | GuiaDoUsuarioTest (PR #23) |
+| RN-15 | Ocultação: a fixa oculta e todas as suas Ocorrências, inclusive pagas, somem de listas, totais, Projeção, Marcos e Alertas, sem nada ser alterado; desocultar restaura tudo. | `SemOcorrenciasOcultas, Recorrente::ocultar, completarJanela` | OcultacaoTest |
+| RN-16 | Comprometimento da Renda com Despesas Fixas = Valor Previsto das fixas vigentes ÷ Proventos do mês atual (sem Proventos, não é calculado). | `DespesasFixasController::index` | DespesasFixasTelaTest |
+| RN-17 | A tela inicial depois do login é a Projeção; `/home` redireciona para ela. | `RouteServiceProvider::HOME, routes/web.php` | MenuTest |
 
 ## 11. Rotas de domínio (web)
 
@@ -349,14 +338,15 @@ Todas sob o middleware `auth`, exceto login, cadastro, recuperação de senha e 
 | PUT | `/despesas/payDespesa/:id` | Toggle de pagamento (RN-11) |
 | PUT | `/despesasFixas/reajustar/:id` | Reajuste a partir de `a_partir_de` (≥ mês atual) |
 | PUT | `/despesasFixas/encerrar/:id` | Encerramento em `mes_fim` |
+| PUT | `/despesasFixas/ocultar/:id` | Ocultação: `oculta=1` oculta, `oculta=0` desoculta |
+| DELETE | `/despesasFixas/delete/:id` | Exclui a fixa e todas as Ocorrências, se nenhuma estiver paga (RN-10) |
 | PUT | `/proventosFixos/reajustar/:id` | Reajuste do Provento Fixo |
 | PUT | `/proventosFixos/encerrar/:id` | Encerramento do Provento Fixo |
+| PUT | `/proventosFixos/ocultar/:id` | Ocultação do Provento Fixo |
 | PUT | `/proventos/update/:id` | Edita; `update_subsequent` vira Reajuste |
 | DELETE | `/proventos/delete/:id` | `delete_subsequent` vira Encerramento |
 | POST | `/proventos/copyProventos` | Copia os Proventos avulsos do usuário do mês anterior para o mês do filtro |
-| GET | `/tiposDespesas/optionsDespesasJSON` | Tipos do usuário, sem o reservado |
-| GET | `/projecao?horizonte` | Projeção, Marcos e Alertas |
-| PUT | `/dividas/payDebt/:id` | Soma uma parcela paga à Dívida |
+| GET | `/projecao?horizonte` | Projeção, Marcos, Alertas e Datas Comemorativas; tela inicial |
 | GET | `/guia` | Guia do usuário, público |
 
 A API (`routes/api.php`, middleware `verifyApi` com JWT) expõe usuários, Tipos de Despesa, Lançamentos (só leitura) e Proventos. Ela não tem Despesas, fixas nem Projeção.
@@ -371,17 +361,16 @@ Testes de Feature pelas rotas HTTP, com `RefreshDatabase` sobre SQLite em memór
 > docker exec jefin_finances_app sh -c 'cd /var/www && php artisan config:clear && vendor/bin/phpunit'
 > ```
 
-- Estado atual: 112 testes, 587 asserções.
-- Não cobertos: as travas `lockForUpdate` (o SQLite as ignora), o JavaScript das telas (sem testes de navegador), Dívidas e Usuários.
+- Estado atual: 140 testes, 761 asserções.
+- Não cobertos: as travas `lockForUpdate` (o SQLite as ignora), o JavaScript das telas e o dark mode (sem testes de navegador) e Usuários.
 - Schema de teste: `tests/migrations/2026_11_21_000001_criar_schema_de_teste.php`. Ao mudar um DDL, atualize os dois.
 
 ## 13. Dívida técnica conhecida
 
 | Gravidade | Item | Detalhe |
 |---|---|---|
-| alta | Dívidas e Usuários sem checagem de dono | Os models de Dívidas e Usuários não aplicam RN-01 nem registram falhas no log. |
+| alta | Usuários sem checagem de dono | O model de Usuários não aplica RN-01 nem registra falhas no log. |
 | média | Schema por DDL manual | Sem migrations: cada ambiente aplica `database/ddl` na ordem certa, e o schema de teste é mantido à parte. Divergência entre os dois passa despercebida. |
-| média | Dívidas em FLOAT e fora da Projeção | `valor_parcela` e `valor_parcial` são `FLOAT(6,2)` (até 9.999,99, com imprecisão). Dívidas não entram no Saldo do Mês. |
-| média | Concorrência e JS sem testes | As travas só funcionam no MySQL e não são exercitadas pela suíte; as telas não têm teste de navegador. A RN-10 (excluir fixa com Ocorrências) não tem teste. |
+| média | Concorrência e JS sem testes | As travas só funcionam no MySQL e não são exercitadas pela suíte; as telas não têm teste de navegador. A Ocultação depende de um global scope: consultas novas em `Despesa`/`Proventos` já o recebem, mas um `withoutGlobalScopes()` esquecido reexibe Ocorrências ocultas. |
 | baixa | Debugbar com chave duplicada | `config/debugbar.php` define `storage.enabled` duas vezes; sem `DEBUGBAR_STORAGE_ENABLED=true`, requisições AJAX estouram o buffer do nginx (502). |
-| baixa | Tabela órfã e guia manual | `valor_hora` não é usada pelo código. O guia do usuário é HTML estático e precisa ser atualizado quando uma regra muda. |
+| baixa | Tabelas órfãs e guia manual | `valor_hora`, `dividas` e `despesas_tipos` (fora da API) não são usadas pelo código. O guia do usuário é HTML estático e precisa ser atualizado quando uma regra muda. |
