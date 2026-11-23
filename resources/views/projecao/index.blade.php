@@ -62,6 +62,16 @@
                         </div>
                     </div>
                     <div class="card-body">
+                        @if (count($mes['datasComemorativas']) > 0)
+                            {{-- DATAS COMEMORATIVAS: PARA SE PROGRAMAR PARA OS GASTOS VARIÁVEIS DO MÊS --}}
+                            <div class="mb-2">
+                                @foreach ($mes['datasComemorativas'] as $comemorativa)
+                                    <span class="badge bg-light-info mb-1" title="Data Comemorativa">
+                                        <i class="fa fa-calendar-day"></i> {{ $comemorativa['nome'] }} ({{ $comemorativa['data']->format('d/m') }})
+                                    </span>
+                                @endforeach
+                            </div>
+                        @endif
                         <table class="table table-sm table-borderless mb-2">
                             <tr>
                                 <td class="text-info"> Proventos </td>

@@ -271,6 +271,18 @@ class ProjecaoTest extends TestCase
     }
 
     /** @test */
+    public function cada_card_mostra_as_datas_comemorativas_do_mes()
+    {
+        $resposta = $this->projecao(['horizonte' => 3]);
+        $meses = $this->meses($resposta);
+
+        $this->assertSame(['Black Friday'], array_column($meses[0]['datasComemorativas'], 'nome'));
+        $this->assertSame(['Natal', 'Réveillon'], array_column($meses[1]['datasComemorativas'], 'nome'));
+        $this->assertSame(['Carnaval'], array_column($meses[3]['datasComemorativas'], 'nome'));
+        $resposta->assertSee('Black Friday (27/11)')->assertSee('Carnaval (09/02)');
+    }
+
+    /** @test */
     public function marcos_e_alertas_fora_do_horizonte_nao_aparecem()
     {
         $this->cadastrarDespesaFixa(['nome_despesa' => 'Escola', 'valor' => '900,00', 'mes_inicio' => '2027-09']);

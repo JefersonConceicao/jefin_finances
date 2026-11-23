@@ -95,6 +95,7 @@ class Projecao
             ];
 
             $mes['gruposDeMarcos'] = $this->gruposDeMarcos($data);
+            $mes['datasComemorativas'] = DatasComemorativas::doMes($data->year, $data->month);
             $mes['marcos'] = self::marcosDosGrupos($mes['gruposDeMarcos']);
 
             if($isMesAtual){
