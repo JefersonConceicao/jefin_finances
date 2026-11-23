@@ -3649,7 +3649,6 @@ var habilitaBotoes = function habilitaBotoes() {
         e.preventDefault();
         formDespesas();
       });
-      settingsInModal();
     });
   });
   $(".rowSettingsDespesa").on("click", function (e) {
@@ -3663,7 +3662,6 @@ var habilitaBotoes = function habilitaBotoes() {
         e.preventDefault();
         formDespesas(id);
       });
-      settingsInModal();
     });
   });
   $(".btnDeleteDespesa").on("click", function () {
@@ -3771,50 +3769,6 @@ var getFilterDespesas = function getFilterDespesas() {
       $(grid).html($(response).find(grid + " >"));
       habilitaBotoes();
     }
-  });
-};
-var settingsInModal = function settingsInModal() {
-  var url = '/tiposDespesas/store';
-  $("#btnAddTipoDespesa").on("click", function () {
-    var button = $(this);
-    var formData = {
-      nome: $("input[name=\"nome\"]").val(),
-      ativo: $("select[name=\"ativo\"]").val()
-    };
-    $.ajax({
-      type: "POST",
-      url: url,
-      data: formData,
-      dataType: "JSON",
-      beforeSend: function beforeSend() {
-        button.prop("disabled", true).html("<i class=\"fa fa-spinner fa-spin\"> </i>");
-      },
-      success: function success(response) {
-        Swal.fire({
-          toast: true,
-          position: 'bottom-left',
-          title: "<h5 style=\"color:white\"> ".concat(response.msg, " </h5>"),
-          icon: !response.error ? 'success' : 'error',
-          showConfirmButton: false,
-          timer: 3000,
-          background: response.error ? 'red' : color()["default"]
-        });
-        new bootstrap.Collapse($("#formAddTipoDespesa"), {
-          hide: true
-        });
-        $("input[name=\"nome\"]").val("");
-        AppUsage.updateOptionsField($("select[name='despesa_tipo_id']"), '/tiposDespesas/optionsDespesasJSON');
-      },
-      error: function error(jqXHR, textStatus, _error2) {
-        var errors = jqXHR.responseJSON.errors;
-        if (!!errors) {
-          AppUsage.showMessagesValidator("#formAddTipoDespesa", errors);
-        }
-      },
-      complete: function complete() {
-        button.prop("disabled", false).html("Salvar");
-      }
-    });
   });
 };
 module.exports = {
@@ -4641,128 +4595,6 @@ module.exports = {
 
 /***/ }),
 
-/***/ "./resources/js/Logged/AppTipoDespesas.js":
-/*!************************************************!*\
-  !*** ./resources/js/Logged/AppTipoDespesas.js ***!
-  \************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-var _require = __webpack_require__(/*! sweetalert2 */ "./node_modules/sweetalert2/dist/sweetalert2.all.js"),
-  Swal = _require["default"];
-var _require2 = __webpack_require__(/*! ../Core/AppUsage */ "./resources/js/Core/AppUsage.js"),
-  loadModal = _require2.loadModal,
-  htmlLoading = _require2.htmlLoading,
-  color = _require2.color,
-  loadingContent = _require2.loadingContent,
-  deleteRowForGrid = _require2.deleteRowForGrid,
-  optionsSwalDelete = _require2.optionsSwalDelete;
-$(function () {
-  habilitaBotoes();
-  habilitaEventos();
-});
-var modalObject = "#nivel1";
-var grid = "#gridTiposDespesa";
-var habilitaEventos = function habilitaEventos() {
-  $("#serachFormTiposDespesas").on("submit", function (e) {
-    e.preventDefault();
-    getFilterTipoDespesas();
-  });
-};
-var habilitaBotoes = function habilitaBotoes() {
-  $("#addTiposDespesa").on("click", function () {
-    var url = '/tiposDespesas/create';
-    loadModal(url, function () {
-      $("#formAddTipoDespesa").on("submit", function (e) {
-        e.preventDefault();
-        formTipoDespesas();
-      });
-    });
-  });
-  $(".btnEditTiposDespesa").on("click", function (e) {
-    var id = $(this).attr("id");
-    var url = '/tiposDespesas/edit/' + id;
-    loadModal(url, function () {
-      $("#formEditTipoDespesa").on("submit", function (e) {
-        e.preventDefault();
-        formTipoDespesas(id);
-      });
-    });
-  });
-  $(".btnDeleteTiposDespesa").on("click", function () {
-    var id = $(this).attr("id");
-    var url = '/tiposDespesas/delete/' + id;
-    Swal.fire(optionsSwalDelete).then(function (result) {
-      if (result.isConfirmed) {
-        deleteRowForGrid(url, function () {
-          getFilterTipoDespesas();
-        });
-      }
-    });
-  });
-};
-var formTipoDespesas = function formTipoDespesas(id) {
-  var url = typeof id === "undefined" ? '/tiposDespesas/store' : '/tiposDespesas/update/' + id;
-  var form = typeof id === "undefined" ? '#formAddTipoDespesa' : '#formEditTipoDespesa';
-  var type = typeof id === "undefined" ? 'POST' : 'PUT';
-  $.ajax({
-    type: type,
-    url: url,
-    data: $(form).serialize(),
-    dataType: "JSON",
-    beforeSend: function beforeSend() {
-      $(form + " .btnSubmit").prop("disabled", true).html(htmlLoading);
-    },
-    success: function success(response) {
-      Swal.fire({
-        toast: true,
-        position: 'bottom-left',
-        title: "<h5 style=\"color:white\"> ".concat(response.msg, " </h5>"),
-        icon: !response.error ? 'success' : 'error',
-        showConfirmButton: false,
-        timer: 3000,
-        background: response.error ? 'red' : color()["default"],
-        didOpen: function didOpen() {
-          $(modalObject).modal('hide');
-        }
-      });
-      getFilterTipoDespesas();
-    },
-    error: function error(jqXHR, textStatus, _error) {
-      var errors = jqXHR.responseJSON.errors;
-      if (!!errors) {
-        AppUsage.showMessagesValidator(form, errors);
-      }
-    },
-    complete: function complete() {
-      $(form + " .btnSubmit").prop("disabled", false).html("Salvar");
-    }
-  });
-};
-var getFilterTipoDespesas = function getFilterTipoDespesas() {
-  var url = '/tiposDespesas/';
-  var form = "#serachFormTiposDespesas";
-  $.ajax({
-    type: "GET",
-    url: url,
-    data: $(form).serialize(),
-    dataType: "HTML",
-    beforeSend: function beforeSend() {
-      loadingContent(grid);
-    },
-    success: function success(response) {
-      $(grid).html($(response).find(grid + " >"));
-      habilitaBotoes();
-    }
-  });
-};
-module.exports = {
-  habilitaEventos: habilitaEventos,
-  habilitaBotoes: habilitaBotoes
-};
-
-/***/ }),
-
 /***/ "./resources/js/Logged/AppUsers.js":
 /*!*****************************************!*\
   !*** ./resources/js/Logged/AppUsers.js ***!
@@ -4905,7 +4737,6 @@ window.AppProventos = __webpack_require__(/*! ./Logged/AppProventos */ "./resour
 window.AppDespesas = __webpack_require__(/*! ./Logged/AppDespesas */ "./resources/js/Logged/AppDespesas.js");
 window.AppDespesasFixas = __webpack_require__(/*! ./Logged/AppDespesasFixas */ "./resources/js/Logged/AppDespesasFixas.js");
 window.AppProventosFixos = __webpack_require__(/*! ./Logged/AppProventosFixos */ "./resources/js/Logged/AppProventosFixos.js");
-window.AppTipoDespesas = __webpack_require__(/*! ./Logged/AppTipoDespesas */ "./resources/js/Logged/AppTipoDespesas.js");
 window.AppLancamentos = __webpack_require__(/*! ./Logged/AppLancamentos */ "./resources/js/Logged/AppLancamentos.js");
 window.AppProfile = __webpack_require__(/*! ./Logged/AppProfile */ "./resources/js/Logged/AppProfile.js");
 window.AppForgotPassword = __webpack_require__(/*! ./Auth/AppForgotPassword */ "./resources/js/Auth/AppForgotPassword.js");

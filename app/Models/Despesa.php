@@ -14,7 +14,6 @@ class Despesa extends Model
     protected $fillable = [
         'user_id',
         'nome_despesa',
-        'despesa_tipo_id',
         'despesa_fixa_id',
         'valor_total',
         'data_vencimento',
@@ -23,10 +22,6 @@ class Despesa extends Model
         'created_at',
         'updated_at'
     ];
-
-    public function despesaTipo(){
-        return $this->hasOne(TiposDespesa::class, 'id', 'despesa_tipo_id');
-    }
 
     const ESCOPO_SO_ESTA = 'so_esta';
     const ESCOPO_SEGUINTES = 'seguintes';
@@ -91,13 +86,7 @@ class Despesa extends Model
             $conditions[] = ['nome_despesa', 'LIKE', "%".$request['nome_despesa']."%"];
         }
 
-        if(isset($request['despesa_tipo_id']) && !empty($request['despesa_tipo_id'])){
-            $conditions[] = ['despesa_tipo_id', '=', $request['despesa_tipo_id']];
-        }
-
-        $query = $this
-            ->where($conditions)
-            ->with('despesaTipo');
+        $query = $this->where($conditions);
 
         //COMPETÊNCIA: MÊS DO VENCIMENTO; REGISTROS ANTIGOS SEM VENCIMENTO USAM A DATA DE CADASTRO (ADR-0002)
         $competencia = DB::raw('COALESCE(data_vencimento, created_at)');
@@ -162,7 +151,7 @@ class Despesa extends Model
         $escopo = $request['escopo'] ?? self::ESCOPO_SO_ESTA;
 
         //SÓ ESTES CAMPOS MUDAM PELA EDIÇÃO: DONO, DATA DE CADASTRO, PAGAMENTO E DESPESA FIXA DE ORIGEM FICAM COMO ESTÃO
-        $request = Arr::only($request, ['nome_despesa', 'despesa_tipo_id', 'valor_total', 'ativo', 'data_vencimento']);
+        $request = Arr::only($request, ['nome_despesa', 'valor_total', 'ativo', 'data_vencimento']);
 
         try{
             if(isset($request['valor_total']) && !empty($request['valor_total'])){
@@ -191,8 +180,8 @@ class Despesa extends Model
                     //"ESTA E AS SEGUINTES" É O REAJUSTE DA DESPESA FIXA, A PARTIR DO MÊS DESTA OCORRÊNCIA
                     $fixa->reajustar($despesa->competencia(), $request['valor_total'], $dia);
 
-                    //O QUE NÃO É DO REAJUSTE (NOME, TIPO, ATIVO) VALE SÓ PARA ESTA OCORRÊNCIA
-                    $despesa->refresh()->fill(Arr::only($request, ['nome_despesa', 'despesa_tipo_id', 'ativo']))->save();
+                    //O QUE NÃO É DO REAJUSTE (NOME, ATIVO) VALE SÓ PARA ESTA OCORRÊNCIA
+                    $despesa->refresh()->fill(Arr::only($request, ['nome_despesa', 'ativo']))->save();
                 });
             }else{
                 $despesa->fill($request)->save();

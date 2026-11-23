@@ -49,15 +49,6 @@ Route::group(['middleware' => 'auth'], function(){
         Route::post('/copyProventos', 'ProventosController@copyProventos')->name('proventos.copy');
     });
 
-    Route::group(['prefix' => 'tiposDespesas'], function(){
-        Route::get('/', 'TiposDespesasController@index')->name('tiposDespesas.index');
-        Route::get('/create', 'TiposDespesasController@create')->name('tiposDespesas.create');
-        Route::post('/store', 'TiposDespesasController@store')->name('tiposDespesas.store');
-        Route::get('/edit/{id}', 'TiposDespesasController@edit')->name('tiposDespesas.edit');
-        Route::put('/update/{id}', 'TiposDespesasController@update')->name('tiposDespesas.update');
-        Route::delete('/delete/{id}', 'TiposDespesasController@delete')->name('tiposDespesas.delete');
-        Route::get('/optionsDespesasJSON', 'TiposDespesasController@optionsDespesasJSON') ->name('tiposDespesas.optionsDespesas');
-    });
 
     Route::group(['prefix' => 'despesas'], function(){
         Route::get('/', 'DespesasController@index')->name('despesas.index');

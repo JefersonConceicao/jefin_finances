@@ -15,17 +15,6 @@
                 </div>
                 <div class="col-md-3">
                     <div class="form-group">
-                        <label> Tipo Despesa </label>
-                        <select name="despesa_tipo_id" class="form-select">
-                            <option value=""> Todos </option>
-                            @foreach ($optionsTipoDespesa as $k => $v)
-                                <option value="{{ $k }}"> {{ $v }} </option>
-                            @endforeach
-                        </select>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="form-group">
                         <label> Mes </label>
                         <select name="mes" class="form-select">
                             <option value=""> Todos os meses </option>
@@ -100,7 +89,6 @@
                                 <th> Vencimento </th>
                                 <th> Nome </th>
                                 <th> Valor (R$) </th>
-                                <th> Tipo </th>
                                 <th width="2%"> Ações </th>
                             </tr>
                         </thead>
@@ -118,9 +106,6 @@
                                         @endif
                                     </td>
                                     <td> {{ convertValorReal($despesa->valor_total) }} </td>
-                                    <td>
-                                        <b> {{ $despesa->despesaTipo->nome }} </b>
-                                    </td>
                                     <td>
                                         <div class="text-center" style="display:flex;">
                                             <button

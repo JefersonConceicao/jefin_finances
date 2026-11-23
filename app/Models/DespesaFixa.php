@@ -17,7 +17,6 @@ class DespesaFixa extends Model
     protected $fillable = [
         'user_id',
         'nome_despesa',
-        'despesa_tipo_id',
         'valor',
         'ativo',
         'mes_inicio',
@@ -31,10 +30,6 @@ class DespesaFixa extends Model
         'ocorrencias_ate' => 'date',
     ];
 
-    public function despesaTipo(){
-        return $this->hasOne(TiposDespesa::class, 'id', 'despesa_tipo_id');
-    }
-
     public function despesas(){
         return $this->hasMany(Despesa::class, 'despesa_fixa_id', 'id');
     }
@@ -47,17 +42,12 @@ class DespesaFixa extends Model
             $conditions[] = ['nome_despesa', 'LIKE', "%".$request['nome_despesa']."%"];
         }
 
-        if(isset($request['despesa_tipo_id']) && !empty($request['despesa_tipo_id'])){
-            $conditions[] = ['despesa_tipo_id', '=', $request['despesa_tipo_id']];
-        }
-
         if(isset($request['ativo']) && $request['ativo'] !== ''){
             $conditions[] = ['ativo', '=', $request['ativo']];
         }
 
         return $this
             ->where($conditions)
-            ->with('despesaTipo')
             ->withCount('ocorrencias')
             ->orderBy('ativo', 'DESC')
             ->orderBy('valor', 'DESC');
@@ -80,7 +70,6 @@ class DespesaFixa extends Model
                     'nome_despesa' => $request['nome_despesa'],
                     'valor' => setToDecimal($request['valor']),
                     'ativo' => $request['ativo'] ?? 1,
-                    'despesa_tipo_id' => (new TiposDespesa)->idTipoFixaDoUsuario($user),
                     'mes_inicio' => $inicio->format('Y-m-d'),
                     'mes_fim' => $fim ? $fim->format('Y-m-d') : null,
                     'dia_vencimento' => (int) $request['dia_vencimento'],
@@ -119,7 +108,6 @@ class DespesaFixa extends Model
         Despesa::create([
             'user_id' => $this->user_id,
             'nome_despesa' => $ocorrencia->nome($this->nome_despesa),
-            'despesa_tipo_id' => $this->despesa_tipo_id,
             'despesa_fixa_id' => $this->id,
             'valor_total' => $this->valor,
             'data_vencimento' => $ocorrencia->vencimento->format('Y-m-d'),

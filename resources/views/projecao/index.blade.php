@@ -147,7 +147,6 @@
                                         @foreach ($mes['listaVariaveis'] as $variavel)
                                             <tr>
                                                 <td> {{ $variavel->nome_despesa }} </td>
-                                                <td> {{ optional($variavel->despesaTipo)->nome }} </td>
                                                 <td class="text-end"> {{ convertValorReal($variavel->valor_total) }} </td>
                                             </tr>
                                         @endforeach

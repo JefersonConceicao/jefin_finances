@@ -130,43 +130,6 @@ class DonoDaDespesaTest extends TestCase
     }
 
     /** @test */
-    public function editar_a_despesa_com_tipo_de_despesa_de_outro_usuario_e_recusado()
-    {
-        $tipoDoOutro = TiposDespesa::create(['nome' => 'TipoDoOutro', 'ativo' => 1, 'user_id' => $this->outro->id]);
-
-        $this->actingAs($this->dono)->putJson(route('despesas.update', $this->despesa->id), [
-            'nome_despesa' => 'Aluguel',
-            'despesa_tipo_id' => $tipoDoOutro->id,
-            'valor_total' => '1.200,00',
-            'ativo' => 1,
-            'data_vencimento' => '05/11/2026',
-        ])
-            ->assertStatus(422)
-            ->assertJsonValidationErrors('despesa_tipo_id');
-
-        $this->listaDoDono()
-            ->assertSee('Moradia')
-            ->assertDontSee('TipoDoOutro');
-    }
-
-    /** @test */
-    public function cadastrar_despesa_com_tipo_de_despesa_de_outro_usuario_e_recusado()
-    {
-        $tipoDoOutro = TiposDespesa::create(['nome' => 'TipoDoOutro', 'ativo' => 1, 'user_id' => $this->outro->id]);
-
-        $this->actingAs($this->dono)->postJson(route('despesas.store'), [
-            'nome_despesa' => 'Padaria',
-            'despesa_tipo_id' => $tipoDoOutro->id,
-            'valor_total' => '20,00',
-            'ativo' => 1,
-        ])
-            ->assertStatus(422)
-            ->assertJsonValidationErrors('despesa_tipo_id');
-
-        $this->listaDoDono()->assertDontSee('Padaria');
-    }
-
-    /** @test */
     public function outro_usuario_nao_exclui_a_despesa()
     {
         $this->actingAs($this->outro)
