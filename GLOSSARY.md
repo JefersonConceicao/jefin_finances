@@ -9,7 +9,7 @@ Um gasto do usuário que conta em um mês específico (sua Competência).
 _Avoid_: Gasto, conta
 
 **Despesa Fixa**:
-Um gasto recorrente que se repete todo mês dentro da sua Vigência; serve de modelo para gerar a Despesa de cada mês. Toda Despesa Fixa e suas Ocorrências têm o Tipo de Despesa "Fixa". Parcelas (cartão, financiamento) são Despesas Fixas com fim.
+Um gasto recorrente que se repete todo mês dentro da sua Vigência; serve de modelo para gerar a Despesa de cada mês. Parcelas (cartão, financiamento) são Despesas Fixas com fim. Pode ser excluída junto com todas as suas Ocorrências enquanto nenhuma delas foi paga; depois disso, só o Encerramento.
 _Avoid_: Despesa recorrente
 
 **Ocorrência**:
@@ -17,12 +17,8 @@ A Despesa (ou Provento) de um mês gerada por uma Despesa Fixa (ou Provento Fixo
 _Avoid_: Instância, parcela, despesa gerada
 
 **Despesa Variável**:
-Uma Despesa avulsa, que não foi gerada a partir de uma Despesa Fixa.
-_Avoid_: Gasto extra, despesa avulsa
-
-**Tipo de Despesa**:
-A categoria de uma Despesa (Moradia, Transporte…). Despesas Variáveis têm o tipo escolhido pelo usuário; Despesas Fixas têm sempre o tipo "Fixa", que é reservado a elas.
-_Avoid_: Categoria
+Uma Despesa avulsa, que não foi gerada a partir de uma Despesa Fixa. Fixa ou Variável é a única classificação de uma Despesa; não há categorias.
+_Avoid_: Gasto extra, despesa avulsa, tipo de despesa, categoria
 
 **Competência**:
 O mês em que uma Despesa conta no orçamento: o mês do seu Vencimento, independente de quando ela foi cadastrada.
@@ -47,6 +43,10 @@ _Avoid_: Atualização, correção
 **Encerramento**:
 Definir o mês de fim da Vigência de uma Despesa Fixa ou Provento Fixo, no mês atual ou no futuro.
 _Avoid_: Inativação, cancelamento
+
+**Ocultação**:
+Esconder uma Despesa Fixa ou Provento Fixo, junto com todas as suas Ocorrências, de todo o app (listas, totais, Projeção, Marcos e Alertas), como se nunca tivesse existido, sem excluir nem alterar nada; desfazer a Ocultação traz tudo de volta. Serve para simular na Projeção como ficaria sem aquele registro.
+_Avoid_: Inativação, desativação, arquivamento, simulação
 
 ## Proventos
 
@@ -83,3 +83,11 @@ _Avoid_: Evento, mudança
 **Alerta**:
 Um aviso na Projeção sobre o impacto futuro de um Marco ou de uma Despesa Variável com Competência futura; é de ganho (o fluxo melhora) ou de atenção (o fluxo piora).
 _Avoid_: Notificação, lembrete
+
+**Comprometimento da Renda**:
+Quanto dos Proventos de um mês é tomado pelas Despesas daquele mês, em percentual.
+_Avoid_: Percentual de gastos, uso da renda
+
+**Data Comemorativa**:
+Uma data do calendário (nacional ou de Salvador/BA) que costuma trazer gastos variáveis extras, como São João ou Natal; aparece no mês da Projeção em que cai.
+_Avoid_: Feriado, evento

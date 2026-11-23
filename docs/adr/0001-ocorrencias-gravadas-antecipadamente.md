@@ -8,3 +8,4 @@ Despesas Fixas e Proventos Fixos gravam suas Ocorrências de uma vez, para toda 
 - "Esta e as seguintes" sobrescreve inclusive Ocorrências ajustadas manualmente; não se rastreia quais meses foram editados à mão.
 - Não há geração retroativa: uma recorrência com início no passado só grava do mês atual em diante.
 - Uma Despesa Fixa deixa de ficar "travada" após gerar Despesas; o histórico é preservado porque alterações só afetam a Ocorrência escolhida e as seguintes.
+- Excluir uma Despesa Fixa apaga junto todas as suas Ocorrências, e só é permitido enquanto nenhuma delas foi paga. Isso corrige um cadastro errado (mês de início ou número de parcelas) sem apagar pagamentos reais; com algo pago, o caminho é o Encerramento.
