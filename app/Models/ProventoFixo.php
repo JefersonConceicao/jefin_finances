@@ -7,6 +7,7 @@ use DB;
 use Illuminate\Database\Eloquent\Model;
 use App\Recorrencia\Ocorrencia;
 use App\Recorrencia\Recorrente;
+use App\Recorrencia\SemOcorrenciasOcultas;
 
 /**
  * Provento recorrente (ex.: salário) que se repete todo mês dentro da sua Vigência.
@@ -32,8 +33,9 @@ class ProventoFixo extends Model
         'ocorrencias_ate' => 'date',
     ];
 
+    //O PRÓPRIO PROVENTO FIXO ENXERGA AS SUAS OCORRÊNCIAS MESMO OCULTO (PARA ENCERRAR E EXCLUIR)
     public function ocorrencias(){
-        return $this->hasMany(Proventos::class, 'provento_fixo_id', 'id');
+        return $this->hasMany(Proventos::class, 'provento_fixo_id', 'id')->withoutGlobalScope(SemOcorrenciasOcultas::class);
     }
 
     protected function colunaCompetencia(){
@@ -64,10 +66,17 @@ class ProventoFixo extends Model
         $provento->delete();
     }
 
-    public function getProventosFixos($user){
-        return $this
-            ->where('user_id', $user->id)
+    public function getProventosFixos($user, $mostrarOcultas = false){
+        $query = $this->where('user_id', $user->id);
+
+        //OS OCULTOS SÓ APARECEM COM "MOSTRAR OCULTAS", DEPOIS DOS VISÍVEIS
+        if(!$mostrarOcultas){
+            $query->where('oculta', 0);
+        }
+
+        return $query
             ->withCount('ocorrencias')
+            ->orderBy('oculta', 'ASC')
             ->orderBy('valor', 'DESC');
     }
 

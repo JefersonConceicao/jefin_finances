@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use DB;
 use Carbon\Carbon;
+use App\Recorrencia\SemOcorrenciasOcultas;
 
 class Proventos extends Model
 {
@@ -19,6 +20,13 @@ class Proventos extends Model
     ];
 
     public $timestamps = true;
+
+    protected static function boot(){
+        parent::boot();
+
+        //OCORRÊNCIAS DE PROVENTO FIXO OCULTO SOMEM DE TODO O APP
+        static::addGlobalScope(new SemOcorrenciasOcultas('provento_fixo_id', 'proventos_fixos'));
+    }
 
     public function proventoFixo(){
         return $this->belongsTo(ProventoFixo::class, 'provento_fixo_id', 'id');

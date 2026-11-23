@@ -69,6 +69,7 @@ Route::group(['middleware' => 'auth'], function(){
         Route::delete('/delete/{id}', 'ProventosFixosController@delete')->name('proventosFixos.delete');
         Route::put('/reajustar/{id}', 'ProventosFixosController@reajustar')->name('proventosFixos.reajustar');
         Route::put('/encerrar/{id}', 'ProventosFixosController@encerrar')->name('proventosFixos.encerrar');
+        Route::put('/ocultar/{id}', 'ProventosFixosController@ocultar')->name('proventosFixos.ocultar');
     });
 
     Route::group(['prefix' => 'despesasFixas'], function(){
@@ -80,6 +81,7 @@ Route::group(['middleware' => 'auth'], function(){
         Route::delete('/delete/{id}', 'DespesasFixasController@delete')->name('despesasFixas.delete');
         Route::put('/reajustar/{id}', 'DespesasFixasController@reajustar')->name('despesasFixas.reajustar');
         Route::put('/encerrar/{id}', 'DespesasFixasController@encerrar')->name('despesasFixas.encerrar');
+        Route::put('/ocultar/{id}', 'DespesasFixasController@ocultar')->name('despesasFixas.ocultar');
     });
 
     Route::get('/projecao', 'ProjecaoController@index')->name('projecao.index');

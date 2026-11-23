@@ -44,6 +44,7 @@ class CriarSchemaDeTeste extends Migration
             $table->unsignedInteger('despesa_tipo_id')->nullable();
             $table->decimal('valor', 10, 2);
             $table->unsignedTinyInteger('ativo')->default(1);
+            $table->unsignedTinyInteger('oculta')->default(0);
             $table->date('mes_inicio');
             $table->date('mes_fim')->nullable();
             $table->unsignedTinyInteger('dia_vencimento');
@@ -77,6 +78,7 @@ class CriarSchemaDeTeste extends Migration
             $table->string('descricao', 255);
             $table->decimal('valor', 10, 2);
             $table->unsignedTinyInteger('ativo')->default(1);
+            $table->unsignedTinyInteger('oculta')->default(0);
             $table->date('mes_inicio');
             $table->date('mes_fim')->nullable();
             $table->date('ocorrencias_ate')->nullable();

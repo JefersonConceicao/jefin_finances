@@ -125,7 +125,7 @@ class Projecao
     private function despesasFixas()
     {
         if($this->despesasFixas === null){
-            $this->despesasFixas = DespesaFixa::where('user_id', $this->user->id)->where('ativo', 1)->get();
+            $this->despesasFixas = DespesaFixa::where('user_id', $this->user->id)->where('ativo', 1)->where('oculta', 0)->get();
         }
 
         return $this->despesasFixas;
@@ -134,7 +134,7 @@ class Projecao
     private function proventosFixos()
     {
         if($this->proventosFixos === null){
-            $this->proventosFixos = ProventoFixo::where('user_id', $this->user->id)->where('ativo', 1)->get();
+            $this->proventosFixos = ProventoFixo::where('user_id', $this->user->id)->where('ativo', 1)->where('oculta', 0)->get();
         }
 
         return $this->proventosFixos;

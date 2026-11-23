@@ -27,6 +27,47 @@ const habilitaEventos = () => {
 }
 
 const habilitaBotoes = () => {
+    $("#mostrarOcultas").on("change", function(){
+        getFilterProventosFixos()
+    });
+
+    $(".btnOcultarProventoFixo").on("click", function(){
+        const id = $(this).parents('tr').attr("id");
+        const oculta = $(this).data("oculta");
+
+        const ocultar = () => $.ajax({
+            type: 'PUT',
+            url: '/proventosFixos/ocultar/' + id,
+            data: { oculta },
+            dataType: "JSON",
+            success: function (response) {
+                Swal.fire({
+                    toast:true,
+                    position: 'bottom-left',
+                    title: `<h5 style="color:white"> ${response.msg} </h5>`,
+                    icon: !response.error ? 'success' : 'error',
+                    showConfirmButton: false,
+                    timer:3000,
+                    background: response.error ? 'red' : color().default,
+                });
+
+                getFilterProventosFixos();
+            }
+        });
+
+        if(oculta == 1){
+            Swal.fire(Object.assign({}, optionsSwalDelete, {
+                title: 'Ocultar?',
+                text: 'O Provento Fixo e todas as Ocorrências dele somem de todo o app (listas, totais e Projeção), sem excluir nada. Dá para desocultar depois em "Mostrar ocultos".',
+                confirmButtonText: 'Sim, ocultar',
+            })).then(result => {
+                if(result.isConfirmed) ocultar();
+            });
+        }else{
+            ocultar();
+        }
+    });
+
     $("#addProventoFixo").on("click", function(){
         loadModal('/proventosFixos/create', function(){
             $("#formAddProventoFixo").on("submit", function(e){
@@ -174,7 +215,8 @@ const getFilterProventosFixos = () => {
     $.ajax({
         type: "GET",
         url: '/proventosFixos/',
-        data: $(searchForm).serialize(),
+        //"MOSTRAR OCULTAS" FICA NO CABEÇALHO DA GRADE, FORA DO FORMULÁRIO DE FILTRO
+        data: $(searchForm).serialize() + ($("#mostrarOcultas").is(":checked") ? '&mostrar_ocultas=1' : ''),
         dataType: "HTML",
         beforeSend:function(){
             loadingContent(grid);

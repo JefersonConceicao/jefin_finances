@@ -7,6 +7,7 @@ use DB;
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
 use App\Models\Lancamento;
+use App\Recorrencia\SemOcorrenciasOcultas;
 
 class Despesa extends Model
 {
@@ -22,6 +23,13 @@ class Despesa extends Model
         'created_at',
         'updated_at'
     ];
+
+    protected static function boot(){
+        parent::boot();
+
+        //OCORRÊNCIAS DE DESPESA FIXA OCULTA SOMEM DE TODO O APP
+        static::addGlobalScope(new SemOcorrenciasOcultas('despesa_fixa_id', 'despesas_fixas'));
+    }
 
     const ESCOPO_SO_ESTA = 'so_esta';
     const ESCOPO_SEGUINTES = 'seguintes';
@@ -205,7 +213,8 @@ class Despesa extends Model
      */
     public function excluirComLancamentos(){
         //TRAVA A DESPESA: UM PAGAMENTO AO MESMO TEMPO NÃO LANÇA DEPOIS DA LIMPEZA ABAIXO
-        static::lockForUpdate()->findOrFail($this->id);
+        //(SEM O SCOPE DA OCULTAÇÃO: O ENCERRAMENTO DE UMA FIXA OCULTA EXCLUI AS OCORRÊNCIAS DELA)
+        static::withoutGlobalScope(SemOcorrenciasOcultas::class)->lockForUpdate()->findOrFail($this->id);
         //A DESPESA PAGA LEVA JUNTO OS LANÇAMENTOS DO DONO
         Lancamento::where('despesa_id', $this->id)->where('user_id', $this->user_id)->delete();
         //DADO ANTIGO: LANÇAMENTO DE OUTRO USUÁRIO NESTA DESPESA É DELE; SÓ SE DESLIGA DELA E VIRA "OUTRO LANÇAMENTO"

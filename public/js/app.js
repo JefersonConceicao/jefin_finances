@@ -3809,6 +3809,46 @@ var habilitaEventos = function habilitaEventos() {
   });
 };
 var habilitaBotoes = function habilitaBotoes() {
+  $("#mostrarOcultas").on("change", function () {
+    getFilterDespesasFixas();
+  });
+  $(".btnOcultarDespesaFixa").on("click", function () {
+    var id = $(this).parents('tr').attr("id");
+    var oculta = $(this).data("oculta");
+    var ocultar = function ocultar() {
+      return $.ajax({
+        type: 'PUT',
+        url: '/despesasFixas/ocultar/' + id,
+        data: {
+          oculta: oculta
+        },
+        dataType: "JSON",
+        success: function success(response) {
+          Swal.fire({
+            toast: true,
+            position: 'bottom-left',
+            title: "<h5 style=\"color:white\"> ".concat(response.msg, " </h5>"),
+            icon: !response.error ? 'success' : 'error',
+            showConfirmButton: false,
+            timer: 3000,
+            background: response.error ? 'red' : color()["default"]
+          });
+          getFilterDespesasFixas();
+        }
+      });
+    };
+    if (oculta == 1) {
+      Swal.fire(Object.assign({}, optionsSwalDelete, {
+        title: 'Ocultar?',
+        text: 'A Despesa Fixa e todas as Ocorrências dela somem de todo o app (listas, totais e Projeção), sem excluir nada. Dá para desocultar depois em "Mostrar ocultas".',
+        confirmButtonText: 'Sim, ocultar'
+      })).then(function (result) {
+        if (result.isConfirmed) ocultar();
+      });
+    } else {
+      ocultar();
+    }
+  });
   $("#addDespesaFixa").on("click", function () {
     loadModal('/despesasFixas/create', function () {
       $("#formAddDespesaFixa").on("submit", function (e) {
@@ -3937,7 +3977,8 @@ var getFilterDespesasFixas = function getFilterDespesasFixas() {
   $.ajax({
     type: "GET",
     url: '/despesasFixas/',
-    data: $(searchForm).serialize(),
+    //"MOSTRAR OCULTAS" FICA NO CABEÇALHO DA GRADE, FORA DO FORMULÁRIO DE FILTRO
+    data: $(searchForm).serialize() + ($("#mostrarOcultas").is(":checked") ? '&mostrar_ocultas=1' : ''),
     dataType: "HTML",
     beforeSend: function beforeSend() {
       loadingContent(grid);
@@ -4449,6 +4490,46 @@ var habilitaEventos = function habilitaEventos() {
   });
 };
 var habilitaBotoes = function habilitaBotoes() {
+  $("#mostrarOcultas").on("change", function () {
+    getFilterProventosFixos();
+  });
+  $(".btnOcultarProventoFixo").on("click", function () {
+    var id = $(this).parents('tr').attr("id");
+    var oculta = $(this).data("oculta");
+    var ocultar = function ocultar() {
+      return $.ajax({
+        type: 'PUT',
+        url: '/proventosFixos/ocultar/' + id,
+        data: {
+          oculta: oculta
+        },
+        dataType: "JSON",
+        success: function success(response) {
+          Swal.fire({
+            toast: true,
+            position: 'bottom-left',
+            title: "<h5 style=\"color:white\"> ".concat(response.msg, " </h5>"),
+            icon: !response.error ? 'success' : 'error',
+            showConfirmButton: false,
+            timer: 3000,
+            background: response.error ? 'red' : color()["default"]
+          });
+          getFilterProventosFixos();
+        }
+      });
+    };
+    if (oculta == 1) {
+      Swal.fire(Object.assign({}, optionsSwalDelete, {
+        title: 'Ocultar?',
+        text: 'O Provento Fixo e todas as Ocorrências dele somem de todo o app (listas, totais e Projeção), sem excluir nada. Dá para desocultar depois em "Mostrar ocultos".',
+        confirmButtonText: 'Sim, ocultar'
+      })).then(function (result) {
+        if (result.isConfirmed) ocultar();
+      });
+    } else {
+      ocultar();
+    }
+  });
   $("#addProventoFixo").on("click", function () {
     loadModal('/proventosFixos/create', function () {
       $("#formAddProventoFixo").on("submit", function (e) {
@@ -4577,7 +4658,8 @@ var getFilterProventosFixos = function getFilterProventosFixos() {
   $.ajax({
     type: "GET",
     url: '/proventosFixos/',
-    data: $(searchForm).serialize(),
+    //"MOSTRAR OCULTAS" FICA NO CABEÇALHO DA GRADE, FORA DO FORMULÁRIO DE FILTRO
+    data: $(searchForm).serialize() + ($("#mostrarOcultas").is(":checked") ? '&mostrar_ocultas=1' : ''),
     dataType: "HTML",
     beforeSend: function beforeSend() {
       loadingContent(grid);

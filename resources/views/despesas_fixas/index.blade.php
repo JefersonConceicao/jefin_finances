@@ -32,6 +32,10 @@
                     <h6 class="text-primary"> Valor Previsto das vigentes neste mês: {{ "R$ " .convertValorReal($totalVigentes) }} </h6>
                 </div>
                 <div class="col-md-6">
+                    <div class="form-check form-switch float-end ms-3 mt-2">
+                        <input class="form-check-input" type="checkbox" id="mostrarOcultas" name="mostrar_ocultas" value="1" @if(request()->boolean('mostrar_ocultas')) checked @endif>
+                        <label class="form-check-label" for="mostrarOcultas"> Mostrar ocultas </label>
+                    </div>
                     <button class="float-end btn btn-primary rounded-pill" id="addDespesaFixa">
                         <i class="fa fa-plus-square"> </i> Novo
                     </button>
@@ -53,8 +57,13 @@
                         </thead>
                         <tbody>
                             @foreach ($dataDespesasFixas as $fixa)
-                                <tr id="{{ $fixa->id }}">
-                                    <td> {{ $fixa->nome_despesa }} </td>
+                                <tr id="{{ $fixa->id }}" @if($fixa->oculta) style="opacity:.55;" @endif>
+                                    <td>
+                                        {{ $fixa->nome_despesa }}
+                                        @if ($fixa->oculta)
+                                            <span class="badge bg-secondary ms-1"> Oculta </span>
+                                        @endif
+                                    </td>
                                     <td>
                                         {{ $fixa->mes_inicio->format('m/Y') }}
                                         &ndash;
@@ -67,6 +76,16 @@
                                             <button class="btn btn-secondary rounded-pill btnEditDespesaFixa" title="Alterar, Reajustar ou Encerrar">
                                                 <i class="fa fa-edit"> </i>
                                             </button>
+                                            &nbsp;
+                                            @if ($fixa->oculta)
+                                                <button class="btn btn-outline-secondary rounded-pill btnOcultarDespesaFixa" data-oculta="0" title="Desocultar">
+                                                    <i class="fa fa-eye"> </i>
+                                                </button>
+                                            @else
+                                                <button class="btn btn-outline-secondary rounded-pill btnOcultarDespesaFixa" data-oculta="1" title="Ocultar: some de todo o app, sem excluir">
+                                                    <i class="fa fa-eye-slash"> </i>
+                                                </button>
+                                            @endif
                                             @if (!$fixa->temOcorrencias())
                                                 &nbsp;
                                                 <button class="btn btn-danger rounded-pill btnDeleteDespesaFixa" title="Excluir">

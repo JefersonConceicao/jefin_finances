@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Recorrencia\Ocorrencia;
 use App\Recorrencia\Recorrente;
 use App\Recorrencia\Vigencia;
+use App\Recorrencia\SemOcorrenciasOcultas;
 
 class DespesaFixa extends Model
 {
@@ -30,8 +31,16 @@ class DespesaFixa extends Model
         'ocorrencias_ate' => 'date',
     ];
 
+    //A PRÓPRIA FIXA ENXERGA AS SUAS OCORRÊNCIAS MESMO OCULTA (PARA ENCERRAR E EXCLUIR)
     public function despesas(){
-        return $this->hasMany(Despesa::class, 'despesa_fixa_id', 'id');
+        return $this->hasMany(Despesa::class, 'despesa_fixa_id', 'id')->withoutGlobalScope(SemOcorrenciasOcultas::class);
+    }
+
+    /**
+     * Busca a Despesa Fixa só entre as do usuário: a de outro usuário é tratada como inexistente (404).
+     */
+    public function doUsuario($id, $user){
+        return $this->where('user_id', $user->id)->findOrFail($id);
     }
 
     public function getDespesasFixas($request = [], $user){
@@ -46,8 +55,14 @@ class DespesaFixa extends Model
             $conditions[] = ['ativo', '=', $request['ativo']];
         }
 
+        //AS OCULTAS SÓ APARECEM COM "MOSTRAR OCULTAS", DEPOIS DAS VISÍVEIS
+        if(empty($request['mostrar_ocultas'])){
+            $conditions[] = ['oculta', '=', 0];
+        }
+
         return $this
             ->where($conditions)
+            ->orderBy('oculta', 'ASC')
             ->withCount('ocorrencias')
             ->orderBy('ativo', 'DESC')
             ->orderBy('valor', 'DESC');
@@ -224,9 +239,10 @@ class DespesaFixa extends Model
         return $this
             ->where('user_id', $user->id)
             ->where('ativo', 1)
-            ->where('mes_inicio', '<=', $mesAtual)
+            ->where('oculta', 0)
+            ->whereDate('mes_inicio', '<=', $mesAtual)
             ->where(function($query) use ($mesAtual){
-                $query->whereNull('mes_fim')->orWhere('mes_fim', '>=', $mesAtual);
+                $query->whereNull('mes_fim')->orWhereDate('mes_fim', '>=', $mesAtual);
             })
             ->sum('valor');
     }

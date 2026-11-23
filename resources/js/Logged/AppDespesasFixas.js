@@ -27,6 +27,47 @@ const habilitaEventos = () => {
 }
 
 const habilitaBotoes = () => {
+    $("#mostrarOcultas").on("change", function(){
+        getFilterDespesasFixas()
+    });
+
+    $(".btnOcultarDespesaFixa").on("click", function(){
+        const id = $(this).parents('tr').attr("id");
+        const oculta = $(this).data("oculta");
+
+        const ocultar = () => $.ajax({
+            type: 'PUT',
+            url: '/despesasFixas/ocultar/' + id,
+            data: { oculta },
+            dataType: "JSON",
+            success: function (response) {
+                Swal.fire({
+                    toast:true,
+                    position: 'bottom-left',
+                    title: `<h5 style="color:white"> ${response.msg} </h5>`,
+                    icon: !response.error ? 'success' : 'error',
+                    showConfirmButton: false,
+                    timer:3000,
+                    background: response.error ? 'red' : color().default,
+                });
+
+                getFilterDespesasFixas();
+            }
+        });
+
+        if(oculta == 1){
+            Swal.fire(Object.assign({}, optionsSwalDelete, {
+                title: 'Ocultar?',
+                text: 'A Despesa Fixa e todas as Ocorrências dela somem de todo o app (listas, totais e Projeção), sem excluir nada. Dá para desocultar depois em "Mostrar ocultas".',
+                confirmButtonText: 'Sim, ocultar',
+            })).then(result => {
+                if(result.isConfirmed) ocultar();
+            });
+        }else{
+            ocultar();
+        }
+    });
+
     $("#addDespesaFixa").on("click", function(){
         loadModal('/despesasFixas/create', function(){
             $("#formAddDespesaFixa").on("submit", function(e){
@@ -174,7 +215,8 @@ const getFilterDespesasFixas = () => {
     $.ajax({
         type: "GET",
         url: '/despesasFixas/',
-        data: $(searchForm).serialize(),
+        //"MOSTRAR OCULTAS" FICA NO CABEÇALHO DA GRADE, FORA DO FORMULÁRIO DE FILTRO
+        data: $(searchForm).serialize() + ($("#mostrarOcultas").is(":checked") ? '&mostrar_ocultas=1' : ''),
         dataType: "HTML",
         beforeSend:function(){
             loadingContent(grid);

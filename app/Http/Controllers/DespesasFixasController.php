@@ -84,4 +84,20 @@ class DespesasFixasController extends Controller
         $data = $despesaFixa->encerrarDespesaFixa($id, $request->all(), Auth::user());
         return response()->json($data);
     }
+
+    /**
+     * Ocultação: oculta = 1 esconde a recorrência e todas as Ocorrências dela; oculta = 0 traz tudo de volta.
+     */
+    public function ocultar(Request $request, $id)
+    {
+        $recorrencia = (new DespesaFixa)->doUsuario($id, Auth::user());
+        $oculta = (bool) $request->input('oculta', 1);
+
+        $recorrencia->ocultar($oculta);
+
+        return response()->json([
+            'error' => false,
+            'msg' => $oculta ? 'Despesa fixa ocultada' : 'Despesa fixa visível de novo',
+        ]);
+    }
 }

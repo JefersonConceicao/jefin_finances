@@ -140,9 +140,11 @@ trait Recorrente
      * Completa a janela de Ocorrências das recorrências do usuário. Idempotente: abrir a tela de novo não grava nada.
      */
     public function completarJanela($user){
+        //A OCULTA NÃO GRAVA NADA ENQUANTO ESTIVER OCULTA; AO DESOCULTAR, A JANELA SE COMPLETA NORMALMENTE
         $ids = $this
             ->where('user_id', $user->id)
             ->where('ativo', 1)
+            ->where('oculta', 0)
             ->pluck('id');
 
         $gravadas = 0;
@@ -161,6 +163,14 @@ trait Recorrente
      */
     public function fimDepoisDoAtual(Carbon $fim){
         return $this->mes_fim && $fim->copy()->startOfMonth()->gt($this->mes_fim);
+    }
+
+    /**
+     * Ocultação: esconde (ou mostra de novo) a recorrência e todas as Ocorrências dela, sem alterar mais nada.
+     */
+    public function ocultar($oculta = true){
+        $this->oculta = $oculta ? 1 : 0;
+        $this->save();
     }
 
     public function temOcorrencias(){
