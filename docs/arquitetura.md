@@ -353,7 +353,7 @@ Todas sob o middleware `auth`, exceto login, cadastro, recuperação de senha e 
 | PUT | `/proventosFixos/encerrar/:id` | Encerramento do Provento Fixo |
 | PUT | `/proventos/update/:id` | Edita; `update_subsequent` vira Reajuste |
 | DELETE | `/proventos/delete/:id` | `delete_subsequent` vira Encerramento |
-| POST | `/proventos/copyProventos` | Copia o mês anterior (com falhas, issue #21) |
+| POST | `/proventos/copyProventos` | Copia os Proventos avulsos do usuário do mês anterior para o mês do filtro |
 | GET | `/tiposDespesas/optionsDespesasJSON` | Tipos do usuário, sem o reservado |
 | GET | `/projecao?horizonte` | Projeção, Marcos e Alertas |
 | PUT | `/dividas/payDebt/:id` | Soma uma parcela paga à Dívida |
@@ -371,7 +371,7 @@ Testes de Feature pelas rotas HTTP, com `RefreshDatabase` sobre SQLite em memór
 > docker exec jefin_finances_app sh -c 'cd /var/www && php artisan config:clear && vendor/bin/phpunit'
 > ```
 
-- Estado atual: 107 testes, 565 asserções.
+- Estado atual: 112 testes, 587 asserções.
 - Não cobertos: as travas `lockForUpdate` (o SQLite as ignora), o JavaScript das telas (sem testes de navegador), Dívidas e Usuários.
 - Schema de teste: `tests/migrations/2026_11_21_000001_criar_schema_de_teste.php`. Ao mudar um DDL, atualize os dois.
 
@@ -379,7 +379,6 @@ Testes de Feature pelas rotas HTTP, com `RefreshDatabase` sobre SQLite em memór
 
 | Gravidade | Item | Detalhe |
 |---|---|---|
-| alta | Cópia de Proventos entre usuários | `Proventos::copyLastMonth` não filtra por usuário, copia Ocorrências de Provento Fixo e falha em janeiro. Issue #21. |
 | alta | Dívidas e Usuários sem checagem de dono | Os models de Dívidas e Usuários não aplicam RN-01 nem registram falhas no log. |
 | média | Schema por DDL manual | Sem migrations: cada ambiente aplica `database/ddl` na ordem certa, e o schema de teste é mantido à parte. Divergência entre os dois passa despercebida. |
 | média | Dívidas em FLOAT e fora da Projeção | `valor_parcela` e `valor_parcial` são `FLOAT(6,2)` (até 9.999,99, com imprecisão). Dívidas não entram no Saldo do Mês. |
