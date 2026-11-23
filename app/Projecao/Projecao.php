@@ -23,6 +23,8 @@ class Projecao
     private $despesasFixas = null;
     private $proventosFixos = null;
     private $recorrencias = null;
+    private $nomesDosMeses = [];
+    private $totaisPorMes = [];
 
     public function __construct($user, $horizonte = null, Carbon $hoje = null)
     {
@@ -221,12 +223,49 @@ class Projecao
 
     private static function emMeses($distancia)
     {
-        return $distancia === 1 ? 'em 1 mês' : "em {$distancia} meses";
+        return $distancia === 1 ? 'Em 1 mês' : "Em {$distancia} meses";
     }
 
     private static function reais($valor)
     {
         return 'R$ ' . convertValorReal($valor);
+    }
+
+    private function nomeDoMes(Carbon $mes)
+    {
+        return $this->nomesDosMeses[$mes->format('m')] . '/' . $mes->format('Y');
+    }
+
+    /**
+     * Total de Despesas Fixas e de Proventos gravados num mês (para o "total atualizado" do Alerta).
+     */
+    private function totaisDoMes(Carbon $mes)
+    {
+        $chave = $mes->format('Y-m');
+
+        if(!isset($this->totaisPorMes[$chave])){
+            $filtro = ['mes' => $mes->format('m'), 'ano' => $mes->format('Y')];
+            $this->totaisPorMes[$chave] = [
+                'fixas' => (float) (new Despesa)->getDespesas($filtro, $this->user)->whereNotNull('despesa_fixa_id')->sum('valor_total'),
+                'proventos' => (float) (new Proventos)->getProventos($filtro, $this->user)->sum('valor_provento'),
+            ];
+        }
+
+        return $this->totaisPorMes[$chave];
+    }
+
+    /**
+     * Como fica o total afetado por um Marco: no próprio mês, quando começa; no mês seguinte, quando termina
+     * (o mês de fim ainda conta a última Ocorrência).
+     */
+    private function totalAtualizado(array $recorrencia, $comeca)
+    {
+        $mes = $comeca ? $recorrencia['inicio']->copy()->startOfMonth() : $recorrencia['fim']->copy()->startOfMonth()->addMonthNoOverflow();
+        $chave = $recorrencia['despesa'] ? 'fixas' : 'proventos';
+        $rotulo = $recorrencia['despesa'] ? 'Despesas Fixas' : 'Proventos';
+        $quando = $comeca ? '' : 'em ' . $this->nomeDoMes($mes) . ', ';
+
+        return " · {$quando}{$rotulo} passam a " . self::reais($this->totaisDoMes($mes)[$chave]);
     }
 
     private function alerta($tipo, Carbon $mes, $distancia, $valor, $descricao)
@@ -235,6 +274,7 @@ class Projecao
             'tipo' => $tipo,
             'mes' => $mes->format('Y-m'),
             'distancia' => $distancia,
+            'quando' => self::emMeses($distancia) . ' (' . $this->nomeDoMes($mes) . ')',
             'valor' => (float) $valor,
             'descricao' => $descricao,
         ];
@@ -245,8 +285,9 @@ class Projecao
      * Ganho: Despesa Fixa termina ou Provento Fixo começa. Atenção: Despesa Fixa começa, Provento Fixo termina
      * ou Despesa Variável com Competência futura. O valor de uma recorrência é o Valor Previsto dela.
      */
-    public function alertas()
+    public function alertas($nomesDosMeses)
     {
+        $this->nomesDosMeses = $nomesDosMeses;
         $alertas = [];
 
         foreach($this->recorrencias() as $r){
@@ -254,18 +295,18 @@ class Projecao
             if($distancia){
                 $alertas[] = $r['despesa']
                     ? $this->alerta('atencao', $r['inicio'], $distancia, $r['valor'],
-                        self::emMeses($distancia) . " começa {$r['nome']}: -" . self::reais($r['valor']))
+                        "Começa {$r['nome']}: -" . self::reais($r['valor']) . $this->totalAtualizado($r, true))
                     : $this->alerta('ganho', $r['inicio'], $distancia, $r['valor'],
-                        self::emMeses($distancia) . " começa {$r['nome']}: +" . self::reais($r['valor']));
+                        "Começa {$r['nome']}: +" . self::reais($r['valor']) . $this->totalAtualizado($r, true));
             }
 
             $distancia = $this->distancia($r['fim']);
             if($distancia){
                 $alertas[] = $r['despesa']
                     ? $this->alerta('ganho', $r['fim'], $distancia, $r['valor'],
-                        self::emMeses($distancia) . " termina {$r['nomeNoFim']}: seu fluxo melhora em " . self::reais($r['valor']))
+                        "Termina {$r['nomeNoFim']}: seu fluxo melhora em " . self::reais($r['valor']) . $this->totalAtualizado($r, false))
                     : $this->alerta('atencao', $r['fim'], $distancia, $r['valor'],
-                        self::emMeses($distancia) . " termina {$r['nomeNoFim']}: -" . self::reais($r['valor']));
+                        "Termina {$r['nomeNoFim']}: -" . self::reais($r['valor']) . $this->totalAtualizado($r, false));
             }
         }
 
@@ -282,7 +323,7 @@ class Projecao
             $mes = $variavel->competencia();
             $distancia = $this->distancia($mes);
             $alertas[] = $this->alerta('atencao', $mes, $distancia, $variavel->valor_total,
-                self::emMeses($distancia) . " vence {$variavel->nome_despesa}: -" . self::reais($variavel->valor_total));
+                "Vence {$variavel->nome_despesa}: -" . self::reais($variavel->valor_total));
         }
 
         usort($alertas, function($a, $b){
@@ -290,5 +331,33 @@ class Projecao
         });
 
         return $alertas;
+    }
+
+    /**
+     * Os Alertas agrupados por mês. Mês com mais de um Alerta ganha o resumo: quanto entra, quanto sai
+     * e o efeito líquido no fluxo.
+     */
+    public static function alertasPorMes(array $alertas)
+    {
+        $grupos = [];
+
+        foreach($alertas as $alerta){
+            if(!isset($grupos[$alerta['mes']])){
+                $grupos[$alerta['mes']] = ['mes' => $alerta['mes'], 'quando' => $alerta['quando'], 'alertas' => [], 'entra' => 0.0, 'sai' => 0.0];
+            }
+
+            $grupos[$alerta['mes']]['alertas'][] = $alerta;
+            $grupos[$alerta['mes']][$alerta['tipo'] === 'ganho' ? 'entra' : 'sai'] += $alerta['valor'];
+        }
+
+        return array_values(array_map(function($grupo){
+            $grupo['liquido'] = $grupo['entra'] - $grupo['sai'];
+            $grupo['resumo'] = count($grupo['alertas']) > 1
+                ? 'Efeito no fluxo: ' . ($grupo['liquido'] < 0 ? '-' : '+') . self::reais(abs($grupo['liquido']))
+                    . ' (entra ' . self::reais($grupo['entra']) . ', sai ' . self::reais($grupo['sai']) . ')'
+                : null;
+
+            return $grupo;
+        }, $grupos));
     }
 }

@@ -23,11 +23,13 @@ class ProjecaoController extends Controller
         (new ProventoFixo)->completarJanela($user);
 
         $projecao = new Projecao($user, $request->input('horizonte'));
+        $alertas = $projecao->alertas($this->optionsMeses);
 
         return view('projecao.index')
             ->with('horizonte', $projecao->horizonte())
             ->with('horizontes', Projecao::HORIZONTES)
             ->with('meses', $projecao->meses($this->optionsMeses))
-            ->with('alertas', $projecao->alertas());
+            ->with('alertas', $alertas)
+            ->with('alertasPorMes', Projecao::alertasPorMes($alertas));
     }
 }

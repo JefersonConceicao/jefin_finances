@@ -152,8 +152,9 @@ class ProjecaoTest extends TestCase
             'tipo' => 'ganho',
             'mes' => '2027-02',
             'distancia' => 3,
+            'quando' => 'Em 3 meses (Fevereiro/2027)',
             'valor' => 450.0,
-            'descricao' => 'em 3 meses termina Cartão (10/10): seu fluxo melhora em R$ 450,00',
+            'descricao' => 'Termina Cartão (10/10): seu fluxo melhora em R$ 450,00 · em Março/2027, Despesas Fixas passam a R$ 0,00',
         ]], $this->alertas($resposta)->all());
     }
 
@@ -164,15 +165,18 @@ class ProjecaoTest extends TestCase
 
         $resposta = $this->projecao()
             ->assertSee('Seguro começa')
-            ->assertSee('em 2 meses começa Seguro: -R$ 180,00');
+            ->assertSee('Em 2 meses (Janeiro/2027)')
+            ->assertSee('Começa Seguro: -R$ 180,00 · Despesas Fixas passam a R$ 180,00')
+            ->assertSee('alert alert-warning', false);
 
         $this->assertEquals([['tipo' => 'comeca', 'descricao' => 'Seguro começa', 'efeito' => 'atencao']], $this->marcosDoMes($resposta, 2)->all());
         $this->assertEquals([[
             'tipo' => 'atencao',
             'mes' => '2027-01',
             'distancia' => 2,
+            'quando' => 'Em 2 meses (Janeiro/2027)',
             'valor' => 180.0,
-            'descricao' => 'em 2 meses começa Seguro: -R$ 180,00',
+            'descricao' => 'Começa Seguro: -R$ 180,00 · Despesas Fixas passam a R$ 180,00',
         ]], $this->alertas($resposta)->all());
     }
 
@@ -187,8 +191,10 @@ class ProjecaoTest extends TestCase
         $this->assertEquals([['tipo' => 'termina', 'descricao' => 'Bolsa termina', 'efeito' => 'atencao']], $this->marcosDoMes($resposta, 1)->all());
         $this->assertEquals([['tipo' => 'comeca', 'descricao' => 'Freela começa', 'efeito' => 'ganho']], $this->marcosDoMes($resposta, 4)->all());
         $this->assertEquals([
-            ['tipo' => 'atencao', 'mes' => '2026-12', 'distancia' => 1, 'valor' => 800.0, 'descricao' => 'em 1 mês termina Bolsa: -R$ 800,00'],
-            ['tipo' => 'ganho', 'mes' => '2027-03', 'distancia' => 4, 'valor' => 2000.0, 'descricao' => 'em 4 meses começa Freela: +R$ 2.000,00'],
+            ['tipo' => 'atencao', 'mes' => '2026-12', 'distancia' => 1, 'quando' => 'Em 1 mês (Dezembro/2026)', 'valor' => 800.0,
+                'descricao' => 'Termina Bolsa: -R$ 800,00 · em Janeiro/2027, Proventos passam a R$ 0,00'],
+            ['tipo' => 'ganho', 'mes' => '2027-03', 'distancia' => 4, 'quando' => 'Em 4 meses (Março/2027)', 'valor' => 2000.0,
+                'descricao' => 'Começa Freela: +R$ 2.000,00 · Proventos passam a R$ 2.000,00'],
         ], $this->alertas($resposta)->all());
     }
 
@@ -202,9 +208,38 @@ class ProjecaoTest extends TestCase
             'tipo' => 'atencao',
             'mes' => '2027-02',
             'distancia' => 3,
+            'quando' => 'Em 3 meses (Fevereiro/2027)',
             'valor' => 1200.0,
-            'descricao' => 'em 3 meses vence IPVA: -R$ 1.200,00',
+            'descricao' => 'Vence IPVA: -R$ 1.200,00',
         ]], $this->alertas($this->projecao())->all());
+    }
+
+    /** @test */
+    public function mes_com_uma_fixa_comecando_e_outra_terminando_ganha_resumo_do_fluxo()
+    {
+        $this->cadastrarDespesaFixa(['nome_despesa' => 'Seguro moto', 'valor' => '306,00', 'mes_inicio' => '2027-01']);
+        $this->cadastrarDespesaFixa(['nome_despesa' => 'Mac mini', 'valor' => '505,00', 'mes_inicio' => '2026-03', 'parcelas' => 11]);
+        $this->cadastrarDespesaVariavel('IPVA', '1.200,00', '15/02/2027');
+
+        $resposta = $this->projecao();
+        $grupos = $resposta->viewData('alertasPorMes');
+
+        $this->assertSame(['2027-01', '2027-02'], array_column($grupos, 'mes'));
+        $this->assertCount(2, $grupos[0]['alertas']);
+        $this->assertEquals(505, $grupos[0]['entra']);
+        $this->assertEquals(306, $grupos[0]['sai']);
+        $this->assertSame('Efeito no fluxo: +R$ 199,00 (entra R$ 505,00, sai R$ 306,00)', $grupos[0]['resumo']);
+        //MÊS COM UM ALERTA SÓ NÃO TEM RESUMO
+        $this->assertNull($grupos[1]['resumo']);
+
+        $resposta->assertSeeInOrder([
+            'Em 2 meses (Janeiro/2027)',
+            'Começa Seguro moto: -R$ 306,00',
+            'Termina Mac mini (11/11): seu fluxo melhora em R$ 505,00 · em Fevereiro/2027, Despesas Fixas passam a R$ 306,00',
+            'Efeito no fluxo: +R$ 199,00',
+            'Em 3 meses (Fevereiro/2027)',
+            'Vence IPVA: -R$ 1.200,00',
+        ]);
     }
 
     /** @test */

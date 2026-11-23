@@ -15,20 +15,28 @@
         </div>
     </form>
 
-    @if (count($alertas) > 0)
+    @if (count($alertasPorMes) > 0)
         <div class="card">
             <div class="card-header pb-0">
                 <h4 class="card-title mb-0"> Alertas </h4>
             </div>
             <div class="card-body">
-                <ul class="list-unstyled mb-0">
-                    @foreach ($alertas as $alerta)
-                        <li class="mb-1 {{ $alerta['tipo'] === 'ganho' ? 'text-success' : 'text-warning' }}">
-                            <i class="fa {{ $alerta['tipo'] === 'ganho' ? 'fa-arrow-up' : 'fa-exclamation-triangle' }}"></i>
-                            {{ $alerta['descricao'] }}
-                        </li>
-                    @endforeach
-                </ul>
+                @foreach ($alertasPorMes as $grupo)
+                    <div class="mb-3">
+                        <h6 class="mb-2"> {{ $grupo['quando'] }} </h6>
+                        @foreach ($grupo['alertas'] as $alerta)
+                            <div class="alert {{ $alerta['tipo'] === 'ganho' ? 'alert-success' : 'alert-warning' }} py-2 px-3 mb-1">
+                                <i class="fa {{ $alerta['tipo'] === 'ganho' ? 'fa-arrow-up' : 'fa-exclamation-triangle' }}"></i>
+                                {{ $alerta['descricao'] }}
+                            </div>
+                        @endforeach
+                        @if ($grupo['resumo'])
+                            <p class="mb-0 mt-1 fw-bold {{ $grupo['liquido'] < 0 ? 'text-danger' : 'text-success' }}">
+                                <i class="fa fa-equals"></i> {{ $grupo['resumo'] }}
+                            </p>
+                        @endif
+                    </div>
+                @endforeach
             </div>
         </div>
     @endif
