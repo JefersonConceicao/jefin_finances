@@ -1,69 +1,54 @@
-
 <ul class="menu">
     <li class="sidebar-title"> Menu </li>
 
-    <li class="sidebar-item">
-        <a href="/home" class="sidebar-link">
-            <i class="fa fa-house-user"> </i>
-            <span> Home </span>
+    <li class="sidebar-item {{ request()->is('projecao') ? 'active' : '' }}">
+        <a href="/projecao" class="sidebar-link">
+            <i class="fas fa-chart-line"></i>
+            <span> Projeção </span>
         </a>
     </li>
 
-    <li class="sidebar-item">
-        <a href="/dividas" class="sidebar-link">
-            <i class="fab fa-amazon-pay"></i>
-            &nbsp;
-            <span> Dívidas </span>
-        </a>
-    </li>
-
-    <li class="sidebar-item has-sub">
+    <li class="sidebar-item has-sub {{ request()->is('proventos*') ? 'active' : '' }}">
         <a href="#" class="sidebar-link">
             <i class="fas fa-hand-holding-usd"></i>
-            <span> Meu dinheiro </span>
+            <span> Proventos </span>
         </a>
-        <ul class="submenu">
-            <li class="submenu-item">
+        <ul class="submenu {{ request()->is('proventos*') ? 'active' : '' }}">
+            <li class="submenu-item {{ request()->is('proventos') ? 'active' : '' }}">
                 <a href="/proventos">
                     <i class="fas fa-angle-right"></i>
                     &nbsp;
-                    Calculadora de Proventos
+                    Proventos
                 </a>
             </li>
-            <li class="submenu-item">
+            <li class="submenu-item {{ request()->is('proventosFixos*') ? 'active' : '' }}">
                 <a href="/proventosFixos">
                     <i class="fas fa-angle-right"></i>
                     &nbsp;
                     Proventos Fixos
                 </a>
             </li>
-            <li class="submenu-item">
-                <a href="/projecao">
-                    <i class="fas fa-angle-right"></i>
-                    &nbsp;
-                    Projeção
-                </a>
-            </li>
-            <li class="submenu-item">
+        </ul>
+    </li>
+
+    <li class="sidebar-item has-sub {{ request()->is('despesas*') ? 'active' : '' }}">
+        <a href="#" class="sidebar-link">
+            <i class="fas fa-file-invoice-dollar"></i>
+            <span> Despesas </span>
+        </a>
+        <ul class="submenu {{ request()->is('despesas*') ? 'active' : '' }}">
+            <li class="submenu-item {{ request()->is('despesas') ? 'active' : '' }}">
                 <a href="/despesas">
                     <i class="fas fa-angle-right"></i>
                     &nbsp;
                     Despesas
                 </a>
             </li>
-            <li class="submenu-item">
+            <li class="submenu-item {{ request()->is('despesasFixas*') ? 'active' : '' }}">
                 <a href="/despesasFixas">
                     <i class="fas fa-angle-right"></i>
                     &nbsp;
                     Despesas Fixas
-                </a>
-            </li>
-
-            <li class="submenu-item">
-                <a href="/tiposDespesas">
-                    <i class="fas fa-angle-right"></i>
-                    &nbsp;
-                    Despesas Tipos
                 </a>
             </li>
         </ul>

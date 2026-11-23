@@ -1,7 +1,7 @@
 @extends('layout.page')
 @section('content_header')
-    <h3> Receitas </h3>
-    <p class="text-subtitle"> Entrada de recursos </p>
+    <h3> Proventos </h3>
+    <p class="text-subtitle"> O dinheiro que entra em cada mês </p>
 @endsection
 
 @section('content-page')
@@ -59,7 +59,7 @@
                             Total de registros: {{ count($dataProventos )}}
                         </h1>
                         @isset($totalProventos)
-                            <h6 class="text-info"> Receitas do mês: {{ "R$ " .convertValorReal($totalProventos) }} </h6>
+                            <h6 class="text-info"> Proventos do mês: {{ "R$ " .convertValorReal($totalProventos) }} </h6>
                         @endisset
                     </div>
                     <div class="col-md-6">

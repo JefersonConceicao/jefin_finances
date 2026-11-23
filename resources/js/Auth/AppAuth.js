@@ -69,7 +69,7 @@ const formLoginUser = () => {
                     background: response.error ? 'red' : color().default,
                 });
             }else{
-                window.location.href = '/home';
+                window.location.href = '/projecao';
             }
         },
         error:function(jqXHR, textStatus, error){

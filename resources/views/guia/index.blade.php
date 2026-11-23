@@ -176,7 +176,7 @@ dl.gloss dd{color:var(--muted); font-size:15px}
 <div class="wrap">
   <nav class="toc" aria-label="Sumário">
     <div class="brand"><span>J</span> Jefin Finances</div>
-    <a class="back" href="{{ auth()->check() ? route('home.index') : route('auth.renderViewLogin') }}">&larr; {{ auth()->check() ? 'Voltar ao sistema' : 'Voltar ao login' }}</a>
+    <a class="back" href="{{ auth()->check() ? route('projecao.index') : route('auth.renderViewLogin') }}">&larr; {{ auth()->check() ? 'Voltar ao sistema' : 'Voltar ao login' }}</a>
     <ol>
       <li><a href="#inicio">A ideia</a></li>
       <li><a href="#fluxo">O caminho do dinheiro</a></li>

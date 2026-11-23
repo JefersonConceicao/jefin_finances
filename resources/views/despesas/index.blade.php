@@ -56,7 +56,7 @@
             <div class="row">
                 <div class="col-md-6">
                     <h3 class="card-title"> Total de registros: {{ count($dataDespesas) }} </h3>
-                    <h6 class="text-info"> Receitas do mês: {{ "R$ " .convertValorReal($totalProventos) }} </h6>
+                    <h6 class="text-info"> Proventos do mês: {{ "R$ " .convertValorReal($totalProventos) }} </h6>
                     <h6> Total despesas: {{ "R$ " .convertValorReal($totalValor) }} </h6>
                     <p class="mb-2 text-muted">
                         Fixas: {{ "R$ " .convertValorReal($totalFixas) }}

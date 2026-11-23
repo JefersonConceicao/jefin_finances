@@ -23,7 +23,8 @@ Route::view('/guia', 'guia.index')->name('guia.index');
 
 //ROTAS COM AUTENTICAÇÃO
 Route::group(['middleware' => 'auth'], function(){
-    Route::get('/home', 'HomeController@index')->name('home.index');
+    //A PROJEÇÃO É A TELA INICIAL; /home FICA PARA LINKS ANTIGOS
+    Route::redirect('/home', '/projecao')->name('home.index');
 
     Route::group(['prefix' => 'users'], function(){
         //RENDER VIEWS
@@ -102,15 +103,5 @@ Route::group(['middleware' => 'auth'], function(){
         Route::get('/getGastosGraphs', 'LancamentosController@dataGastosGraficos')->name('lancamentos.dataGrafico');
     });
 
-    Route::group(['prefix' => 'dividas'], function(){
-        Route::get('/', 'DividasController@index')->name('dividas.index');
-        Route::get('/create', 'DividasController@create')->name('dividas.create');
-        Route::post('/store', 'DividasController@store')->name('dividas.store');
-        Route::get('/edit/{id}', 'DividasController@edit')->name('dividas.edit');
-        Route::put('/update/{id}', 'DividasController@update')->name('dividas.update');
-        Route::get('/show/{id}', 'DividasController@show')->name('dividas.show');
-        Route::put('/payDebt/{id}', 'DividasController@declarePayment')->name('dividas.declarePayment');
-        Route::delete('/delete/{id}', 'DividasController@delete')->name('dividas.destroy');
-    });
 });
 
