@@ -375,7 +375,7 @@ flowchart LR
       <h2>Outras telas</h2>
       <div class="screens">
         <div class="screen"><h3>Home</h3><p>Total já pago, total de proventos, há quantos dias você usa o sistema e os últimos lançamentos.</p></div>
-        <div class="screen"><h3>Calculadora de Proventos</h3><p>Os Proventos de um mês, fixos e avulsos. O botão "Repetir proventos do mês anterior" é anterior aos Proventos Fixos: para o que entra todo mês, use um Provento Fixo.</p></div>
+        <div class="screen"><h3>Calculadora de Proventos</h3><p>Os Proventos de um mês, fixos e avulsos. O botão "Repetir proventos do mês anterior" copia os seus Proventos avulsos do mês anterior para o mês escolhido no filtro; os Proventos Fixos ficam de fora, porque já aparecem sozinhos. Para o que entra todo mês, prefira um Provento Fixo.</p></div>
         <div class="screen"><h3>Dívidas</h3><p>Controle à parte de dívidas parceladas: valor total, parcelas e "declarar pagamento" a cada parcela. As Dívidas não entram na Projeção. Para que uma parcela conte no saldo, cadastre-a também como Despesa Fixa com fim.</p></div>
         <div class="screen"><h3>Usuários e perfil</h3><p>Dados da conta e troca de senha.</p></div>
       </div>

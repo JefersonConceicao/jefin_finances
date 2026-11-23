@@ -274,34 +274,46 @@ class Proventos extends Model
         }
     }
 
-    public function copyLastMonth($request = []){
+    //"REPETIR PROVENTOS DO MÊS ANTERIOR": COPIA OS PROVENTOS AVULSOS DO USUÁRIO DO MÊS ANTERIOR PARA O MÊS DO FILTRO.
+    //OCORRÊNCIAS DE PROVENTO FIXO FICAM DE FORA: O PROVENTO FIXO JÁ GRAVA AS DO MÊS DE DESTINO
+    public function copyLastMonth($request = [], $user){
+        if(empty($request['mes']) || empty($request['ano'])){
+            return [
+                'error' => true,
+                'msg' => 'Escolha o mês e o ano para onde copiar'
+            ];
+        }
+
         try{
-            $lastProventos = $this
-                ->whereMonth('data_provento', $request['mes'] - 1)
-                ->whereYear('data_provento', $request['ano']);
+            $destino = Carbon::create((int) $request['ano'], (int) $request['mes'], 1)->startOfDay();
+            $origem = $destino->copy()->subMonthNoOverflow();
 
-            if($lastProventos->count() > 0){
-                DB::beginTransaction();
-                foreach($lastProventos->get()->toArray() as $k => $v){
-                    $formData = [
-                        'user_id' => $v['user_id'],
-                        'valor_provento' => $v['valor_provento'],
-                        'data_provento' => $request['ano'].'-'.$request['mes'].'-'.date('d'),
-                        'descricao_provento' => $v['descricao_provento']
-                    ];
+            $anteriores = $this->where('user_id', $user->id)
+                ->whereNull('provento_fixo_id')
+                ->whereDate('data_provento', '>=', $origem->toDateString())
+                ->whereDate('data_provento', '<=', $origem->copy()->endOfMonth()->toDateString())
+                ->get();
 
-                    $this->create($formData);
-                    unset($formData);
+            DB::transaction(function() use ($anteriores, $destino, $user){
+                foreach($anteriores as $anterior){
+                    //MESMO DIA NO MÊS DE DESTINO; 31 VIRA O ÚLTIMO DIA EM MÊS MAIS CURTO
+                    $dia = min(Carbon::parse($anterior->data_provento)->day, $destino->daysInMonth);
+
+                    $this->create([
+                        'user_id' => $user->id,
+                        'valor_provento' => $anterior->valor_provento,
+                        'data_provento' => $destino->copy()->day($dia)->toDateString(),
+                        'descricao_provento' => $anterior->descricao_provento
+                    ]);
                 }
-            }
+            });
 
-            DB::commit();
             return [
                 'error' => false,
                 'msg' => 'Proventos adicionados!'
             ];
         }catch(\Exception $error){
-            DB::rollback();
+            \Log::error($error->getMessage(), ['exception' => $error]);
             return [
                 'error' => true,
                 'msg' => 'Não foi possível adicionar os proventos, tente de novo'

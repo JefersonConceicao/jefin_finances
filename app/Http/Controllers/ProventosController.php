@@ -97,7 +97,7 @@ class ProventosController extends Controller
     public function copyProventos(Request $request){
         $proventos = new Proventos; 
 
-        $data = $proventos->copyLastMonth($request->all());
+        $data = $proventos->copyLastMonth($request->all(), Auth::user());
         return response()->json($data);
     }
 }
