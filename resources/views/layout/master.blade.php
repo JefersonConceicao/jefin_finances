@@ -8,6 +8,17 @@
     <meta name="google-signin-client_id" content="23951275285-j7sp1aucu6lhegsvjfd1fni74bct3uip.apps.googleusercontent.com" />
 
     <title> Jefin Finances GESTÃO FINANCEIRA SIMPLES </title>
+    {{-- DARK MODE: APLICA O TEMA ANTES DA PINTURA PARA NÃO PISCAR O TEMA ERRADO. SEM ESCOLHA SALVA, SEGUE O SISTEMA --}}
+    <script>
+        (function () {
+            var tema = null;
+            try { tema = localStorage.getItem('jefin-tema'); } catch (e) {}
+            if (tema !== 'dark' && tema !== 'light') {
+                tema = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            document.documentElement.setAttribute('data-theme', tema);
+        })();
+    </script>
     <link
         href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
         rel="stylesheet"
@@ -30,6 +41,7 @@
     <link rel="stylesheet" href="{{ asset('css/mazer-theme/app.css') }} "/>
     <link rel="stylesheet" href="{{ asset('vendor/jquery-datetimepicker/build/jquery.datetimepicker.min.css')}}" />
     <link rel="stylesheet" href="{{ asset('css/app.css') }} "/>
+    <link rel="stylesheet" href="{{ asset('css/tema-escuro.css') }}"/>
 </head>
 
 <body style="background-color:#e7e7e7">

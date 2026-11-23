@@ -1,0 +1,184 @@
+/*
+ * Dark mode (issue #32). O tema Mazer usado aqui (Bootstrap 5.0) não tem tema escuro: estas regras
+ * valem quando o <html> tem data-theme="dark", definido antes da pintura por um script no <head>.
+ */
+html[data-theme="dark"] {
+    --escuro-fundo: #151521;
+    --escuro-superficie: #1e1e2d;
+    --escuro-superficie-2: #2b2b40;
+    --escuro-borda: #323248;
+    --escuro-texto: #c9cfe0;
+    --escuro-texto-forte: #e8ebf5;
+    --escuro-texto-suave: #8f97b2;
+    color-scheme: dark;
+}
+
+html[data-theme="dark"] body {
+    background-color: var(--escuro-fundo) !important;
+    color: var(--escuro-texto);
+}
+
+/* TEXTO */
+html[data-theme="dark"] h1, html[data-theme="dark"] h2, html[data-theme="dark"] h3,
+html[data-theme="dark"] h4, html[data-theme="dark"] h5, html[data-theme="dark"] h6,
+html[data-theme="dark"] .h1, html[data-theme="dark"] .h2, html[data-theme="dark"] .h3,
+html[data-theme="dark"] .h4, html[data-theme="dark"] .h5, html[data-theme="dark"] .h6,
+html[data-theme="dark"] .card-title,
+html[data-theme="dark"] .logo h4 {
+    color: var(--escuro-texto-forte);
+}
+html[data-theme="dark"] .text-muted,
+html[data-theme="dark"] .text-subtitle,
+html[data-theme="dark"] .text-gray-600 {
+    color: var(--escuro-texto-suave) !important;
+}
+html[data-theme="dark"] label,
+html[data-theme="dark"] p,
+html[data-theme="dark"] td,
+html[data-theme="dark"] th {
+    color: inherit;
+}
+
+/* SIDEBAR E NAVBAR */
+html[data-theme="dark"] .sidebar-wrapper {
+    background-color: var(--escuro-superficie);
+}
+html[data-theme="dark"] .sidebar-wrapper .menu .sidebar-title,
+html[data-theme="dark"] .sidebar-wrapper .menu .sidebar-link,
+html[data-theme="dark"] .sidebar-wrapper .menu .submenu .submenu-item a {
+    color: var(--escuro-texto);
+}
+html[data-theme="dark"] .sidebar-wrapper .menu .sidebar-link:hover,
+html[data-theme="dark"] .sidebar-wrapper .menu .submenu .submenu-item a:hover {
+    background-color: var(--escuro-superficie-2);
+}
+html[data-theme="dark"] .sidebar-wrapper .menu .sidebar-item.active > .sidebar-link {
+    color: #fff;
+}
+html[data-theme="dark"] .navbar,
+html[data-theme="dark"] .dropdown-menu {
+    background-color: var(--escuro-superficie) !important;
+}
+html[data-theme="dark"] .dropdown-item,
+html[data-theme="dark"] .dropdown-header {
+    color: var(--escuro-texto);
+}
+html[data-theme="dark"] .dropdown-item:hover {
+    background-color: var(--escuro-superficie-2);
+}
+html[data-theme="dark"] .burger-btn,
+html[data-theme="dark"] .burger-btn i {
+    color: var(--escuro-texto);
+}
+
+/* CARDS E MODAIS */
+html[data-theme="dark"] .card,
+html[data-theme="dark"] .card-header,
+html[data-theme="dark"] .card-body,
+html[data-theme="dark"] .modal-content {
+    background-color: var(--escuro-superficie);
+    color: var(--escuro-texto);
+    border-color: var(--escuro-borda);
+}
+html[data-theme="dark"] .card {
+    box-shadow: none;
+    border-right-color: var(--escuro-borda);
+}
+html[data-theme="dark"] .modal-header,
+html[data-theme="dark"] .modal-footer {
+    border-color: var(--escuro-borda);
+}
+html[data-theme="dark"] .btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+/* TABELAS */
+html[data-theme="dark"] .table {
+    color: var(--escuro-texto);
+    border-color: var(--escuro-borda);
+    --bs-table-hover-color: var(--escuro-texto-forte);
+    --bs-table-hover-bg: rgba(255, 255, 255, .05);
+}
+html[data-theme="dark"] .table > :not(caption) > * > * {
+    background-color: transparent;
+    color: inherit;
+    border-bottom-color: var(--escuro-borda);
+    box-shadow: none;
+}
+html[data-theme="dark"] .table-hover > tbody > tr:hover > * {
+    background-color: rgba(255, 255, 255, .05);
+    color: var(--escuro-texto-forte);
+}
+html[data-theme="dark"] .border-top {
+    border-top-color: var(--escuro-borda) !important;
+}
+
+/* FORMULÁRIOS */
+html[data-theme="dark"] .form-control,
+html[data-theme="dark"] .form-select,
+html[data-theme="dark"] .form-control:focus,
+html[data-theme="dark"] .form-select:focus {
+    background-color: var(--escuro-superficie-2);
+    color: var(--escuro-texto-forte);
+    border-color: var(--escuro-borda);
+}
+html[data-theme="dark"] .form-control::placeholder {
+    color: var(--escuro-texto-suave);
+}
+html[data-theme="dark"] .form-check-input:not(:checked) {
+    background-color: var(--escuro-superficie-2);
+    border-color: var(--escuro-borda);
+}
+html[data-theme="dark"] .btn-outline-secondary {
+    color: var(--escuro-texto);
+    border-color: var(--escuro-borda);
+}
+
+/* BARRAS, ALERTAS E BADGES */
+html[data-theme="dark"] .progress {
+    background-color: var(--escuro-superficie-2);
+}
+html[data-theme="dark"] .alert-warning {
+    background-color: rgba(255, 193, 7, .15);
+    border-color: rgba(255, 193, 7, .35);
+    color: #ffd666;
+}
+html[data-theme="dark"] .alert-success {
+    background-color: rgba(25, 135, 84, .2);
+    border-color: rgba(25, 135, 84, .45);
+    color: #7ee2b0;
+}
+html[data-theme="dark"] .bg-light-primary { background-color: rgba(67, 94, 190, .25); color: #b5c4ff; }
+html[data-theme="dark"] .bg-light-secondary { background-color: rgba(255, 255, 255, .08); color: var(--escuro-texto); }
+html[data-theme="dark"] .bg-light-success { background-color: rgba(25, 135, 84, .25); color: #7ee2b0; }
+html[data-theme="dark"] .bg-light-danger { background-color: rgba(220, 53, 69, .25); color: #ff9aa5; }
+html[data-theme="dark"] .bg-light-warning { background-color: rgba(255, 193, 7, .18); color: #ffd666; }
+html[data-theme="dark"] .bg-light-info { background-color: rgba(13, 202, 240, .18); color: #8be4f7; }
+html[data-theme="dark"] .text-success { color: #5cd29a !important; }
+html[data-theme="dark"] .text-primary { color: #8fa6ff !important; }
+html[data-theme="dark"] .text-danger { color: #ff7b88 !important; }
+
+/* DATAS E ALERTAS DO SWEETALERT */
+html[data-theme="dark"] .swal2-popup:not(.swal2-toast) {
+    background-color: var(--escuro-superficie);
+    color: var(--escuro-texto);
+}
+html[data-theme="dark"] .swal2-title,
+html[data-theme="dark"] .swal2-html-container {
+    color: var(--escuro-texto-forte);
+}
+html[data-theme="dark"] .xdsoft_datetimepicker {
+    filter: invert(.9) hue-rotate(180deg);
+}
+
+/* BOTÃO DE ALTERNAR O TEMA */
+.btn-tema {
+    background: none;
+    border: none;
+    color: #607080;
+    font-size: 1.25rem;
+    line-height: 1;
+}
+html[data-theme="dark"] .btn-tema {
+    color: #ffd666;
+}

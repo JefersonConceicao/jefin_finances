@@ -5,6 +5,7 @@ window.Swal = require('sweetalert2');
 window.AppRegister = require('./Auth/AppRegister');
 window.AppAuth = require('./Auth/AppAuth');
 window.AppUsage = require('./Core/AppUsage');
+window.AppTema = require('./Core/AppTema');
 window.AppUsers = require('./Logged/AppUsers');
 window.AppProventos = require('./Logged/AppProventos');
 window.AppDespesas = require('./Logged/AppDespesas');

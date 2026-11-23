@@ -3421,6 +3421,41 @@ module.exports = {
 
 /***/ }),
 
+/***/ "./resources/js/Core/AppTema.js":
+/*!**************************************!*\
+  !*** ./resources/js/Core/AppTema.js ***!
+  \**************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+//DARK MODE: O TEMA JÁ FOI APLICADO NO <head> (layout/master); AQUI SÓ O BOTÃO DE ALTERNAR
+var CHAVE = 'jefin-tema';
+var temaAtual = function temaAtual() {
+  return document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+};
+var aplicarTema = function aplicarTema(tema) {
+  document.documentElement.setAttribute('data-theme', tema);
+  $("#btnAlternarTema i").toggleClass('fa-moon', tema !== 'dark').toggleClass('fa-sun', tema === 'dark');
+};
+$(function () {
+  if ($("#btnAlternarTema").length == 0) return;
+  aplicarTema(temaAtual());
+  $("#btnAlternarTema").on("click", function () {
+    var tema = temaAtual() === 'dark' ? 'light' : 'dark';
+    aplicarTema(tema);
+
+    //SEM localStorage (NAVEGAÇÃO PRIVADA, DADOS BLOQUEADOS) O TEMA SÓ VALE ATÉ RECARREGAR
+    try {
+      localStorage.setItem(CHAVE, tema);
+    } catch (e) {}
+  });
+});
+module.exports = {
+  aplicarTema: aplicarTema
+};
+
+/***/ }),
+
 /***/ "./resources/js/Core/AppUsage.js":
 /*!***************************************!*\
   !*** ./resources/js/Core/AppUsage.js ***!
@@ -4816,6 +4851,7 @@ window.Swal = __webpack_require__(/*! sweetalert2 */ "./node_modules/sweetalert2
 window.AppRegister = __webpack_require__(/*! ./Auth/AppRegister */ "./resources/js/Auth/AppRegister.js");
 window.AppAuth = __webpack_require__(/*! ./Auth/AppAuth */ "./resources/js/Auth/AppAuth.js");
 window.AppUsage = __webpack_require__(/*! ./Core/AppUsage */ "./resources/js/Core/AppUsage.js");
+window.AppTema = __webpack_require__(/*! ./Core/AppTema */ "./resources/js/Core/AppTema.js");
 window.AppUsers = __webpack_require__(/*! ./Logged/AppUsers */ "./resources/js/Logged/AppUsers.js");
 window.AppProventos = __webpack_require__(/*! ./Logged/AppProventos */ "./resources/js/Logged/AppProventos.js");
 window.AppDespesas = __webpack_require__(/*! ./Logged/AppDespesas */ "./resources/js/Logged/AppDespesas.js");
