@@ -251,6 +251,7 @@ flowchart LR
     <section id="recorrencias">
       <h2>Fixas, Vigência e Ocorrências</h2>
       <p>Uma Despesa Fixa ou um Provento Fixo vale durante a sua <span class="term">Vigência</span>: um mês de início e, se houver, um mês de fim. O sistema grava antes a Ocorrência de cada mês, até <b>12 meses à frente</b> do mês atual. Por isso você pode ajustar um mês futuro antes de ele chegar.</p>
+      <p>Essa janela anda sozinha: a cada mês que passa, o sistema grava mais um mês à frente quando você abre as telas. Uma fixa sem mês de fim não precisa ser renovada nem reajustada depois de 12 meses; ela só termina com um <b>Encerramento</b>.</p>
       <p>Quando o mês vira, a próxima tela que você abrir completa os meses que faltam. Um mês que você excluiu não volta.</p>
 
       <div class="tl" role="img" aria-label="Linha do tempo de novembro de 2026 a novembro de 2027 com três recorrências de exemplo">

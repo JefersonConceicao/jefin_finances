@@ -55,7 +55,7 @@
     </li>
 
     <li class="sidebar-item {{ request()->is('guia') ? 'active' : '' }}">
-        <a href="/guia" class="sidebar-link">
+        <a href="/guia" class="sidebar-link" target="_blank" rel="noopener">
             <i class="fas fa-book"></i>
             <span> Guia do Usuário </span>
         </a>
