@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use DB;
+use App\Recorrencia\SemOcorrenciasOcultas;
 
 class Lancamento extends Model
 {
@@ -18,26 +19,41 @@ class Lancamento extends Model
 
     public $timestamps = false;
 
+    //ENXERGA A DESPESA MESMO QUANDO É OCORRÊNCIA DE UMA FIXA OCULTA: O PAGAMENTO CONTINUA LIGADO A ELA
     public function despesa(){
-        return $this->hasOne(Despesa::class, 'id', 'despesa_id');
+        return $this->hasOne(Despesa::class, 'id', 'despesa_id')->withoutGlobalScope(SemOcorrenciasOcultas::class);
+    }
+
+    /**
+     * Lançamentos do usuário, sem os que pagam Ocorrência de uma Despesa Fixa oculta (Ocultação: somem de todo o app).
+     */
+    private function doUsuarioVisiveis($user){
+        return $this
+            ->where('user_id', $user->id)
+            ->where(function($query){
+                $query->whereNull('despesa_id')
+                    ->orWhereNotIn('despesa_id', function($ocultas){
+                        $ocultas->select('despesas.id')
+                            ->from('despesas')
+                            ->join('despesas_fixas', 'despesas_fixas.id', '=', 'despesas.despesa_fixa_id')
+                            ->where('despesas_fixas.oculta', 1);
+                    });
+            });
     }
 
     public function getLancamentos($request = [], $user){
-        return $this
-            ->where('user_id', $user->id);
+        return $this->doUsuarioVisiveis($user);
     }
 
     public function getTotalLancamentosByMonth($request = [], $user){
-        return $this
-            ->where('user_id', $user->id)
+        return $this->doUsuarioVisiveis($user)
             ->whereMonth('data_lancamento', !empty($request['mes']) ? $request['mes'] : '')
             ->whereYear('data_lancamento', !empty($request['ano']) ? $request['ano'] : '')
             ->sum('valor');
     }
 
     public function getLancamentosDespesa($request = [], $user){
-        return $this
-            ->where('user_id', $user->id)
+        return $this->doUsuarioVisiveis($user)
             ->whereMonth('data_lancamento', !empty($request['mes']) ? $request['mes'] : '')
             ->whereYear('data_lancamento', !empty($request['ano']) ? $request['ano'] : '')
             ->has('despesa')
@@ -45,8 +61,7 @@ class Lancamento extends Model
     }
 
     public function getOutrosLancamentos($request = [], $user){
-        return $this
-            ->where('user_id', $user->id)
+        return $this->doUsuarioVisiveis($user)
             ->whereMonth('data_lancamento', !empty($request['mes']) ? $request['mes'] : '')
             ->whereYear('data_lancamento', !empty($request['ano']) ? $request['ano'] : '')
             ->doesntHave('despesa')
@@ -54,17 +69,15 @@ class Lancamento extends Model
     }
 
     public function getUltimosLancamentos($user){
-        return $this
-            ->where('user_id', $user->id)
+        return $this->doUsuarioVisiveis($user)
             ->orderBy('id', 'DESC')
             ->limit(5)
             ->get();
     }
 
     public function getLancamentosGroupData($user){
-        return $this
+        return $this->doUsuarioVisiveis($user)
             ->select('*')
-            ->where('user_id', $user->id)
             ->whereYear('data_lancamento', '=', date('Y'))
             ->orderBy('data_lancamento', 'ASC')
             ->get();
@@ -128,7 +141,7 @@ class Lancamento extends Model
      * Busca o Lançamento só entre os do usuário: o de outro usuário é tratado como inexistente (404).
      */
     public function doUsuario($id, $user){
-        return $this->where('user_id', $user->id)->findOrFail($id);
+        return $this->doUsuarioVisiveis($user)->findOrFail($id);
     }
 
     public function deleteLancamento($id, $user){

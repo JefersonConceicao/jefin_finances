@@ -1,4 +1,7 @@
 <ul class="navbar-nav ms-auto mb-2 mb-lg-0"></ul>
+<button type="button" class="btn-tema me-3" id="btnAlternarTema" title="Alternar tema claro/escuro" aria-label="Alternar tema claro/escuro">
+    <i class="fas fa-moon"></i>
+</button>
 <div class="dropdown">
     <a href="#" data-bs-toggle="dropdown" aria-expanded="false">
         <div class="user-menu d-flex">

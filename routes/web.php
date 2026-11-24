@@ -23,7 +23,8 @@ Route::view('/guia', 'guia.index')->name('guia.index');
 
 //ROTAS COM AUTENTICAÇÃO
 Route::group(['middleware' => 'auth'], function(){
-    Route::get('/home', 'HomeController@index')->name('home.index');
+    //A PROJEÇÃO É A TELA INICIAL; /home FICA PARA LINKS ANTIGOS
+    Route::redirect('/home', '/projecao')->name('home.index');
 
     Route::group(['prefix' => 'users'], function(){
         //RENDER VIEWS
@@ -48,15 +49,6 @@ Route::group(['middleware' => 'auth'], function(){
         Route::post('/copyProventos', 'ProventosController@copyProventos')->name('proventos.copy');
     });
 
-    Route::group(['prefix' => 'tiposDespesas'], function(){
-        Route::get('/', 'TiposDespesasController@index')->name('tiposDespesas.index');
-        Route::get('/create', 'TiposDespesasController@create')->name('tiposDespesas.create');
-        Route::post('/store', 'TiposDespesasController@store')->name('tiposDespesas.store');
-        Route::get('/edit/{id}', 'TiposDespesasController@edit')->name('tiposDespesas.edit');
-        Route::put('/update/{id}', 'TiposDespesasController@update')->name('tiposDespesas.update');
-        Route::delete('/delete/{id}', 'TiposDespesasController@delete')->name('tiposDespesas.delete');
-        Route::get('/optionsDespesasJSON', 'TiposDespesasController@optionsDespesasJSON') ->name('tiposDespesas.optionsDespesas');
-    });
 
     Route::group(['prefix' => 'despesas'], function(){
         Route::get('/', 'DespesasController@index')->name('despesas.index');
@@ -77,6 +69,7 @@ Route::group(['middleware' => 'auth'], function(){
         Route::delete('/delete/{id}', 'ProventosFixosController@delete')->name('proventosFixos.delete');
         Route::put('/reajustar/{id}', 'ProventosFixosController@reajustar')->name('proventosFixos.reajustar');
         Route::put('/encerrar/{id}', 'ProventosFixosController@encerrar')->name('proventosFixos.encerrar');
+        Route::put('/ocultar/{id}', 'ProventosFixosController@ocultar')->name('proventosFixos.ocultar');
     });
 
     Route::group(['prefix' => 'despesasFixas'], function(){
@@ -88,6 +81,7 @@ Route::group(['middleware' => 'auth'], function(){
         Route::delete('/delete/{id}', 'DespesasFixasController@delete')->name('despesasFixas.delete');
         Route::put('/reajustar/{id}', 'DespesasFixasController@reajustar')->name('despesasFixas.reajustar');
         Route::put('/encerrar/{id}', 'DespesasFixasController@encerrar')->name('despesasFixas.encerrar');
+        Route::put('/ocultar/{id}', 'DespesasFixasController@ocultar')->name('despesasFixas.ocultar');
     });
 
     Route::get('/projecao', 'ProjecaoController@index')->name('projecao.index');
@@ -102,15 +96,5 @@ Route::group(['middleware' => 'auth'], function(){
         Route::get('/getGastosGraphs', 'LancamentosController@dataGastosGraficos')->name('lancamentos.dataGrafico');
     });
 
-    Route::group(['prefix' => 'dividas'], function(){
-        Route::get('/', 'DividasController@index')->name('dividas.index');
-        Route::get('/create', 'DividasController@create')->name('dividas.create');
-        Route::post('/store', 'DividasController@store')->name('dividas.store');
-        Route::get('/edit/{id}', 'DividasController@edit')->name('dividas.edit');
-        Route::put('/update/{id}', 'DividasController@update')->name('dividas.update');
-        Route::get('/show/{id}', 'DividasController@show')->name('dividas.show');
-        Route::put('/payDebt/{id}', 'DividasController@declarePayment')->name('dividas.declarePayment');
-        Route::delete('/delete/{id}', 'DividasController@delete')->name('dividas.destroy');
-    });
 });
 

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Recorrencia\Ocorrencia;
 use App\Recorrencia\Recorrente;
 use App\Recorrencia\Vigencia;
+use App\Recorrencia\SemOcorrenciasOcultas;
 
 class DespesaFixa extends Model
 {
@@ -17,7 +18,6 @@ class DespesaFixa extends Model
     protected $fillable = [
         'user_id',
         'nome_despesa',
-        'despesa_tipo_id',
         'valor',
         'ativo',
         'mes_inicio',
@@ -31,12 +31,16 @@ class DespesaFixa extends Model
         'ocorrencias_ate' => 'date',
     ];
 
-    public function despesaTipo(){
-        return $this->hasOne(TiposDespesa::class, 'id', 'despesa_tipo_id');
+    //A PRÓPRIA FIXA ENXERGA AS SUAS OCORRÊNCIAS MESMO OCULTA (PARA ENCERRAR E EXCLUIR)
+    public function despesas(){
+        return $this->hasMany(Despesa::class, 'despesa_fixa_id', 'id')->withoutGlobalScope(SemOcorrenciasOcultas::class);
     }
 
-    public function despesas(){
-        return $this->hasMany(Despesa::class, 'despesa_fixa_id', 'id');
+    /**
+     * Busca a Despesa Fixa só entre as do usuário: a de outro usuário é tratada como inexistente (404).
+     */
+    public function doUsuario($id, $user){
+        return $this->where('user_id', $user->id)->findOrFail($id);
     }
 
     public function getDespesasFixas($request = [], $user){
@@ -47,17 +51,18 @@ class DespesaFixa extends Model
             $conditions[] = ['nome_despesa', 'LIKE', "%".$request['nome_despesa']."%"];
         }
 
-        if(isset($request['despesa_tipo_id']) && !empty($request['despesa_tipo_id'])){
-            $conditions[] = ['despesa_tipo_id', '=', $request['despesa_tipo_id']];
-        }
-
         if(isset($request['ativo']) && $request['ativo'] !== ''){
             $conditions[] = ['ativo', '=', $request['ativo']];
         }
 
+        //AS OCULTAS SÓ APARECEM COM "MOSTRAR OCULTAS", DEPOIS DAS VISÍVEIS
+        if(empty($request['mostrar_ocultas'])){
+            $conditions[] = ['oculta', '=', 0];
+        }
+
         return $this
             ->where($conditions)
-            ->with('despesaTipo')
+            ->orderBy('oculta', 'ASC')
             ->withCount('ocorrencias')
             ->orderBy('ativo', 'DESC')
             ->orderBy('valor', 'DESC');
@@ -80,7 +85,6 @@ class DespesaFixa extends Model
                     'nome_despesa' => $request['nome_despesa'],
                     'valor' => setToDecimal($request['valor']),
                     'ativo' => $request['ativo'] ?? 1,
-                    'despesa_tipo_id' => (new TiposDespesa)->idTipoFixaDoUsuario($user),
                     'mes_inicio' => $inicio->format('Y-m-d'),
                     'mes_fim' => $fim ? $fim->format('Y-m-d') : null,
                     'dia_vencimento' => (int) $request['dia_vencimento'],
@@ -119,7 +123,6 @@ class DespesaFixa extends Model
         Despesa::create([
             'user_id' => $this->user_id,
             'nome_despesa' => $ocorrencia->nome($this->nome_despesa),
-            'despesa_tipo_id' => $this->despesa_tipo_id,
             'despesa_fixa_id' => $this->id,
             'valor_total' => $this->valor,
             'data_vencimento' => $ocorrencia->vencimento->format('Y-m-d'),
@@ -211,20 +214,55 @@ class DespesaFixa extends Model
         }, 'Despesa fixa encerrada!', 'Não foi possível encerrar, tente de novo.');
     }
 
-    public function deleteDespesaFixa($id, $user){
-        $despesaFixa = $this->where('user_id', $user->id)->findOrFail($id);
+    const MSG_EXCLUIR_COM_PAGA = 'Esta despesa fixa já tem Ocorrência paga. Use "Encerrar" para terminar a Vigência.';
 
-        //COM OCORRÊNCIAS, EXCLUIR APAGARIA O HISTÓRICO: O CAMINHO É O ENCERRAMENTO
-        if($despesaFixa->temOcorrencias()){
+    /**
+     * Exclui a Despesa Fixa junto com todas as Ocorrências dela, enquanto nenhuma foi paga (corrige um cadastro
+     * errado sem apagar pagamento real). Com alguma paga, o caminho é o Encerramento.
+     */
+    public function deleteDespesaFixa($id, $user){
+        $despesaFixa = $this->doUsuario($id, $user);
+
+        if($despesaFixa->temOcorrenciaPaga()){
             return [
                 'error' => true,
-                'msg' => 'Esta despesa fixa já tem Ocorrências. Use "Encerrar" para terminar a Vigência.'
+                'msg' => self::MSG_EXCLUIR_COM_PAGA
             ];
         }
 
         return $this->resposta(function() use ($despesaFixa){
-            $despesaFixa->delete();
-        }, 'Registro excluído com sucesso!', 'Não foi possível excluír o registro, tente de novo');
+            DB::transaction(function() use ($despesaFixa){
+                $fixa = static::lockForUpdate()->findOrFail($despesaFixa->id);
+
+                //TRAVA AS OCORRÊNCIAS COMO O PAGAMENTO FAZ: UM PAGAMENTO FEITO ENTRE A CONFERÊNCIA ACIMA E A TRAVA
+                //ESPERA OU É VISTO AQUI, E CANCELA A EXCLUSÃO
+                $ocorrencias = $fixa->ocorrencias()->lockForUpdate()->get();
+                if($ocorrencias->contains(function($ocorrencia){ return $ocorrencia->paga(); })){
+                    throw new \RuntimeException('Ocorrência paga durante a exclusão da Despesa Fixa ' . $fixa->id);
+                }
+
+                foreach($ocorrencias as $ocorrencia){
+                    $ocorrencia->excluirComLancamentos();
+                }
+                $fixa->delete();
+            });
+        }, 'Despesa fixa e Ocorrências excluídas!', 'Não foi possível excluír o registro, tente de novo');
+    }
+
+    public function temOcorrenciaPaga(){
+        return $this->ocorrencias()->get()->contains(function($ocorrencia){
+            return $ocorrencia->paga();
+        });
+    }
+
+    //MESMO CRITÉRIO DE totalVigentes, PARA O PERCENTUAL DE CADA LINHA SOMAR O DO TOPO
+    public function vigenteNoMesAtual(){
+        $mesAtual = Carbon::now()->startOfMonth();
+
+        return (int) $this->ativo === 1
+            && (int) $this->oculta === 0
+            && $this->mes_inicio->lte($mesAtual)
+            && (!$this->mes_fim || $this->mes_fim->gte($mesAtual));
     }
 
     /**
@@ -236,9 +274,10 @@ class DespesaFixa extends Model
         return $this
             ->where('user_id', $user->id)
             ->where('ativo', 1)
-            ->where('mes_inicio', '<=', $mesAtual)
+            ->where('oculta', 0)
+            ->whereDate('mes_inicio', '<=', $mesAtual)
             ->where(function($query) use ($mesAtual){
-                $query->whereNull('mes_fim')->orWhere('mes_fim', '>=', $mesAtual);
+                $query->whereNull('mes_fim')->orWhereDate('mes_fim', '>=', $mesAtual);
             })
             ->sum('valor');
     }

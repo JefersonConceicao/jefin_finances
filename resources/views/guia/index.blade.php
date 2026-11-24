@@ -176,7 +176,7 @@ dl.gloss dd{color:var(--muted); font-size:15px}
 <div class="wrap">
   <nav class="toc" aria-label="Sumário">
     <div class="brand"><span>J</span> Jefin Finances</div>
-    <a class="back" href="{{ auth()->check() ? route('home.index') : route('auth.renderViewLogin') }}">&larr; {{ auth()->check() ? 'Voltar ao sistema' : 'Voltar ao login' }}</a>
+    <a class="back" href="{{ auth()->check() ? route('projecao.index') : route('auth.renderViewLogin') }}">&larr; {{ auth()->check() ? 'Voltar ao sistema' : 'Voltar ao login' }}</a>
     <ol>
       <li><a href="#inicio">A ideia</a></li>
       <li><a href="#fluxo">O caminho do dinheiro</a></li>
@@ -225,29 +225,26 @@ flowchart LR
   PA["Provento avulso<br/>ex.: freela"] --> P
   DF["Despesa Fixa<br/>ex.: Aluguel, Cartão 10x"] -->|"gera um por mês"| D["Despesas<br/>do mês"]
   DV["Despesa Variável<br/>ex.: IPVA"] --> D
-  T["Tipos de Despesa<br/>Moradia, Transporte..."] -.->|"classifica"| DV
   D -->|"Declarar pagamento"| L["Lançamento<br/>(pago)"]
   P --> PR["Projeção"]
   D --> PR
   PR --> S["Saldo do Mês<br/>e Saldo Acumulado"]
   PR --> M["Marcos e Alertas"]
-  L --> H["Home<br/>últimos lançamentos"]
 </pre>
       </div>
-      <p class="caption">Despesas pagas viram Lançamentos, que aparecem na Home. A Projeção conta todas as Despesas do mês, pagas ou não.</p>
+      <p class="caption">Despesas pagas ficam marcadas e geram um Lançamento. A Projeção conta todas as Despesas do mês, pagas ou não.</p>
     </section>
 
     <section id="passos">
       <h2>Primeiros passos</h2>
-      <p>Uma ordem que funciona bem no primeiro uso. Todas as telas ficam no menu <b>Meu dinheiro</b>.</p>
+      <p>Uma ordem que funciona bem no primeiro uso. Depois do login você cai na <b>Projeção</b>; as outras telas ficam nos menus <b>Proventos</b> e <b>Despesas</b>.</p>
       <ol class="steps">
         <li><div><h3>Crie sua conta e entre</h3><p>Pela tela de cadastro, ou com a conta Google. Cada usuário só vê os próprios dados.</p></div></li>
-        <li><div><h3>Crie seus Tipos de Despesa</h3><p><span class="where">Despesas Tipos</span> Moradia, Transporte, Mercado… São as categorias das Despesas Variáveis. O tipo "Fixa" já existe e é reservado para as Despesas Fixas.</p></div></li>
         <li><div><h3>Cadastre o que entra todo mês</h3><p><span class="where">Proventos Fixos</span> Descrição, valor e mês de início. Sem mês de fim, vale por tempo indeterminado.</p></div></li>
         <li><div><h3>Cadastre o que sai todo mês</h3><p><span class="where">Despesas Fixas</span> Nome, valor, dia de vencimento e mês de início. Para parcelas, informe o número de parcelas ou o mês de fim: o sistema numera cada mês, como "Cartão (3/10)".</p></div></li>
-        <li><div><h3>Registre os gastos avulsos</h3><p><span class="where">Despesas</span> Escolha o tipo e a data de vencimento. A Despesa conta no mês do vencimento, mesmo que você cadastre antes.</p></div></li>
+        <li><div><h3>Registre os gastos avulsos</h3><p><span class="where">Despesas</span> Nome, valor e data de vencimento. A Despesa conta no mês do vencimento, mesmo que você cadastre antes. Não há categorias: uma Despesa é Fixa ou Variável.</p></div></li>
         <li><div><h3>Marque o que pagou</h3><p><span class="where">Despesas</span> O botão de pagamento ao lado de cada Despesa declara que ela foi paga.</p></div></li>
-        <li><div><h3>Olhe a Projeção</h3><p><span class="where">Projeção</span> Escolha 3, 6 ou 12 meses e veja o saldo de cada mês e os avisos do que muda.</p></div></li>
+        <li><div><h3>Olhe a Projeção</h3><p><span class="where">Projeção</span> Escolha 3, 6 ou 12 meses e veja o saldo de cada mês, as Datas Comemorativas e os avisos do que muda.</p></div></li>
       </ol>
     </section>
 
@@ -293,6 +290,12 @@ flowchart LR
           <p style="margin:0; color:var(--muted); font-size:14.5px">Define o último mês da Vigência. Os meses depois dele são apagados e a janela não os recria. O Encerramento só encurta: para estender, cadastre uma nova fixa.</p>
         </div>
       </div>
+
+      <h3 style="margin-top:18px">Excluir uma Despesa Fixa</h3>
+      <p>Cadastrou errado (mês de início, número de parcelas)? O botão de excluir na lista de Despesas Fixas apaga a fixa <b>e todas as Ocorrências dela</b>, para você cadastrar de novo. Só funciona enquanto nenhuma Ocorrência foi paga; com algo pago, use Encerrar.</p>
+
+      <h3 style="margin-top:18px">Ocultar para simular</h3>
+      <p>O botão com o olho, nas listas de Despesas Fixas e de Proventos Fixos, <b>oculta</b> a fixa: ela e todas as Ocorrências dela (inclusive as pagas) somem de todo o app, como se nunca tivessem existido. Nada é apagado nem alterado. Serve para ver na Projeção como ficaria sem aquela conta, ou para cadastrar algo, ver como ficaria e depois ocultar. Para trazer de volta, ligue "Mostrar ocultas" e clique em desocultar.</p>
     </section>
 
     <section id="alterar">
@@ -337,7 +340,7 @@ flowchart LR
 
     <section id="pagamento">
       <h2>Pagar uma Despesa</h2>
-      <p>Na lista de Despesas, o botão ao lado de cada item declara o pagamento. A Despesa fica marcada como paga e o sistema cria um <span class="term">Lançamento</span> com a data e o valor, que aparece em "últimos lançamentos" na Home. Clicar de novo remove o pagamento e o Lançamento.</p>
+      <p>Na lista de Despesas, o botão ao lado de cada item declara o pagamento. A Despesa fica marcada como paga e o sistema cria um <span class="term">Lançamento</span> com a data e o valor. Clicar de novo remove o pagamento e o Lançamento.</p>
       <p>No topo da lista aparecem o valor total do mês, quanto já foi pago e quanto falta pagar.</p>
       <div class="note">Uma Despesa conta no mês do seu vencimento (a <b>Competência</b>), e não no mês em que foi cadastrada ou paga. Um IPVA cadastrado em novembro com vencimento em 15/02/2027 conta em fevereiro.</div>
     </section>
@@ -362,21 +365,28 @@ flowchart LR
       <p class="caption">Exemplo com Salário, Aluguel e o Cartão da seção anterior, um presente de R$ 300 em dezembro e o IPVA em fevereiro.</p>
 
       <h3 style="margin-top:22px">Marcos e Alertas</h3>
-      <p>Um <span class="term">Marco</span> é o mês em que uma fixa começa ou termina; ele aparece na linha daquele mês. Os <span class="term">Alertas</span> avisam, do mais próximo ao mais distante, o que vai mudar nos meses futuros:</p>
+      <p>Um <span class="term">Marco</span> é o mês em que uma fixa começa ou termina; ele aparece no card daquele mês. Com mais de 3 Marcos do mesmo tipo (por exemplo, 12 despesas que começam), o card mostra só a contagem, e um clique abre a lista.</p>
+      <p>Os <span class="term">Alertas</span> avisam, do mês mais próximo ao mais distante, o que vai mudar. Cada Alerta mostra como fica o total afetado, e um mês com mais de um Alerta ganha um resumo do efeito no fluxo:</p>
       <div class="alerts">
-        <div class="alert atencao"><span class="dot"></span><span>em 1 mês começa Cartão: <span class="money out">-R$ 450,00</span></span></div>
-        <div class="alert atencao"><span class="dot"></span><span>em 3 meses vence IPVA: <span class="money out">-R$ 1.200,00</span></span></div>
-        <div class="alert ganho"><span class="dot"></span><span>em 6 meses termina Cartão (6/6): seu fluxo melhora em <span class="money in">R$ 450,00</span></span></div>
+        <p style="margin:0 0 4px; font-weight:700">Em 1 mês (Dezembro/2026)</p>
+        <div class="alert atencao"><span class="dot"></span><span>Começa Cartão: <span class="money out">-R$ 450,00</span> · Despesas Fixas passam a R$ 2.250,00</span></div>
+        <p style="margin:10px 0 4px; font-weight:700">Em 3 meses (Fevereiro/2027)</p>
+        <div class="alert atencao"><span class="dot"></span><span>Vence IPVA: <span class="money out">-R$ 1.200,00</span></span></div>
+        <p style="margin:10px 0 4px; font-weight:700">Em 6 meses (Maio/2027)</p>
+        <div class="alert ganho"><span class="dot"></span><span>Termina Cartão (6/6): seu fluxo melhora em <span class="money in">R$ 450,00</span> · em Junho/2027, Despesas Fixas passam a R$ 1.800,00</span></div>
       </div>
-      <p class="caption" style="margin-top:10px">Verde é ganho: uma Despesa Fixa que termina ou um Provento Fixo que começa. Terracota pede atenção: uma Despesa Fixa que começa, um Provento Fixo que termina ou uma Despesa Variável futura.</p>
+      <p class="caption" style="margin-top:10px">Verde é ganho: uma Despesa Fixa que termina ou um Provento Fixo que começa. Amarelo pede atenção: uma Despesa Fixa que começa, um Provento Fixo que termina ou uma Despesa Variável futura.</p>
+
+      <h3 style="margin-top:22px">Datas Comemorativas</h3>
+      <p>O card de cada mês mostra as <span class="term">Datas Comemorativas</span> que costumam trazer gastos extras, para você se programar: Réveillon, Carnaval, Páscoa, Dia das Mães, São João, 2 de Julho, Dia dos Pais, Dia das Crianças, Black Friday e Natal.</p>
     </section>
 
     <section id="telas">
       <h2>Outras telas</h2>
       <div class="screens">
-        <div class="screen"><h3>Home</h3><p>Total já pago, total de proventos, há quantos dias você usa o sistema e os últimos lançamentos.</p></div>
-        <div class="screen"><h3>Calculadora de Proventos</h3><p>Os Proventos de um mês, fixos e avulsos. O botão "Repetir proventos do mês anterior" copia os seus Proventos avulsos do mês anterior para o mês escolhido no filtro; os Proventos Fixos ficam de fora, porque já aparecem sozinhos. Para o que entra todo mês, prefira um Provento Fixo.</p></div>
-        <div class="screen"><h3>Dívidas</h3><p>Controle à parte de dívidas parceladas: valor total, parcelas e "declarar pagamento" a cada parcela. As Dívidas não entram na Projeção. Para que uma parcela conte no saldo, cadastre-a também como Despesa Fixa com fim.</p></div>
+        <div class="screen"><h3>Proventos</h3><p>Os Proventos de um mês, fixos e avulsos. O botão "Repetir proventos do mês anterior" copia os seus Proventos avulsos do mês anterior para o mês escolhido no filtro; os Proventos Fixos ficam de fora, porque já aparecem sozinhos. Para o que entra todo mês, prefira um Provento Fixo.</p></div>
+        <div class="screen"><h3>Despesas Fixas</h3><p>Além da lista, mostra o <b>Comprometimento da Renda com Despesas Fixas</b>: quanto dos Proventos do mês atual as fixas tomam, no total e em cada linha.</p></div>
+        <div class="screen"><h3>Tema escuro</h3><p>O botão da lua, na barra de cima, alterna entre claro e escuro. Até você escolher, o sistema segue o tema do seu aparelho.</p></div>
         <div class="screen"><h3>Usuários e perfil</h3><p>Dados da conta e troca de senha.</p></div>
       </div>
     </section>
@@ -391,13 +401,15 @@ flowchart LR
         <dt>Despesa Fixa</dt><dd>Gasto que se repete todo mês na Vigência. Parcelas são Despesas Fixas com fim.</dd>
         <dt>Despesa Variável</dt><dd>Despesa avulsa, que não veio de uma Despesa Fixa.</dd>
         <dt>Ocorrência</dt><dd>A Despesa ou o Provento de um mês gerado por uma fixa.</dd>
-        <dt>Tipo de Despesa</dt><dd>A categoria de uma Despesa. "Fixa" é reservado às Despesas Fixas.</dd>
         <dt>Vencimento</dt><dd>A data em que você pretende pagar a Despesa.</dd>
         <dt>Competência</dt><dd>O mês em que a Despesa conta: o mês do Vencimento.</dd>
         <dt>Vigência</dt><dd>Mês de início e, se houver, mês de fim de uma fixa.</dd>
         <dt>Valor Previsto</dt><dd>O valor esperado de uma fixa a cada mês.</dd>
         <dt>Reajuste</dt><dd>Novo Valor Previsto a partir de um mês, sem mudar os anteriores.</dd>
         <dt>Encerramento</dt><dd>Definir o último mês da Vigência.</dd>
+        <dt>Ocultação</dt><dd>Esconder uma fixa e todas as Ocorrências dela de todo o app, sem apagar nada; desfazer traz tudo de volta.</dd>
+        <dt>Comprometimento da Renda</dt><dd>Quanto dos Proventos de um mês é tomado pelas Despesas daquele mês.</dd>
+        <dt>Data Comemorativa</dt><dd>Data que costuma trazer gastos extras, como São João ou Natal.</dd>
         <dt>Lançamento</dt><dd>O registro do pagamento de uma Despesa.</dd>
         <dt>Projeção</dt><dd>A visão mês a mês do que vai entrar e sair.</dd>
         <dt>Horizonte</dt><dd>Quantos meses à frente a Projeção mostra: 3, 6 ou 12.</dd>

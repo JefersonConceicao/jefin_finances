@@ -4,6 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Sem uso nas telas desde o fim dos Tipos de Despesa (issue #26): a Despesa é só Fixa ou Variável.
+ * Continua aqui porque a API (routes/api.php) ainda expõe o cadastro, e a tabela fica no banco.
+ */
 class TiposDespesa extends Model
 {
     protected $table = 'despesas_tipos';
@@ -52,16 +56,6 @@ class TiposDespesa extends Model
         }
     }
 
-    /**
-     * Opções de Tipo de Despesa para uma Despesa Variável: os do usuário, sem o tipo reservado.
-     */
-    public function opcoesDespesaVariavel($user){
-        return $this
-            ->where('user_id', $user->id)
-            ->where('reservado', 0)
-            ->pluck('nome', 'id');
-    }
-
     const MSG_RESERVADO = 'O tipo "Fixa" é reservado às Despesas Fixas e não pode ser alterado nem excluído';
 
     /**
@@ -96,33 +90,6 @@ class TiposDespesa extends Model
                 'msg' => 'Não foi possível atlerar o registro, tente de novo',
             ];
         }
-    }
-
-    /**
-     * Tipo de Despesa "Fixa" reservado do usuário, usado em toda Despesa Fixa e nas Ocorrências dela.
-     * É identificado pelo marcador `reservado`, não pelo nome; se o usuário ainda não tiver, é criado.
-     */
-    public function idTipoFixaDoUsuario($user){
-        $existente = $this
-            ->where('user_id', $user->id)
-            ->where('reservado', 1)
-            ->orderBy('id')
-            ->value('id');
-
-        if($existente){
-            return $existente;
-        }
-
-        //reservado FICA FORA DO fillable PARA O FORMULÁRIO NÃO CONSEGUIR MARCAR UM TIPO COMO RESERVADO
-        $tipo = new static;
-        $tipo->forceFill([
-            'user_id' => $user->id,
-            'nome' => 'Fixa',
-            'ativo' => 1,
-            'reservado' => 1,
-        ])->save();
-
-        return $tipo->id;
     }
 
     public function deleteTipoDespesa($id, $user = null){

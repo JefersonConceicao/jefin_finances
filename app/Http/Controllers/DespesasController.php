@@ -10,7 +10,6 @@ use App\Http\Requests\DespesasRequest;
 //MODELS
 use App\Models\Despesa;
 use App\Models\DespesaFixa;
-use App\Models\TiposDespesa;
 use App\Models\Proventos;
 use Illuminate\View\View;
 
@@ -22,7 +21,6 @@ class DespesasController extends Controller
     public function index(Request $request)
     {
         $despesa = new Despesa;
-        $tipoDespesa = new TiposDespesa;
         $proventos = new Proventos;
         $despesaFixa = new DespesaFixa;
         $user = Auth::user();
@@ -50,14 +48,9 @@ class DespesasController extends Controller
             ->getProventos($request->all(), $user)
             ->sum('valor_provento');
 
-        $optionsTipoDesesa = $tipoDespesa
-            ->where('user_id', $user->id)
-            ->pluck('nome', 'id');
-
         return view('despesas.index')
             ->with('dataDespesas', $data)
             ->with('optionsMeses', $this->optionsMeses)
-            ->with('optionsTipoDespesa', $optionsTipoDesesa)
             ->with('totalValor', $totalValor)
             ->with('totalFixas', $totalFixas)
             ->with('totalVariaveis', $totalValor - $totalFixas)
@@ -70,13 +63,7 @@ class DespesasController extends Controller
      */
     public function create()
     {
-        $user = Auth::user();
-        $tipoDespesa = new TiposDespesa;
-
-        $optionsTipoDespesa = $tipoDespesa->opcoesDespesaVariavel($user);
-
-        return view('despesas.create')
-            ->with('optionsTipoDespesa', $optionsTipoDespesa);
+        return view('despesas.create');
     }
     /**
      * @param  \Illuminate\Http\Request  $request
@@ -98,18 +85,12 @@ class DespesasController extends Controller
     public function edit($id)
     {
         $user = Auth::user();
-        $tipoDespesa = new TiposDespesa;
         $despesa = new Despesa;
 
         $data = $despesa->doUsuario($id, $user);
-        //A OCORRÊNCIA DE UMA DESPESA FIXA FICA COM O TIPO RESERVADO; A DESPESA VARIÁVEL NÃO PODE ESCOLHÊ-LO
-        $optionsTipoDespesa = !empty($data->despesa_fixa_id)
-            ? $tipoDespesa->where('id', $data->despesa_tipo_id)->pluck('nome', 'id')
-            : $tipoDespesa->opcoesDespesaVariavel($user);
 
         return view('despesas.edit')
-            ->with('despesa', $data)
-            ->with('optionsTipoDespesa', $optionsTipoDespesa);
+            ->with('despesa', $data);
     }
 
     /**

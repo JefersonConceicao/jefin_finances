@@ -7,6 +7,7 @@ use DB;
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
 use App\Models\Lancamento;
+use App\Recorrencia\SemOcorrenciasOcultas;
 
 class Despesa extends Model
 {
@@ -14,7 +15,6 @@ class Despesa extends Model
     protected $fillable = [
         'user_id',
         'nome_despesa',
-        'despesa_tipo_id',
         'despesa_fixa_id',
         'valor_total',
         'data_vencimento',
@@ -24,8 +24,11 @@ class Despesa extends Model
         'updated_at'
     ];
 
-    public function despesaTipo(){
-        return $this->hasOne(TiposDespesa::class, 'id', 'despesa_tipo_id');
+    protected static function boot(){
+        parent::boot();
+
+        //OCORRÊNCIAS DE DESPESA FIXA OCULTA SOMEM DE TODO O APP
+        static::addGlobalScope(new SemOcorrenciasOcultas('despesa_fixa_id', 'despesas_fixas'));
     }
 
     const ESCOPO_SO_ESTA = 'so_esta';
@@ -91,13 +94,7 @@ class Despesa extends Model
             $conditions[] = ['nome_despesa', 'LIKE', "%".$request['nome_despesa']."%"];
         }
 
-        if(isset($request['despesa_tipo_id']) && !empty($request['despesa_tipo_id'])){
-            $conditions[] = ['despesa_tipo_id', '=', $request['despesa_tipo_id']];
-        }
-
-        $query = $this
-            ->where($conditions)
-            ->with('despesaTipo');
+        $query = $this->where($conditions);
 
         //COMPETÊNCIA: MÊS DO VENCIMENTO; REGISTROS ANTIGOS SEM VENCIMENTO USAM A DATA DE CADASTRO (ADR-0002)
         $competencia = DB::raw('COALESCE(data_vencimento, created_at)');
@@ -162,7 +159,7 @@ class Despesa extends Model
         $escopo = $request['escopo'] ?? self::ESCOPO_SO_ESTA;
 
         //SÓ ESTES CAMPOS MUDAM PELA EDIÇÃO: DONO, DATA DE CADASTRO, PAGAMENTO E DESPESA FIXA DE ORIGEM FICAM COMO ESTÃO
-        $request = Arr::only($request, ['nome_despesa', 'despesa_tipo_id', 'valor_total', 'ativo', 'data_vencimento']);
+        $request = Arr::only($request, ['nome_despesa', 'valor_total', 'ativo', 'data_vencimento']);
 
         try{
             if(isset($request['valor_total']) && !empty($request['valor_total'])){
@@ -191,8 +188,8 @@ class Despesa extends Model
                     //"ESTA E AS SEGUINTES" É O REAJUSTE DA DESPESA FIXA, A PARTIR DO MÊS DESTA OCORRÊNCIA
                     $fixa->reajustar($despesa->competencia(), $request['valor_total'], $dia);
 
-                    //O QUE NÃO É DO REAJUSTE (NOME, TIPO, ATIVO) VALE SÓ PARA ESTA OCORRÊNCIA
-                    $despesa->refresh()->fill(Arr::only($request, ['nome_despesa', 'despesa_tipo_id', 'ativo']))->save();
+                    //O QUE NÃO É DO REAJUSTE (NOME, ATIVO) VALE SÓ PARA ESTA OCORRÊNCIA
+                    $despesa->refresh()->fill(Arr::only($request, ['nome_despesa', 'ativo']))->save();
                 });
             }else{
                 $despesa->fill($request)->save();
@@ -216,7 +213,8 @@ class Despesa extends Model
      */
     public function excluirComLancamentos(){
         //TRAVA A DESPESA: UM PAGAMENTO AO MESMO TEMPO NÃO LANÇA DEPOIS DA LIMPEZA ABAIXO
-        static::lockForUpdate()->findOrFail($this->id);
+        //(SEM O SCOPE DA OCULTAÇÃO: O ENCERRAMENTO DE UMA FIXA OCULTA EXCLUI AS OCORRÊNCIAS DELA)
+        static::withoutGlobalScope(SemOcorrenciasOcultas::class)->lockForUpdate()->findOrFail($this->id);
         //A DESPESA PAGA LEVA JUNTO OS LANÇAMENTOS DO DONO
         Lancamento::where('despesa_id', $this->id)->where('user_id', $this->user_id)->delete();
         //DADO ANTIGO: LANÇAMENTO DE OUTRO USUÁRIO NESTA DESPESA É DELE; SÓ SE DESLIGA DELA E VIRA "OUTRO LANÇAMENTO"

@@ -15,20 +15,28 @@
         </div>
     </form>
 
-    @if (count($alertas) > 0)
+    @if (count($alertasPorMes) > 0)
         <div class="card">
             <div class="card-header pb-0">
                 <h4 class="card-title mb-0"> Alertas </h4>
             </div>
             <div class="card-body">
-                <ul class="list-unstyled mb-0">
-                    @foreach ($alertas as $alerta)
-                        <li class="mb-1 {{ $alerta['tipo'] === 'ganho' ? 'text-success' : 'text-warning' }}">
-                            <i class="fa {{ $alerta['tipo'] === 'ganho' ? 'fa-arrow-up' : 'fa-exclamation-triangle' }}"></i>
-                            {{ $alerta['descricao'] }}
-                        </li>
-                    @endforeach
-                </ul>
+                @foreach ($alertasPorMes as $grupo)
+                    <div class="mb-3">
+                        <h6 class="mb-2"> {{ $grupo['quando'] }} </h6>
+                        @foreach ($grupo['alertas'] as $alerta)
+                            <div class="alert {{ $alerta['tipo'] === 'ganho' ? 'alert-success' : 'alert-warning' }} py-2 px-3 mb-1">
+                                <i class="fa {{ $alerta['tipo'] === 'ganho' ? 'fa-arrow-up' : 'fa-exclamation-triangle' }}"></i>
+                                {{ $alerta['descricao'] }}
+                            </div>
+                        @endforeach
+                        @if ($grupo['resumo'])
+                            <p class="mb-0 mt-1 fw-bold {{ $grupo['liquido'] < 0 ? 'text-danger' : 'text-success' }}">
+                                <i class="fa fa-equals"></i> {{ $grupo['resumo'] }}
+                            </p>
+                        @endif
+                    </div>
+                @endforeach
             </div>
         </div>
     @endif
@@ -54,6 +62,16 @@
                         </div>
                     </div>
                     <div class="card-body">
+                        @if (count($mes['datasComemorativas']) > 0)
+                            {{-- DATAS COMEMORATIVAS: PARA SE PROGRAMAR PARA OS GASTOS VARIÁVEIS DO MÊS --}}
+                            <div class="mb-2">
+                                @foreach ($mes['datasComemorativas'] as $comemorativa)
+                                    <span class="badge bg-light-info mb-1" title="Data Comemorativa">
+                                        <i class="fa fa-calendar-day"></i> {{ $comemorativa['nome'] }} ({{ $comemorativa['data']->format('d/m') }})
+                                    </span>
+                                @endforeach
+                            </div>
+                        @endif
                         <table class="table table-sm table-borderless mb-2">
                             <tr>
                                 <td class="text-info"> Proventos </td>
@@ -97,12 +115,44 @@
                             </tr>
                         </table>
 
-                        @if (count($mes['marcos']) > 0)
+                        @if (count($mes['gruposDeMarcos']) > 0)
                             <div class="mb-2">
-                                @foreach ($mes['marcos'] as $marco)
-                                    <span class="badge {{ $marco['efeito'] === 'ganho' ? 'bg-light-success' : 'bg-light-warning' }} mb-1">
-                                        {{ $marco['descricao'] }}
-                                    </span>
+                                @foreach ($mes['gruposDeMarcos'] as $grupo)
+                                    @if ($grupo['agrupado'])
+                                        {{-- MAIS DE 3 MARCOS DO MESMO LADO E TIPO: UM LINK COM A CONTAGEM ABRE A LISTA --}}
+                                        <a href="#" class="badge {{ $grupo['efeito'] === 'ganho' ? 'bg-light-success' : 'bg-light-warning' }} mb-1 text-decoration-underline"
+                                            data-bs-toggle="modal" data-bs-target="#marcos-{{ $grupo['chave'] }}">
+                                            {{ $grupo['rotulo'] }}
+                                        </a>
+                                        <div class="modal fade" id="marcos-{{ $grupo['chave'] }}" tabindex="-1" aria-hidden="true">
+                                            <div class="modal-dialog modal-dialog-scrollable">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title"> {{ $mes['label'] }}: {{ $grupo['rotulo'] }} </h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <table class="table table-sm mb-0">
+                                                            <tbody>
+                                                                @foreach ($grupo['itens'] as $item)
+                                                                    <tr>
+                                                                        <td> {{ $item['nome'] }} </td>
+                                                                        <td class="text-end"> {{ "R$ " .convertValorReal($item['valor']) }} </td>
+                                                                    </tr>
+                                                                @endforeach
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @else
+                                        @foreach ($grupo['itens'] as $item)
+                                            <span class="badge {{ $grupo['efeito'] === 'ganho' ? 'bg-light-success' : 'bg-light-warning' }} mb-1">
+                                                {{ $item['descricao'] }}
+                                            </span>
+                                        @endforeach
+                                    @endif
                                 @endforeach
                             </div>
                         @endif
@@ -147,7 +197,6 @@
                                         @foreach ($mes['listaVariaveis'] as $variavel)
                                             <tr>
                                                 <td> {{ $variavel->nome_despesa }} </td>
-                                                <td> {{ optional($variavel->despesaTipo)->nome }} </td>
                                                 <td class="text-end"> {{ convertValorReal($variavel->valor_total) }} </td>
                                             </tr>
                                         @endforeach

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Auth;
+use Illuminate\Http\Request;
 
 //REQUEST
 use App\Http\Requests\ProventosFixosRequest;
@@ -12,7 +13,7 @@ use App\Models\ProventoFixo;
 
 class ProventosFixosController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
         $proventoFixo = new ProventoFixo;
@@ -20,7 +21,7 @@ class ProventosFixosController extends Controller
         $proventoFixo->completarJanela($user);
 
         return view('proventos_fixos.index')
-            ->with('dataProventosFixos', $proventoFixo->getProventosFixos($user)->get());
+            ->with('dataProventosFixos', $proventoFixo->getProventosFixos($user, $request->boolean('mostrar_ocultas'))->get());
     }
 
     public function create()
@@ -62,5 +63,21 @@ class ProventosFixosController extends Controller
     {
         $data = (new ProventoFixo)->encerrarProventoFixo($id, $request->all(), Auth::user());
         return response()->json($data);
+    }
+
+    /**
+     * Ocultação: oculta = 1 esconde a recorrência e todas as Ocorrências dela; oculta = 0 traz tudo de volta.
+     */
+    public function ocultar(Request $request, $id)
+    {
+        $recorrencia = (new ProventoFixo)->doUsuario($id, Auth::user());
+        $oculta = (bool) $request->input('oculta', 1);
+
+        $recorrencia->ocultar($oculta);
+
+        return response()->json([
+            'error' => false,
+            'msg' => $oculta ? 'Provento fixo ocultado' : 'Provento fixo visível de novo',
+        ]);
     }
 }
