@@ -367,16 +367,17 @@ flowchart LR
 
       <h3 style="margin-top:22px">Marcos e Alertas</h3>
       <p>Um <span class="term">Marco</span> é o mês em que uma fixa começa ou termina; ele aparece no card daquele mês. Com mais de 3 Marcos do mesmo tipo (por exemplo, 12 despesas que começam), o card mostra só a contagem, e um clique abre a lista.</p>
-      <p>Os <span class="term">Alertas</span> avisam, do mês mais próximo ao mais distante, o que vai mudar. Cada Alerta mostra como fica o total afetado, e um mês com mais de um Alerta ganha um resumo do efeito no fluxo:</p>
+      <p>Os <span class="term">Alertas</span> avisam, do mês mais próximo ao mais distante, o que vai mudar. Na Projeção aparece só um resumo: quantos Alertas há no Horizonte e qual é o próximo mês com Alertas. O botão <b>Ver linha do tempo</b> abre todos eles.</p>
+      <p>Na linha do tempo, o topo tem uma barra por mês: para cima e verde quando o mês melhora o fluxo, para baixo e vermelha quando piora. Clicar numa barra leva até o mês. Os botões <b>Tudo</b>, <b>Entradas</b> e <b>Saídas</b> filtram o que aparece. Cada mês mostra o efeito no fluxo e cada Alerta mostra como fica o total afetado:</p>
       <div class="alerts">
-        <p style="margin:0 0 4px; font-weight:700">Em 1 mês (Dezembro/2026)</p>
-        <div class="alert atencao"><span class="dot"></span><span>Começa Cartão: <span class="money out">-R$ 450,00</span> · Despesas Fixas passam a R$ 2.250,00</span></div>
-        <p style="margin:10px 0 4px; font-weight:700">Em 3 meses (Fevereiro/2027)</p>
-        <div class="alert atencao"><span class="dot"></span><span>Vence IPVA: <span class="money out">-R$ 1.200,00</span></span></div>
-        <p style="margin:10px 0 4px; font-weight:700">Em 6 meses (Maio/2027)</p>
-        <div class="alert ganho"><span class="dot"></span><span>Termina Cartão (6/6): seu fluxo melhora em <span class="money in">R$ 450,00</span> · em Junho/2027, Despesas Fixas passam a R$ 1.800,00</span></div>
+        <p style="margin:0 0 4px; font-weight:700; display:flex; justify-content:space-between">Dezembro/2026 · em 1 mês <span class="money out">-R$ 450,00</span></p>
+        <div class="alert atencao"><span class="dot"></span><span style="display:flex; justify-content:space-between; gap:12px"><span>Começa Cartão<br/><small style="color:var(--muted)">Despesas Fixas passam a R$ 2.250,00</small></span><span class="money out">-R$ 450,00</span></span></div>
+        <p style="margin:10px 0 4px; font-weight:700; display:flex; justify-content:space-between">Fevereiro/2027 · em 3 meses <span class="money out">-R$ 1.200,00</span></p>
+        <div class="alert atencao"><span class="dot"></span><span style="display:flex; justify-content:space-between; gap:12px"><span>Vence IPVA</span><span class="money out">-R$ 1.200,00</span></span></div>
+        <p style="margin:10px 0 4px; font-weight:700; display:flex; justify-content:space-between">Maio/2027 · em 6 meses <span class="money in">+R$ 450,00</span></p>
+        <div class="alert ganho"><span class="dot"></span><span style="display:flex; justify-content:space-between; gap:12px"><span>Termina Cartão (6/6)<br/><small style="color:var(--muted)">em Junho/2027, Despesas Fixas passam a R$ 1.800,00</small></span><span class="money in">+R$ 450,00</span></span></div>
       </div>
-      <p class="caption" style="margin-top:10px">Verde é ganho: uma Despesa Fixa que termina ou um Provento Fixo que começa. Amarelo pede atenção: uma Despesa Fixa que começa, um Provento Fixo que termina ou uma Despesa Variável futura.</p>
+      <p class="caption" style="margin-top:10px">Entrada (verde) é uma Despesa Fixa que termina ou um Provento Fixo que começa. Saída é uma Despesa Fixa que começa, um Provento Fixo que termina ou uma Despesa Variável futura. Uma fixa que termina mostra o total do mês seguinte, porque o mês de fim ainda tem a última Ocorrência.</p>
 
       <h3 style="margin-top:22px">Datas Comemorativas</h3>
       <p>O card de cada mês mostra as <span class="term">Datas Comemorativas</span> que costumam trazer gastos extras, para você se programar: Réveillon, Carnaval, Páscoa, Dia das Mães, São João, 2 de Julho, Dia dos Pais, Dia das Crianças, Black Friday e Natal.</p>

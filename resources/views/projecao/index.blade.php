@@ -16,29 +16,119 @@
     </form>
 
     @if (count($alertasPorMes) > 0)
-        <div class="card">
-            <div class="card-header pb-0">
-                <h4 class="card-title mb-0"> Alertas </h4>
-            </div>
-            <div class="card-body">
-                @foreach ($alertasPorMes as $grupo)
-                    <div class="mb-3">
-                        <h6 class="mb-2"> {{ $grupo['quando'] }} </h6>
-                        @foreach ($grupo['alertas'] as $alerta)
-                            <div class="alert {{ $alerta['tipo'] === 'ganho' ? 'alert-success' : 'alert-warning' }} py-2 px-3 mb-1">
-                                <i class="fa {{ $alerta['tipo'] === 'ganho' ? 'fa-arrow-up' : 'fa-exclamation-triangle' }}"></i>
-                                {{ $alerta['descricao'] }}
-                            </div>
-                        @endforeach
-                        @if ($grupo['resumo'])
-                            <p class="mb-0 mt-1 fw-bold {{ $grupo['liquido'] < 0 ? 'text-danger' : 'text-success' }}">
-                                <i class="fa fa-equals"></i> {{ $grupo['resumo'] }}
-                            </p>
-                        @endif
-                    </div>
-                @endforeach
+        @php
+            $proximo = collect($linhaDoTempo)->first(function($m){ return $m['grupo'] !== null; });
+            $qtdProximo = count($proximo['grupo']['alertas']);
+        @endphp
+        <div class="card" id="cardAlertas">
+            <div class="card-body py-3 d-flex flex-wrap align-items-center justify-content-between gap-2">
+                <div>
+                    <h4 class="card-title mb-1">
+                        Alertas
+                        <span class="text-muted fs-6 fw-normal"> · {{ count($alertas) }} nos próximos {{ $horizonte }} meses </span>
+                    </h4>
+                    <span class="text-muted">
+                        Próximo: <b>{{ $proximo['label'] }}</b> · {{ $qtdProximo }} {{ $qtdProximo === 1 ? 'alerta' : 'alertas' }} ·
+                        <b class="{{ $proximo['grupo']['liquido'] < 0 ? 'text-danger' : 'text-success' }}">{{ $proximo['grupo']['efeito'] }}</b>
+                    </span>
+                </div>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalLinhaDoTempo">
+                    <i class="fa fa-stream"></i> Ver linha do tempo
+                </button>
             </div>
         </div>
+
+        <div class="modal fade" id="modalLinhaDoTempo" tabindex="-1" aria-labelledby="tituloLinhaDoTempo" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-scrollable modal-fullscreen-sm-down">
+                <div class="modal-content">
+                    <div class="modal-header flex-wrap gap-2">
+                        <h5 class="modal-title" id="tituloLinhaDoTempo"> Linha do tempo dos Alertas </h5>
+                        <div class="btn-group btn-group-sm ms-auto" role="group" aria-label="Filtrar Alertas" id="filtroLinhaDoTempo">
+                            <button type="button" class="btn btn-outline-primary active" data-filtro="tudo" aria-pressed="true"> Tudo </button>
+                            <button type="button" class="btn btn-outline-primary" data-filtro="entra" aria-pressed="false"> Entradas </button>
+                            <button type="button" class="btn btn-outline-primary" data-filtro="sai" aria-pressed="false"> Saídas </button>
+                        </div>
+                        <button type="button" class="btn-close ms-1" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                    </div>
+                    <div class="modal-body">
+                        {{-- MINI-GRÁFICO: UMA COLUNA POR MÊS FUTURO; CLICAR ROLA ATÉ O MÊS NA LINHA --}}
+                        <div class="ldt-barras" role="group" aria-label="Efeito no fluxo por mês">
+                            @foreach ($linhaDoTempo as $m)
+                                <button type="button" class="ldt-barra" data-alvo="ldt-{{ $m['mes'] }}" data-label="{{ $m['label'] }}"
+                                    data-entra="{{ $m['grupo']['entra'] ?? 0 }}" data-sai="{{ $m['grupo']['sai'] ?? 0 }}"
+                                    data-qtd-entra="{{ $m['grupo'] ? collect($m['grupo']['alertas'])->where('tipo', 'ganho')->count() : 0 }}"
+                                    data-qtd-sai="{{ $m['grupo'] ? collect($m['grupo']['alertas'])->where('tipo', 'atencao')->count() : 0 }}">
+                                    <span class="ldt-metade ldt-cima"><span class="ldt-coluna"></span></span>
+                                    <span class="ldt-metade ldt-baixo"><span class="ldt-coluna"></span></span>
+                                    <span class="ldt-rotulo"> {{ $m['rotuloCurto'] }} </span>
+                                </button>
+                            @endforeach
+                        </div>
+
+                        <ol class="ldt-linha">
+                            @foreach ($linhaDoTempo as $m)
+                                @continue($m['grupo'] === null)
+                                <li class="ldt-mes" id="ldt-{{ $m['mes'] }}" data-entra="{{ $m['grupo']['entra'] }}" data-sai="{{ $m['grupo']['sai'] }}">
+                                    <div class="ldt-cabecalho">
+                                        <div>
+                                            <span class="fw-bold"> {{ $m['label'] }} </span>
+                                            <span class="text-muted"> · {{ $m['grupo']['emMeses'] }} </span>
+                                        </div>
+                                        <span class="ldt-efeito fw-bold {{ $m['grupo']['liquido'] < 0 ? 'text-danger' : 'text-success' }}"> {{ $m['grupo']['efeito'] }} </span>
+                                    </div>
+                                    <ul class="ldt-itens">
+                                        @foreach ($m['grupo']['alertas'] as $alerta)
+                                            @php $entra = $alerta['tipo'] === 'ganho'; @endphp
+                                            <li class="ldt-item {{ $entra ? 'ldt-entra' : 'ldt-sai' }}" data-lado="{{ $entra ? 'entra' : 'sai' }}">
+                                                <i class="fa {{ $entra ? 'fa-arrow-up' : 'fa-arrow-down' }}"></i>
+                                                <div class="ldt-texto">
+                                                    <div> {{ $alerta['titulo'] }} </div>
+                                                    @if ($alerta['detalhe'])
+                                                        <small class="text-muted"> {{ $alerta['detalhe'] }} </small>
+                                                    @endif
+                                                </div>
+                                                <span class="ldt-valor"> {{ $entra ? '+' : '-' }}R$ {{ convertValorReal($alerta['valor']) }} </span>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                </li>
+                            @endforeach
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <style>
+            .ldt-barras { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 1rem; }
+            .ldt-barra { flex: 1 0 44px; display: flex; flex-direction: column; align-items: stretch; background: none; border: 0; padding: 4px 2px; border-radius: 6px; cursor: pointer; }
+            .ldt-barra:hover:not(:disabled), .ldt-barra:focus-visible { background: rgba(67, 94, 190, .1); }
+            .ldt-barra:disabled { cursor: default; }
+            .ldt-metade { height: 48px; display: flex; justify-content: center; }
+            .ldt-cima { align-items: flex-end; border-bottom: 1px solid var(--escuro-borda, #dce7f1); }
+            .ldt-baixo { align-items: flex-start; }
+            .ldt-coluna { width: 60%; max-width: 28px; height: 0; transition: height .25s; }
+            .ldt-cima .ldt-coluna { background: #2fa86b; border-radius: 4px 4px 0 0; }
+            .ldt-baixo .ldt-coluna { background: #e0505e; border-radius: 0 0 4px 4px; }
+            .ldt-cima .ldt-coluna.ldt-neutra { background: var(--escuro-texto-suave, #adb5bd); }
+            .ldt-rotulo { font-size: 12px; margin-top: 4px; color: var(--escuro-texto-suave, #6c757d); white-space: nowrap; }
+            .ldt-linha { list-style: none; padding: 0 0 0 22px; margin: 0; border-left: 2px solid var(--escuro-borda, #dce7f1); margin-left: 6px; }
+            .ldt-mes { position: relative; padding-bottom: 1.25rem; }
+            .ldt-mes::before { content: ''; position: absolute; left: -30px; top: 4px; width: 14px; height: 14px; border-radius: 50%; background: #435ebe; box-shadow: 0 0 0 3px var(--escuro-superficie, #fff); }
+            .ldt-mes.ldt-destaque .ldt-cabecalho { background: rgba(67, 94, 190, .15); border-radius: 6px; }
+            .ldt-cabecalho { display: flex; justify-content: space-between; gap: .5rem; flex-wrap: wrap; padding: 0 4px; margin-bottom: .5rem; transition: background .4s; }
+            .ldt-itens { list-style: none; padding: 0; margin: 0; }
+            .ldt-item { display: flex; align-items: flex-start; gap: .6rem; padding: .45rem .7rem; border-radius: 6px; margin-bottom: 4px; }
+            .ldt-item > svg, .ldt-item > i { margin-top: 4px; }
+            .ldt-texto { flex: 1; min-width: 0; }
+            .ldt-valor { font-weight: 600; white-space: nowrap; }
+            .ldt-entra { background: rgba(25, 135, 84, .1); }
+            .ldt-entra > svg, .ldt-entra .ldt-valor { color: #198754; }
+            .ldt-sai { background: rgba(255, 193, 7, .14); }
+            .ldt-sai > svg, .ldt-sai .ldt-valor { color: #b07d00; }
+            html[data-theme="dark"] .ldt-entra > svg, html[data-theme="dark"] .ldt-entra .ldt-valor { color: #5cd29a; }
+            html[data-theme="dark"] .ldt-sai > svg, html[data-theme="dark"] .ldt-sai .ldt-valor { color: #ffd666; }
+        </style>
     @endif
 
     <div class="row">

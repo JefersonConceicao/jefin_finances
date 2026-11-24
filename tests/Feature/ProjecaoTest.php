@@ -154,6 +154,8 @@ class ProjecaoTest extends TestCase
             'distancia' => 3,
             'quando' => 'Em 3 meses (Fevereiro/2027)',
             'valor' => 450.0,
+            'titulo' => 'Termina Cartão (10/10)',
+            'detalhe' => 'em Março/2027, Despesas Fixas passam a R$ 0,00',
             'descricao' => 'Termina Cartão (10/10): seu fluxo melhora em R$ 450,00 · em Março/2027, Despesas Fixas passam a R$ 0,00',
         ]], $this->alertas($resposta)->all());
     }
@@ -165,9 +167,8 @@ class ProjecaoTest extends TestCase
 
         $resposta = $this->projecao()
             ->assertSee('Seguro começa')
-            ->assertSee('Em 2 meses (Janeiro/2027)')
-            ->assertSee('Começa Seguro: -R$ 180,00 · Despesas Fixas passam a R$ 180,00')
-            ->assertSee('alert alert-warning', false);
+            ->assertSeeInOrder(['Janeiro/2027', 'em 2 meses', 'Começa Seguro', 'Despesas Fixas passam a R$ 180,00', '-R$ 180,00'])
+            ->assertSee('ldt-item ldt-sai', false);
 
         $this->assertEquals([['tipo' => 'comeca', 'descricao' => 'Seguro começa', 'efeito' => 'atencao']], $this->marcosDoMes($resposta, 2)->all());
         $this->assertEquals([[
@@ -176,6 +177,8 @@ class ProjecaoTest extends TestCase
             'distancia' => 2,
             'quando' => 'Em 2 meses (Janeiro/2027)',
             'valor' => 180.0,
+            'titulo' => 'Começa Seguro',
+            'detalhe' => 'Despesas Fixas passam a R$ 180,00',
             'descricao' => 'Começa Seguro: -R$ 180,00 · Despesas Fixas passam a R$ 180,00',
         ]], $this->alertas($resposta)->all());
     }
@@ -192,8 +195,10 @@ class ProjecaoTest extends TestCase
         $this->assertEquals([['tipo' => 'comeca', 'descricao' => 'Freela começa', 'efeito' => 'ganho']], $this->marcosDoMes($resposta, 4)->all());
         $this->assertEquals([
             ['tipo' => 'atencao', 'mes' => '2026-12', 'distancia' => 1, 'quando' => 'Em 1 mês (Dezembro/2026)', 'valor' => 800.0,
+                'titulo' => 'Termina Bolsa', 'detalhe' => 'em Janeiro/2027, Proventos passam a R$ 0,00',
                 'descricao' => 'Termina Bolsa: -R$ 800,00 · em Janeiro/2027, Proventos passam a R$ 0,00'],
             ['tipo' => 'ganho', 'mes' => '2027-03', 'distancia' => 4, 'quando' => 'Em 4 meses (Março/2027)', 'valor' => 2000.0,
+                'titulo' => 'Começa Freela', 'detalhe' => 'Proventos passam a R$ 2.000,00',
                 'descricao' => 'Começa Freela: +R$ 2.000,00 · Proventos passam a R$ 2.000,00'],
         ], $this->alertas($resposta)->all());
     }
@@ -210,6 +215,8 @@ class ProjecaoTest extends TestCase
             'distancia' => 3,
             'quando' => 'Em 3 meses (Fevereiro/2027)',
             'valor' => 1200.0,
+            'titulo' => 'Vence IPVA',
+            'detalhe' => null,
             'descricao' => 'Vence IPVA: -R$ 1.200,00',
         ]], $this->alertas($this->projecao())->all());
     }
@@ -228,18 +235,77 @@ class ProjecaoTest extends TestCase
         $this->assertCount(2, $grupos[0]['alertas']);
         $this->assertEquals(505, $grupos[0]['entra']);
         $this->assertEquals(306, $grupos[0]['sai']);
-        $this->assertSame('Efeito no fluxo: +R$ 199,00 (entra R$ 505,00, sai R$ 306,00)', $grupos[0]['resumo']);
-        //MÊS COM UM ALERTA SÓ NÃO TEM RESUMO
-        $this->assertNull($grupos[1]['resumo']);
+        $this->assertSame('+R$ 199,00', $grupos[0]['efeito']);
+        $this->assertSame('-R$ 1.200,00', $grupos[1]['efeito']);
+        $this->assertSame('em 2 meses', $grupos[0]['emMeses']);
 
+        //LINHA DO TEMPO NO MODAL: CABEÇALHO DO MÊS COM O EFEITO, DEPOIS OS ITENS COM TÍTULO, DETALHE E VALOR
         $resposta->assertSeeInOrder([
-            'Em 2 meses (Janeiro/2027)',
-            'Começa Seguro moto: -R$ 306,00',
-            'Termina Mac mini (11/11): seu fluxo melhora em R$ 505,00 · em Fevereiro/2027, Despesas Fixas passam a R$ 306,00',
-            'Efeito no fluxo: +R$ 199,00',
-            'Em 3 meses (Fevereiro/2027)',
-            'Vence IPVA: -R$ 1.200,00',
+            'Janeiro/2027', 'em 2 meses', '+R$ 199,00',
+            'Começa Seguro moto', 'Despesas Fixas passam a R$ 811,00', '-R$ 306,00',
+            'Termina Mac mini (11/11)', 'em Fevereiro/2027, Despesas Fixas passam a R$ 306,00', '+R$ 505,00',
+            'Fevereiro/2027', 'em 3 meses', '-R$ 1.200,00',
+            'Vence IPVA', '-R$ 1.200,00',
         ]);
+    }
+
+    /** @test */
+    public function o_card_de_alertas_vira_um_resumo_com_o_botao_da_linha_do_tempo()
+    {
+        $this->cadastrarDespesaFixa(['nome_despesa' => 'Seguro moto', 'valor' => '306,00', 'mes_inicio' => '2027-01']);
+        $this->cadastrarDespesaFixa(['nome_despesa' => 'Mac mini', 'valor' => '505,00', 'mes_inicio' => '2026-03', 'parcelas' => 11]);
+        $this->cadastrarDespesaVariavel('IPVA', '1.200,00', '15/02/2027');
+
+        $this->projecao()
+            ->assertSeeInOrder(['Alertas', '3 nos próximos 6 meses', 'Próximo:', 'Janeiro/2027', '2 alertas', '+R$ 199,00', 'Ver linha do tempo'])
+            ->assertSee('data-bs-target="#modalLinhaDoTempo"', false)
+            ->assertSee('id="modalLinhaDoTempo"', false)
+            ->assertSeeInOrder(['data-filtro="tudo"', 'data-filtro="entra"', 'data-filtro="sai"'], false)
+            ->assertDontSee('alert alert-warning', false)
+            ->assertDontSee('alert alert-success', false);
+    }
+
+    /** @test */
+    public function a_linha_do_tempo_tem_todos_os_meses_futuros_do_horizonte_com_barra_e_so_os_com_alertas_na_lista()
+    {
+        $this->cadastrarDespesaFixa(['nome_despesa' => 'Seguro moto', 'valor' => '306,00', 'mes_inicio' => '2027-01']);
+
+        $resposta = $this->projecao();
+        $linha = $resposta->viewData('linhaDoTempo');
+
+        $this->assertSame(['2026-12', '2027-01', '2027-02', '2027-03', '2027-04', '2027-05'], array_column($linha, 'mes'));
+        $this->assertSame('Dez/26', $linha[0]['rotuloCurto']);
+        $this->assertNull($linha[0]['grupo']);
+        $this->assertSame('-R$ 306,00', $linha[1]['grupo']['efeito']);
+
+        //UMA BARRA POR MÊS FUTURO, MAS SÓ O MÊS COM ALERTA ENTRA NA LISTA VERTICAL
+        $this->assertSame(6, substr_count($resposta->getContent(), 'class="ldt-barra"'));
+        $resposta->assertSee('id="ldt-2027-01"', false)->assertDontSee('id="ldt-2026-12"', false);
+        $resposta->assertSee('data-alvo="ldt-2027-01" data-label="Janeiro/2027"', false);
+    }
+
+    /** @test */
+    public function mes_com_entradas_e_saidas_que_se_anulam_tem_efeito_zero_positivo()
+    {
+        //10,10 + 20,20 EM FLOAT DÁ 30,299999...; SEM ARREDONDAR O MÊS VIRARIA UM "-R$ 0,00" VERMELHO
+        $this->cadastrarProventoFixo(['descricao' => 'Freela A', 'valor' => '10,10', 'mes_inicio' => '2027-01']);
+        $this->cadastrarProventoFixo(['descricao' => 'Freela B', 'valor' => '20,20', 'mes_inicio' => '2027-01']);
+        $this->cadastrarDespesaFixa(['nome_despesa' => 'Assinatura', 'valor' => '30,30', 'mes_inicio' => '2027-01']);
+
+        $grupo = $this->projecao()->viewData('alertasPorMes')[0];
+
+        $this->assertSame(0.0, $grupo['liquido']);
+        $this->assertSame('+R$ 0,00', $grupo['efeito']);
+        $this->assertSame([2, 1], [
+            collect($grupo['alertas'])->where('tipo', 'ganho')->count(),
+            collect($grupo['alertas'])->where('tipo', 'atencao')->count(),
+        ]);
+    }
+
+    /** @test */
+    public function sem_alertas_nao_ha_card_nem_modal()
+    {
+        $this->projecao()->assertDontSee('modalLinhaDoTempo');
     }
 
     /** @test */

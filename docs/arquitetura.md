@@ -295,12 +295,12 @@ flowchart LR
   SM --> SA["Saldo Acumulado<br/>começa em 0 no mês atual"]
   LOOP --> MC["Marcos: mes_inicio ou mes_fim<br/>de fixas ativas e não ocultas = este mês<br/>agrupados por lado e tipo; mais de 3 viram link"]
   LOOP --> DC["Datas Comemorativas do mês<br/>lista fixa, Carnaval e Páscoa calculados"]
-  CJ --> AL["Alertas: Marcos e Variáveis<br/>com distância de 1 a N<br/>agrupados por mês, com total atualizado<br/>e resumo quando há mais de um"]
+  CJ --> AL["Alertas: Marcos e Variáveis<br/>com distância de 1 a N<br/>agrupados por mês, com total atualizado<br/>e efeito no fluxo; linha do tempo em modal"]
 ```
 
 Competência das Despesas: `COALESCE(data_vencimento, created_at)`. O nome no Marco de término é o da Ocorrência gravada no mês de fim, por exemplo "Cartão (4/10)" após um Encerramento antecipado.
 
-No Alerta de um Marco, o total atualizado é o de Despesas Fixas (ou de Proventos) gravado no mês em que o Marco faz efeito: o próprio mês, quando começa; o mês seguinte, quando termina (o mês de fim ainda conta a última Ocorrência). O resumo do mês soma os Alertas de ganho (entra) e de atenção (sai).
+No Alerta de um Marco, o total atualizado é o de Despesas Fixas (ou de Proventos) gravado no mês em que o Marco faz efeito: o próprio mês, quando começa; o mês seguinte, quando termina (o mês de fim ainda conta a última Ocorrência). O efeito no fluxo do mês soma os Alertas de ganho (entra) e de atenção (sai). Na tela, os Alertas ficam num modal de linha do tempo (`Projecao::linhaDoTempo`): uma barra por mês futuro do Horizonte e, abaixo, só os meses com Alertas; o filtro Tudo/Entradas/Saídas roda no navegador (`AppProjecao.js`).
 
 ## 10. Regras de negócio
 
@@ -361,7 +361,7 @@ Testes de Feature pelas rotas HTTP, com `RefreshDatabase` sobre SQLite em memór
 > docker exec jefin_finances_app sh -c 'cd /var/www && php artisan config:clear && vendor/bin/phpunit'
 > ```
 
-- Estado atual: 144 testes, 786 asserções.
+- Estado atual: 148 testes, 815 asserções.
 - Não cobertos: as travas `lockForUpdate` (o SQLite as ignora), o JavaScript das telas e o dark mode (sem testes de navegador) e Usuários.
 - Schema de teste: `tests/migrations/2026_11_21_000001_criar_schema_de_teste.php`. Ao mudar um DDL, atualize os dois.
 
