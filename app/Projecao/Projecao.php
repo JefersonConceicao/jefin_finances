@@ -322,10 +322,14 @@ class Projecao
         $rotulo = $recorrencia['despesa'] ? 'Despesas Fixas' : 'Proventos';
         $quando = $comeca ? '' : 'em ' . $this->nomeDoMes($mes) . ', ';
 
-        return " · {$quando}{$rotulo} passam a " . self::reais($this->totaisDoMes($mes)[$chave]);
+        return "{$quando}{$rotulo} passam a " . self::reais($this->totaisDoMes($mes)[$chave]);
     }
 
-    private function alerta($tipo, Carbon $mes, $distancia, $valor, $descricao)
+    /**
+     * Titulo ("Começa Seguro") e detalhe (o total atualizado) ficam separados para a linha do tempo;
+     * a descrição junta tudo numa frase só.
+     */
+    private function alerta($tipo, Carbon $mes, $distancia, $valor, $titulo, $textoDoValor, $detalhe = null)
     {
         return [
             'tipo' => $tipo,
@@ -333,7 +337,9 @@ class Projecao
             'distancia' => $distancia,
             'quando' => self::emMeses($distancia) . ' (' . $this->nomeDoMes($mes) . ')',
             'valor' => (float) $valor,
-            'descricao' => $descricao,
+            'titulo' => $titulo,
+            'detalhe' => $detalhe,
+            'descricao' => "{$titulo}: {$textoDoValor}" . ($detalhe ? " · {$detalhe}" : ''),
         ];
     }
 
@@ -352,18 +358,18 @@ class Projecao
             if($distancia){
                 $alertas[] = $r['despesa']
                     ? $this->alerta('atencao', $r['inicio'], $distancia, $r['valor'],
-                        "Começa {$r['nome']}: -" . self::reais($r['valor']) . $this->totalAtualizado($r, true))
+                        "Começa {$r['nome']}", '-' . self::reais($r['valor']), $this->totalAtualizado($r, true))
                     : $this->alerta('ganho', $r['inicio'], $distancia, $r['valor'],
-                        "Começa {$r['nome']}: +" . self::reais($r['valor']) . $this->totalAtualizado($r, true));
+                        "Começa {$r['nome']}", '+' . self::reais($r['valor']), $this->totalAtualizado($r, true));
             }
 
             $distancia = $this->distancia($r['fim']);
             if($distancia){
                 $alertas[] = $r['despesa']
                     ? $this->alerta('ganho', $r['fim'], $distancia, $r['valor'],
-                        "Termina {$r['nomeNoFim']}: seu fluxo melhora em " . self::reais($r['valor']) . $this->totalAtualizado($r, false))
+                        "Termina {$r['nomeNoFim']}", 'seu fluxo melhora em ' . self::reais($r['valor']), $this->totalAtualizado($r, false))
                     : $this->alerta('atencao', $r['fim'], $distancia, $r['valor'],
-                        "Termina {$r['nomeNoFim']}: -" . self::reais($r['valor']) . $this->totalAtualizado($r, false));
+                        "Termina {$r['nomeNoFim']}", '-' . self::reais($r['valor']), $this->totalAtualizado($r, false));
             }
         }
 
@@ -380,7 +386,7 @@ class Projecao
             $mes = $variavel->competencia();
             $distancia = $this->distancia($mes);
             $alertas[] = $this->alerta('atencao', $mes, $distancia, $variavel->valor_total,
-                "Vence {$variavel->nome_despesa}: -" . self::reais($variavel->valor_total));
+                "Vence {$variavel->nome_despesa}", '-' . self::reais($variavel->valor_total));
         }
 
         usort($alertas, function($a, $b){
@@ -391,8 +397,7 @@ class Projecao
     }
 
     /**
-     * Os Alertas agrupados por mês. Mês com mais de um Alerta ganha o resumo: quanto entra, quanto sai
-     * e o efeito líquido no fluxo.
+     * Os Alertas agrupados por mês, com quanto entra, quanto sai e o efeito líquido no fluxo.
      */
     public static function alertasPorMes(array $alertas)
     {
@@ -400,7 +405,14 @@ class Projecao
 
         foreach($alertas as $alerta){
             if(!isset($grupos[$alerta['mes']])){
-                $grupos[$alerta['mes']] = ['mes' => $alerta['mes'], 'quando' => $alerta['quando'], 'alertas' => [], 'entra' => 0.0, 'sai' => 0.0];
+                $grupos[$alerta['mes']] = [
+                    'mes' => $alerta['mes'],
+                    'quando' => $alerta['quando'],
+                    'emMeses' => mb_strtolower(self::emMeses($alerta['distancia'])),
+                    'alertas' => [],
+                    'entra' => 0.0,
+                    'sai' => 0.0,
+                ];
             }
 
             $grupos[$alerta['mes']]['alertas'][] = $alerta;
@@ -408,13 +420,40 @@ class Projecao
         }
 
         return array_values(array_map(function($grupo){
-            $grupo['liquido'] = $grupo['entra'] - $grupo['sai'];
-            $grupo['resumo'] = count($grupo['alertas']) > 1
-                ? 'Efeito no fluxo: ' . ($grupo['liquido'] < 0 ? '-' : '+') . self::reais(abs($grupo['liquido']))
-                    . ' (entra ' . self::reais($grupo['entra']) . ', sai ' . self::reais($grupo['sai']) . ')'
-                : null;
+            //EM CENTAVOS: SOMA DE FLOATS QUE SE ANULA NÃO PODE VIRAR UM "-R$ 0,00" VERMELHO
+            $grupo['entra'] = round($grupo['entra'], 2);
+            $grupo['sai'] = round($grupo['sai'], 2);
+            $grupo['liquido'] = round($grupo['entra'] - $grupo['sai'], 2);
+            $grupo['efeito'] = ($grupo['liquido'] < 0 ? '-' : '+') . self::reais(abs($grupo['liquido']));
 
             return $grupo;
         }, $grupos));
+    }
+
+    /**
+     * Linha do tempo dos Alertas: todos os meses futuros da Projeção, em ordem, cada um com o grupo de
+     * Alertas dele (ou null, para o mês sem nada aparecer como intervalo na linha).
+     */
+    public static function linhaDoTempo(array $meses, array $alertasPorMes)
+    {
+        $grupos = [];
+        foreach($alertasPorMes as $grupo){
+            $grupos[$grupo['mes']] = $grupo;
+        }
+
+        $linha = [];
+        foreach($meses as $mes){
+            if($mes['isMesAtual']) continue;
+
+            $chave = "{$mes['ano']}-{$mes['mes']}";
+            $linha[] = [
+                'mes' => $chave,
+                'label' => $mes['label'],
+                'rotuloCurto' => mb_substr($mes['label'], 0, 3) . '/' . substr($mes['ano'], 2),
+                'grupo' => $grupos[$chave] ?? null,
+            ];
+        }
+
+        return $linha;
     }
 }

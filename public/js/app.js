@@ -4264,6 +4264,136 @@ module.exports = {
 
 /***/ }),
 
+/***/ "./resources/js/Logged/AppProjecao.js":
+/*!********************************************!*\
+  !*** ./resources/js/Logged/AppProjecao.js ***!
+  \********************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
+function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+//LINHA DO TEMPO DOS ALERTAS (MODAL DA PROJEÇÃO): FILTRO TUDO/ENTRADAS/SAÍDAS, ALTURA DAS BARRAS E ROLAGEM ATÉ O MÊS
+var moeda = new Intl.NumberFormat('pt-BR', {
+  style: 'currency',
+  currency: 'BRL'
+});
+var reais = function reais(valor) {
+  return moeda.format(Math.abs(valor)).replace(/\s/g, ' ');
+};
+
+//VALOR QUE A BARRA E O CABEÇALHO DO MÊS MOSTRAM PARA O FILTRO: EFEITO LÍQUIDO, SÓ O QUE ENTRA OU SÓ O QUE SAI
+//EM CENTAVOS, PARA ENTRADAS IGUAIS ÀS SAÍDAS DAREM ZERO EXATO
+var valorNoFiltro = function valorNoFiltro(entra, sai, filtro) {
+  var valor = entra - sai;
+  if (filtro === 'entra') valor = entra;
+  if (filtro === 'sai') valor = -sai;
+  return Math.round(valor * 100) / 100;
+};
+
+//MÊS SEM NENHUM ALERTA DO LADO FILTRADO (CONTA OS ALERTAS, NÃO A SOMA: UM ALERTA DE R$ 0,00 AINDA CONTA)
+var vazioNoFiltro = function vazioNoFiltro($barra, filtro) {
+  var entram = parseInt($barra.data('qtd-entra'), 10) || 0;
+  var saem = parseInt($barra.data('qtd-sai'), 10) || 0;
+  if (filtro === 'entra') return entram === 0;
+  if (filtro === 'sai') return saem === 0;
+  return entram + saem === 0;
+};
+var lerValores = function lerValores($el) {
+  return [parseFloat($el.data('entra')) || 0, parseFloat($el.data('sai')) || 0];
+};
+var desenharBarras = function desenharBarras($modal, filtro) {
+  var $barras = $modal.find('.ldt-barra');
+  var leituras = $barras.map(function () {
+    var _lerValores = lerValores($(this)),
+      _lerValores2 = _slicedToArray(_lerValores, 2),
+      entra = _lerValores2[0],
+      sai = _lerValores2[1];
+    return {
+      valor: valorNoFiltro(entra, sai, filtro),
+      vazio: vazioNoFiltro($(this), filtro)
+    };
+  }).get();
+  var valores = leituras.map(function (l) {
+    return l.valor;
+  });
+  var maximo = Math.max.apply(Math, _toConsumableArray(valores.map(Math.abs)).concat([0]));
+  $barras.each(function (i) {
+    var valor = valores[i];
+    var altura = maximo > 0 ? Math.round(Math.abs(valor) / maximo * 100) : 0;
+    //BARRA DE MÊS COM ALGUM VALOR TEM PELO MENOS 4% PARA NÃO SUMIR AO LADO DE UM MÊS MUITO MAIOR
+    var visivel = valor !== 0 ? Math.max(altura, 4) : 0;
+    var vazio = leituras[i].vazio;
+    //MÊS COM ALERTAS QUE SE ANULAM: MARCA NEUTRA CINZA NO EIXO, PARA NÃO PARECER UM MÊS VAZIO
+    var neutro = !vazio && valor === 0;
+    var descricao = $(this).data('label') + ': ' + (vazio ? 'nada no filtro' : (valor < 0 ? '-' : '+') + reais(valor));
+    $(this).find('.ldt-cima .ldt-coluna').toggleClass('ldt-neutra', neutro).css('height', (valor > 0 ? visivel : neutro ? 6 : 0) + '%');
+    $(this).find('.ldt-baixo .ldt-coluna').css('height', (valor < 0 ? visivel : 0) + '%');
+    $(this).prop('disabled', vazio).attr({
+      title: descricao,
+      'aria-label': descricao
+    });
+  });
+};
+var filtrarLinha = function filtrarLinha($modal, filtro) {
+  $modal.find('.ldt-item').each(function () {
+    $(this).toggle(filtro === 'tudo' || $(this).data('lado') === filtro);
+  });
+  $modal.find('.ldt-mes').each(function () {
+    var _lerValores3 = lerValores($(this)),
+      _lerValores4 = _slicedToArray(_lerValores3, 2),
+      entra = _lerValores4[0],
+      sai = _lerValores4[1];
+    var valor = valorNoFiltro(entra, sai, filtro);
+    var temItens = filtro === 'tudo' || $(this).find('.ldt-item[data-lado="' + filtro + '"]').length > 0;
+    $(this).toggle(temItens);
+    $(this).find('.ldt-efeito').text((valor < 0 ? '-' : '+') + reais(valor)).toggleClass('text-danger', valor < 0).toggleClass('text-success', valor >= 0);
+  });
+};
+var aplicarFiltro = function aplicarFiltro($modal, filtro) {
+  $modal.find('[data-filtro]').each(function () {
+    var ativo = $(this).data('filtro') === filtro;
+    $(this).toggleClass('active', ativo).attr('aria-pressed', ativo ? 'true' : 'false');
+  });
+  desenharBarras($modal, filtro);
+  filtrarLinha($modal, filtro);
+};
+$(function () {
+  var $modal = $("#modalLinhaDoTempo");
+  if ($modal.length == 0) return;
+  aplicarFiltro($modal, 'tudo');
+  $modal.on('click', '[data-filtro]', function () {
+    aplicarFiltro($modal, $(this).data('filtro'));
+  });
+  $modal.on('click', '.ldt-barra', function () {
+    var alvo = document.getElementById($(this).data('alvo'));
+    if (!alvo) return;
+    alvo.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
+    });
+    //UM CLIQUE NOVO REINICIA O DESTAQUE EM VEZ DE SER CORTADO PELO TIMER DO CLIQUE ANTERIOR
+    clearTimeout($(alvo).data('timerDestaque'));
+    $(alvo).addClass('ldt-destaque');
+    $(alvo).data('timerDestaque', setTimeout(function () {
+      return $(alvo).removeClass('ldt-destaque');
+    }, 1200));
+  });
+});
+module.exports = {
+  valorNoFiltro: valorNoFiltro
+};
+
+/***/ }),
+
 /***/ "./resources/js/Logged/AppProventos.js":
 /*!*********************************************!*\
   !*** ./resources/js/Logged/AppProventos.js ***!
@@ -4880,6 +5010,7 @@ window.AppDespesas = __webpack_require__(/*! ./Logged/AppDespesas */ "./resource
 window.AppDespesasFixas = __webpack_require__(/*! ./Logged/AppDespesasFixas */ "./resources/js/Logged/AppDespesasFixas.js");
 window.AppProventosFixos = __webpack_require__(/*! ./Logged/AppProventosFixos */ "./resources/js/Logged/AppProventosFixos.js");
 window.AppLancamentos = __webpack_require__(/*! ./Logged/AppLancamentos */ "./resources/js/Logged/AppLancamentos.js");
+window.AppProjecao = __webpack_require__(/*! ./Logged/AppProjecao */ "./resources/js/Logged/AppProjecao.js");
 window.AppProfile = __webpack_require__(/*! ./Logged/AppProfile */ "./resources/js/Logged/AppProfile.js");
 window.AppForgotPassword = __webpack_require__(/*! ./Auth/AppForgotPassword */ "./resources/js/Auth/AppForgotPassword.js");
 $.ajaxSetup({

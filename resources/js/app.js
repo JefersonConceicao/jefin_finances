@@ -12,6 +12,7 @@ window.AppDespesas = require('./Logged/AppDespesas');
 window.AppDespesasFixas = require('./Logged/AppDespesasFixas');
 window.AppProventosFixos = require('./Logged/AppProventosFixos');
 window.AppLancamentos = require('./Logged/AppLancamentos');
+window.AppProjecao = require('./Logged/AppProjecao');
 window.AppProfile = require('./Logged/AppProfile');
 window.AppForgotPassword = require('./Auth/AppForgotPassword');
 

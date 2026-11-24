@@ -24,12 +24,15 @@ class ProjecaoController extends Controller
 
         $projecao = new Projecao($user, $request->input('horizonte'));
         $alertas = $projecao->alertas($this->optionsMeses);
+        $alertasPorMes = Projecao::alertasPorMes($alertas);
+        $meses = $projecao->meses($this->optionsMeses);
 
         return view('projecao.index')
             ->with('horizonte', $projecao->horizonte())
             ->with('horizontes', Projecao::HORIZONTES)
-            ->with('meses', $projecao->meses($this->optionsMeses))
+            ->with('meses', $meses)
             ->with('alertas', $alertas)
-            ->with('alertasPorMes', Projecao::alertasPorMes($alertas));
+            ->with('alertasPorMes', $alertasPorMes)
+            ->with('linhaDoTempo', Projecao::linhaDoTempo($meses, $alertasPorMes));
     }
 }
