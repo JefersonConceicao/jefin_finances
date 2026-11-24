@@ -361,7 +361,7 @@ Testes de Feature pelas rotas HTTP, com `RefreshDatabase` sobre SQLite em memór
 > docker exec jefin_finances_app sh -c 'cd /var/www && php artisan config:clear && vendor/bin/phpunit'
 > ```
 
-- Estado atual: 143 testes, 783 asserções.
+- Estado atual: 144 testes, 786 asserções.
 - Não cobertos: as travas `lockForUpdate` (o SQLite as ignora), o JavaScript das telas e o dark mode (sem testes de navegador) e Usuários.
 - Schema de teste: `tests/migrations/2026_11_21_000001_criar_schema_de_teste.php`. Ao mudar um DDL, atualize os dois.
 

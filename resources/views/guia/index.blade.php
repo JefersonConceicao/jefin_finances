@@ -237,7 +237,7 @@ flowchart LR
 
     <section id="passos">
       <h2>Primeiros passos</h2>
-      <p>Uma ordem que funciona bem no primeiro uso. Depois do login você cai na <b>Projeção</b>; as outras telas ficam nos menus <b>Proventos</b> e <b>Despesas</b>.</p>
+      <p>Uma ordem que funciona bem no primeiro uso. Depois do login você cai na <b>Projeção</b>; as outras telas ficam nos menus <b>Proventos</b> e <b>Despesas</b>, e este guia fica no item <b>Guia do Usuário</b>.</p>
       <ol class="steps">
         <li><div><h3>Crie sua conta e entre</h3><p>Pela tela de cadastro, ou com a conta Google. Cada usuário só vê os próprios dados.</p></div></li>
         <li><div><h3>Cadastre o que entra todo mês</h3><p><span class="where">Proventos Fixos</span> Descrição, valor e mês de início. Sem mês de fim, vale por tempo indeterminado.</p></div></li>

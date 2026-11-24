@@ -39,6 +39,16 @@ class MenuTest extends TestCase
     }
 
     /** @test */
+    public function o_menu_tem_o_link_do_guia_do_usuario()
+    {
+        $this->actingAs(factory(User::class)->create())
+            ->get(route('projecao.index'))
+            ->assertOk()
+            ->assertSee('href="/guia"', false)
+            ->assertSee('Guia do Usuário');
+    }
+
+    /** @test */
     public function dividas_nao_existe_mais()
     {
         $this->actingAs(factory(User::class)->create())

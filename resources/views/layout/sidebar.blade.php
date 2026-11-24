@@ -54,6 +54,13 @@
         </ul>
     </li>
 
+    <li class="sidebar-item {{ request()->is('guia') ? 'active' : '' }}">
+        <a href="/guia" class="sidebar-link">
+            <i class="fas fa-book"></i>
+            <span> Guia do Usuário </span>
+        </a>
+    </li>
+
     @if(Auth::user()->id == 16)
         <li class="sidebar-item">
             <a href="/users" class="sidebar-link">
