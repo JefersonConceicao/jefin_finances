@@ -4,7 +4,7 @@ set -e
 cd "$(dirname "$0")/../.."
 
 git fetch --quiet origin master
-git reset --hard origin/master
+git checkout --quiet -B master origin/master
 
 docker compose -f docker-compose.prod.yml up -d --build --remove-orphans
 docker image prune -f >/dev/null
