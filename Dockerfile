@@ -5,7 +5,8 @@ ARG user
 ARG uid
 
 # Install system dependencies
-RUN apt-get update && apt-get install -y \
+# PHP 7.4 só existe sobre Debian 11, que saiu do suporte e foi para archive.debian.org
+RUN sed -i "s|http://deb.debian.org|http://archive.debian.org|g" /etc/apt/sources.list && apt-get update && apt-get install -y \
     git \
     curl \
     libpng-dev \

@@ -1,0 +1,78 @@
+# Produção. Uso, na pasta do projeto no servidor:
+#   docker compose -f docker-compose.prod.yml up -d --build
+# Lê o .env da pasta (o mesmo do Laravel) para DB_DATABASE, DB_USERNAME, DB_PASSWORD e DB_ROOT_PASSWORD.
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/prod/Dockerfile
+      target: app
+    image: jefin_finances_app:prod
+    container_name: jefin_finances_app
+    restart: unless-stopped
+    volumes:
+      - ./.env:/var/www/.env:ro
+      - storage:/var/www/storage
+    depends_on:
+      db:
+        condition: service_healthy
+    networks: [jefin_network]
+    logging: *logging
+
+  web:
+    build:
+      context: .
+      dockerfile: docker/prod/Dockerfile
+      target: web
+    image: jefin_finances_web:prod
+    container_name: jefin_finances_web
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on: [app]
+    networks: [jefin_network]
+    logging: *logging
+
+  db:
+    image: mysql:5.7
+    container_name: jefin_finances_db
+    restart: unless-stopped
+    # Ajustado para 1 GB de RAM
+    command:
+      - --max_allowed_packet=512M
+      - --innodb_buffer_pool_size=128M
+      - --performance_schema=OFF
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    environment:
+      MYSQL_DATABASE: '${DB_DATABASE}'
+      MYSQL_USER: '${DB_USERNAME}'
+      MYSQL_PASSWORD: '${DB_PASSWORD}'
+      MYSQL_ROOT_PASSWORD: '${DB_ROOT_PASSWORD}'
+      TZ: America/Sao_Paulo
+    # Sem porta publicada: o Docker passa por cima do ufw. Acesso pelo túnel SSH ou docker exec.
+    volumes:
+      - dbdata:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p\"$$MYSQL_ROOT_PASSWORD\" --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks: [jefin_network]
+    logging: *logging
+
+volumes:
+  dbdata:
+  storage:
+
+networks:
+  jefin_network:
+    driver: bridge
