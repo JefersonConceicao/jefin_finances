@@ -34,10 +34,10 @@ services:
     image: jefin_finances_web:prod
     container_name: jefin_finances_web
     restart: unless-stopped
-    ports:
-      - "80:80"
+    # Sem porta publicada: o Caddy (/opt/proxy no servidor) recebe 80/443, termina o HTTPS
+    # e encaminha para cá pela rede "proxy", compartilhada entre as aplicações.
     depends_on: [app]
-    networks: [jefin_network]
+    networks: [jefin_network, proxy]
     logging: *logging
 
   db:
@@ -79,3 +79,6 @@ volumes:
 networks:
   jefin_network:
     driver: bridge
+  proxy:
+    external: true
+    name: proxy
