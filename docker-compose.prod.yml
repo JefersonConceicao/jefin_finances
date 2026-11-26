@@ -57,7 +57,10 @@ services:
       MYSQL_PASSWORD: '${DB_PASSWORD}'
       MYSQL_ROOT_PASSWORD: '${DB_ROOT_PASSWORD}'
       TZ: America/Sao_Paulo
-    # Sem porta publicada: o Docker passa por cima do ufw. Acesso pelo túnel SSH ou docker exec.
+    # Só no localhost do servidor: o Docker passa por cima do ufw, então 0.0.0.0 deixaria o MySQL aberto
+    # para a internet. DBeaver e afins entram por túnel SSH até 127.0.0.1:3306.
+    ports:
+      - "127.0.0.1:3306:3306"
     volumes:
       - dbdata:/var/lib/mysql
     healthcheck:
